@@ -14,12 +14,15 @@
 
     /*Accounts*/
     Ruta::get("buscarAccountsBackup","ControlAccount@buscarAccountsBackup");
+    Ruta::get("buscarInconsistenciaDatosAccounts","ControlAccount@inconsistenciaAccounts");
 
     /*Automatics*/
     Ruta::get("buscarAutomaticsBackup","ControlAutomatic@buscarAutomaticsBackup");
+    Ruta::get("buscarInconsistenciaDatosAutomatics","ControlAutomatic@inconsistenciaAutomatics");
 
     /*Budgets*/
     Ruta::get("buscarBudgetsBackup","ControlBudget@buscarBudgetsBackup");
+    Ruta::get("buscarInconsistenciaDatosBudgets","ControlBudget@inconsistenciaBudget");
 
     /*Cardviews*/
     Ruta::get("buscarCardviewsBackup","ControlCardView@buscarCardviewsBackup");

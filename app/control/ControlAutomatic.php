@@ -34,9 +34,27 @@ class ControlAutomatic
             $arreglo["automatics"] = $select;
             $arreglo["titulo"] = "¡ AUTOMATICS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron automatics del respaldo solicitado.";
+        } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ AUTOMATICS NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron automatics del respaldo solicitado.";
+        }
+        return $arreglo;
+    }
+
+    public function inconsistenciaAutomatics() {
+        $arreglo = array();
+        $select = $this -> a -> mostrar("1  group by `id_backup`, `id_operation`, `id_account`,`id_category`,`period`,`repeat_number`,`each_number`,`enabled`,`amount`,`sign`,`detail`,`initial_date`,`next_date`,`operation_code`,`rate`,`counter`  HAVING COUNT( * ) >= 2 limit 1, 10",
+            "*, COUNT(id_backup) cantidadRepetida");
+        if ($select) {
+            $arreglo["error"] = false;
+            $arreglo["automatics"] = $select;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Automatics";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Automatics";
         }
         return $arreglo;
     }

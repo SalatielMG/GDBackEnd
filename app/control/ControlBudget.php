@@ -38,4 +38,21 @@ class ControlBudget
         }
         return $arreglo;
     }
+
+    public function inconsistenciaBudget() {
+        $select = $this -> b -> mostrar("1 GROUP BY `id_backup`,`id_account`,`id_category`,`period`,`amount`,`budget`,`initial_date`,`final_date`,`number`  HAVING COUNT( * ) >= 2 limit 1, 10",
+            "*, COUNT(id_backup) cantidadRepetida");
+        $arreglo = array();
+        if ($select) {
+            $arreglo["error"] = false;
+            $arreglo["budgets"] = $select;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Budgets";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Budgets";
+        }
+        return $arreglo;
+    }
 }
