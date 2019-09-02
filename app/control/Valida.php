@@ -11,7 +11,7 @@ class Valida {
         $length = count($arreglo) - 1;
         foreach ($arreglo as $key => $value) {
             if ($key == $length)
-                $name = $name . $value;
+                $name = $name . $aliasTable. $value;
             else
                 $name = $name . $aliasTable. $value . ", ";
         }
@@ -23,6 +23,19 @@ class Valida {
     public function consultaSQL($select = "", $table = "", $where = "") {
         return "SELECT $select FROM $table WHERE $where";
     }
+    public function senetenciaInconsistenicaSQL($nameTable, $namesColumns, $colOrderBy) {
+        $sql = "CREATE TABLE duplicado_$nameTable LIKE $nameTable;";
+        $sql.= "ALTER TABLE duplicado_$nameTable ADD UNIQUE(". $this -> namesColumns($namesColumns) .");";
+        $sql.= "INSERT IGNORE INTO duplicado_$nameTable SELECT * FROM $nameTable ORDER BY $colOrderBy;";
+        $sql.= "RENAME TABLE $nameTable TO duplicate_$nameTable, duplicado_$nameTable TO $nameTable;";
+
+        return $sql;
+    }
+
+
+
+
+
 	/*protected $token;
 	protected $id;
 	protected $mu;

@@ -18,6 +18,7 @@
     /*Accounts*/
     Ruta::get("buscarAccountsBackup","ControlAccount@buscarAccountsBackup");
     Ruta::get("buscarInconsistenciaDatosAccounts","ControlAccount@inconsistenciaAccounts");
+    Ruta::get("corregirInconsistenciaDatosAccounts","ControlAccount@corregirInconsitencia");
 
     /*Automatics*/
     Ruta::get("buscarAutomaticsBackup","ControlAutomatic@buscarAutomaticsBackup");

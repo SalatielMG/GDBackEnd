@@ -66,4 +66,14 @@ class ControlAccount extends Valida
         return $arreglo;
     }
 
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> nameColumns, "id_backup");
+        $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
+
 }
