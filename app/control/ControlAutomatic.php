@@ -6,7 +6,7 @@
  * Time: 12:25
  */
 require_once (APP_PATH."model/Automatic.php");
-class ControlAutomatic
+class ControlAutomatic extends Valida
 {
     private $a;
     public function __construct()
@@ -43,18 +43,32 @@ class ControlAutomatic
     }
 
     public function inconsistenciaAutomatics() {
+        $email = Form::getValue('email');
         $arreglo = array();
-        $select = $this -> a -> mostrar("1  group by `id_backup`, `id_operation`, `id_account`,`id_category`,`period`,`repeat_number`,`each_number`,`enabled`,`amount`,`sign`,`detail`,`initial_date`,`next_date`,`operation_code`,`rate`,`counter`  HAVING COUNT( * ) >= 2 limit 1, 10",
-            "*, COUNT(id_backup) cantidadRepetida");
-        if ($select) {
+        if ($email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($email, 'Correo electronico', 'email');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        }
+        $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
+        $table = "backup_automatics ba, users u, backups b";
+        $where = "b.id_user = u.id_user AND b.id_backup = ba.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        $consulta = $this -> a -> mostrar($where, $select, $table);
+        if ($consulta) {
             $arreglo["error"] = false;
-            $arreglo["automatics"] = $select;
+            $arreglo["automatics"] = $consulta;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Automatics";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Automatics ". (($email != "Generales") ? "del usuario: $email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Automatics";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Automatics ". (($email != "Generales") ? "del usuario: $email" : "");
         }
         return $arreglo;
     }

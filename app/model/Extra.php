@@ -8,6 +8,8 @@
 
 class Extra extends DB
 {
+    public $nameTable = "backup_extras";
+    public $nameColumns = ['id_backup', 'id_extra', 'account', 'category'];
     public function mostrar($where = "1", $select = "*", $tabla = "backup_extras"){
         return $this -> getDatos($tabla, $select, $where);
     }

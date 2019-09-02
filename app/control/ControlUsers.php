@@ -7,7 +7,7 @@
  */
 require_once(APP_PATH.'model/Users.php');
 
-class ControlUsers
+class ControlUsers extends Valida
 {
     private $u;
     public function __construct()
@@ -174,9 +174,6 @@ class ControlUsers
         }*/
         return $data;
 
-    }
-    private function condicionarConsulta($dato, $columna) {
-        return ($dato == "0") ? "" : "AND $columna = $dato";
     }
     /**********************************************************************************************/
 

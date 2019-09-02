@@ -8,8 +8,10 @@
 
 class Category extends DB
 {
+    public $nameTable = "backup_categories";
+    public $nameColumns = ['id_backup', 'id_category', 'id_account', 'name', 'sign', 'icon_name', 'number'];
     public function mostrar($where = "1", $select = "*", $tabla = "backup_categories"){
-    return $this -> getDatos($tabla, $select, $where);
-}
+        return $this -> getDatos($tabla, $select, $where);
+    }
 
 }

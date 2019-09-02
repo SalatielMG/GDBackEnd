@@ -1,9 +1,29 @@
 <?php
-/*
-require_once(APP_PATH."model/Usuario.php");
-require_once(APP_PATH."model/Permiso.php");
-class Valida{
-	protected $token;
+
+// require_once(APP_PATH."model/Usuario.php");
+// require_once(APP_PATH."model/Permiso.php");
+class Valida {
+    protected $limit = 10;
+    protected $having_Count = 2;
+
+    public function namesColumns($arreglo, $aliasTable = "") {
+        $name = "";
+        $length = count($arreglo) - 1;
+        foreach ($arreglo as $key => $value) {
+            if ($key == $length)
+                $name = $name . $value;
+            else
+                $name = $name . $aliasTable. $value . ", ";
+        }
+        return $name;
+    }
+    public function condicionarConsulta($dato, $columna, $condicion = "0") {
+        return ($dato == $condicion) ? "" : "AND $columna = $dato";
+    }
+    public function consultaSQL($select = "", $table = "", $where = "") {
+        return "SELECT $select FROM $table WHERE $where";
+    }
+	/*protected $token;
 	protected $id;
 	protected $mu;
 	public function __construct(){
@@ -41,5 +61,5 @@ class Valida{
 			]);
 			exit();
 		}
-	}
-}*/
+	}*/
+}

@@ -7,7 +7,9 @@ class Form{
 	public function __construct(){
 		$this->errores = array();
 	}
-
+    static function email($str){
+        return (bool) preg_match("/^[a-zA-Z0-9\._-]+@[a-zA-Z0-9-]{2,}[.][a-zA-Z]{2,4}$/", $str);
+    }
 	static function letras($str){
 		return (bool) preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚÑñ ]+$/", $str);
 	}
@@ -86,6 +88,10 @@ class Form{
             case "enterosPositivos":
                 if(!static::enterosPositivos($g))
                     return "El campo $etiqueta solo debe contener numeros enteros positivos";
+                break;
+            case "email":
+                if(!static::email($g))
+                    return "El campo $etiqueta debe tener el formato de un emil valido.";
                 break;
 			default:
 				// "required|enteros|max[20]|lon[10]"

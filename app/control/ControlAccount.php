@@ -7,7 +7,7 @@
  */
 require_once(APP_PATH.'model/Account.php');
 
-class ControlAccount
+class ControlAccount extends Valida
 {
     private $a;
     public function __construct()
@@ -36,18 +36,32 @@ class ControlAccount
     }
 
     public function inconsistenciaAccounts() {
-        $select = $this -> a -> mostrar("1 GROUP by  `id_backup`, `id_account`, `name`, `detail`, `sign`, `income`, `expense`, `initial_balance`, `final_balance`, `month`, `year`, `positive_limit`, `negative_limit`, `positive_max`, `negative_max`, `iso_code`, `selected`, `value_type`, `include_total`, `rate`, `icon_name` HAVING COUNT( * ) >= 2 limit 1, 10",
-            "*, COUNT(id_backup) cantidadRepetida");
+        $email = Form::getValue('email');
         $arreglo = array();
-        if ($select) {
+        if ($email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($email, 'Correo electronico', 'email');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        }
+        $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
+        $table = "backup_accounts ba, users u, backups b";
+        $where = "b.id_user = u.id_user AND b.id_backup = ba.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        $consulta = $this -> a -> mostrar($where, $select, $table);
+        if ($consulta) {
             $arreglo["error"] = false;
-            $arreglo["accounts"] = $select;
+            $arreglo["accounts"] = $consulta;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Accounts";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Accounts ". (($email != "Generales") ? "del usuario: $email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Accounts";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Accounts ". (($email != "Generales") ? "del usuario: $email" : "");
         }
         return $arreglo;
     }

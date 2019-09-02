@@ -1,5 +1,8 @@
 <?php
+
+    /*Rutas de prueba*/
 	Ruta::get("contraseña","Prueba@encriptacion");
+
 	/*Usuario*/
 	Ruta::post("login","ControlUsuario@login");
 
@@ -26,18 +29,24 @@
 
     /*Cardviews*/
     Ruta::get("buscarCardviewsBackup","ControlCardView@buscarCardviewsBackup");
+    Ruta::get("buscarInconsistenciaDatosCardviews","ControlCardView@inconsistenciaCardView");
 
     /*Categories*/
     Ruta::get("buscarCategoriesBackup","ControlCategory@buscarCategoriesBackup");
+    Ruta::get("buscarInconsistenciaDatosCategories","ControlCategory@inconsistenciaCategory");
 
     /*Currencies*/
     Ruta::get("buscarCurrenciesBackup","ControlCurrency@buscarCurrenciesBackup");
+    Ruta::get("buscarInconsistenciaDatosCurrencies","ControlCurrency@inconsistenciaCurrency");
 
     /*Extras*/
     Ruta::get("buscarExtrasBackup","ControlExtra@buscarExtrasBackup");
+    Ruta::get("buscarInconsistenciaDatosExtras","ControlExtra@inconsistenciaExtra");
 
     /*Movements*/
     Ruta::get("buscarMovementsBackup","ControlMovement@buscarMovementsBackup");
+    Ruta::get("buscarInconsistenciaDatosMovements","ControlMovement@inconsistenciaMovement");
 
     /*Preferences*/
     Ruta::get("buscarPreferencesBackup","ControlPreference@buscarPreferencesBackup");
+    Ruta::get("buscarInconsistenciaDatosPreferences","ControlPreference@inconsistenciaPreference");

@@ -7,7 +7,7 @@
  */
 require_once (APP_PATH."model/Extra.php");
 
-class ControlExtra
+class ControlExtra extends Valida
 {
     private $e;
     public function __construct()
@@ -27,6 +27,36 @@ class ControlExtra
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ EXTRAS NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron extras del respaldo solicitado.";
+        }
+        return $arreglo;
+    }
+    public function inconsistenciaExtra(){
+        $email = Form::getValue('email');
+        $arreglo = array();
+        if ($email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($email, 'Correo electronico', 'email');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        }
+        $select = "be.*, COUNT(be.id_backup) cantidadRepetida";
+        $table = "backup_extras be, users u, backups b";
+        $where = "b.id_user = u.id_user AND b.id_backup = be.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> e -> nameColumns, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        $consulta = $this -> e -> mostrar($where, $select, $table);
+        if ($consulta) {
+            $arreglo["error"] = false;
+            $arreglo["extras"] = $consulta;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Extra ". (($email != "Generales") ? "del usuario: $email" : "");
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Extra ". (($email != "Generales") ? "del usuario: $email" : "");
         }
         return $arreglo;
     }

@@ -7,7 +7,7 @@
  */
 require_once (APP_PATH."model/Movement.php");
 
-class ControlMovement
+class ControlMovement extends Valida
 {
     private $m;
     public function __construct()
@@ -37,6 +37,36 @@ class ControlMovement
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ MOVEMENTS NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron movements del respaldo solicitado.";
+        }
+        return $arreglo;
+    }
+    public function inconsistenciaMovement(){
+        $email = Form::getValue('email');
+        $arreglo = array();
+        if ($email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($email, 'Correo electronico', 'email');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        }
+        $select = "bm.*, COUNT(bm.id_backup) cantidadRepetida";
+        $table = "backup_movements bm, users u, backups b";
+        $where = "b.id_user = u.id_user AND b.id_backup = bm.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> m -> nameColumns, "bm.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        $consulta = $this -> m -> mostrar($where, $select, $table);
+        if ($consulta) {
+            $arreglo["error"] = false;
+            $arreglo["movements"] = $consulta;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Movement ". (($email != "Generales") ? "del usuario: $email" : "");
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Movement ". (($email != "Generales") ? "del usuario: $email" : "");
         }
         return $arreglo;
     }

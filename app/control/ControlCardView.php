@@ -6,7 +6,7 @@
  * Time: 12:47
  */
 require_once (APP_PATH."model/CardView.php");
-class ControlCardView
+class ControlCardView extends Valida
 {
     private $cv;
     public function __construct()
@@ -27,6 +27,36 @@ class ControlCardView
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CARDVIEWS NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron cardviews del respaldo solicitado.";
+        }
+        return $arreglo;
+    }
+    public function inconsistenciaCardView() {
+        $email = Form::getValue('email');
+        $arreglo = array();
+        if ($email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($email, 'Correo electronico', 'email');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        }
+        $select = "cv.*, COUNT(cv.id_backup) cantidadRepetida";
+        $table = "backup_cardviews cv, users u, backups b";
+        $where = "b.id_user = u.id_user AND b.id_backup = cv.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> cv -> nameColumns, "cv.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        $consulta = $this -> cv -> mostrar($where, $select, $table);
+        if ($consulta) {
+            $arreglo["error"] = false;
+            $arreglo["cardviews"] = $consulta;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla CardView ". (($email != "Generales") ? "del usuario: $email" : "");
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla CardView ". (($email != "Generales") ? "del usuario: $email" : "");
         }
         return $arreglo;
     }
