@@ -60,4 +60,13 @@ class ControlPreference extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> p -> nameTable, $this -> p -> nameColumns, "id_backup");
+        $operacion = $this -> p -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
 }

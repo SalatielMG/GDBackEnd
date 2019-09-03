@@ -60,4 +60,13 @@ class ControlExtra extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> e -> nameTable, $this -> e -> nameColumns, "id_backup");
+        $operacion = $this -> e -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
 }

@@ -3,7 +3,7 @@
 // require_once(APP_PATH."model/Usuario.php");
 // require_once(APP_PATH."model/Permiso.php");
 class Valida {
-    protected $limit = 10;
+    protected $limit = 5;
     protected $having_Count = 2;
 
     public function namesColumns($arreglo, $aliasTable = "") {

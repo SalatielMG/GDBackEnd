@@ -70,4 +70,13 @@ class ControlMovement extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> m -> nameTable, $this -> m -> nameColumns, "id_backup");
+        $operacion = $this -> m -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
 }

@@ -60,4 +60,13 @@ class ControlCategory extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c -> nameColumns, "id_backup");
+        $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
 }

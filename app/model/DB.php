@@ -77,14 +77,31 @@ class DB {
         try{
             $this -> conectaMYSQLI();
             $this -> result = $this -> conexion -> multi_query($sql);
+            $resultado = array(
+              0 => "No se pudo crear una copia exacta de la tabla ",
+              1 => "No se pudo agregar el indice unico a la nueva tabla creada ",
+              2 => "No se pudo insertar los datos sin duplicidad en la nueva tabla creada ",
+              3 => "No se pudieron renombrar la tabla nueva con la tabla original "
+            );
+            $indice = 0;
+            if ($this -> result) {
+                do {
+                    $resultado[$indice] = ($indice + 1) . "° Sentencia ejecutada correctamente";
+                    $indice++;
+                    if (!$this -> conexion -> more_results()) {
+                        if ($this -> conexion -> errno) {
+                            $resultado[$indice] = $resultado[$indice] ." [ERROR]:= ". $this -> conexion -> error;
+                        }
+                        break;
+                    }
+
+                } while ($this -> conexion -> next_result());
+            } else if ($this -> conexion -> errno) {
+                $resultado[$indice] = $resultado[$indice] . $this -> conexion -> error;
+            }
             $this -> conexion -> close();
-            return $this -> result;
-            /*if($this -> result)
-                return true;
-            else{
-                $this -> result = null;
-                return false;
-            }*/
+            $this -> result = null;
+            return $resultado;
         }catch (Exception $e){
             echo $e -> getMessage();
             exit();

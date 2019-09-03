@@ -69,4 +69,13 @@ class ControlBudget extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> b -> nameTable, $this -> b -> nameColumns, "id_backup");
+        $operacion = $this -> b -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
 }

@@ -60,4 +60,13 @@ class ControlCardView extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsitencia() {
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> cv -> nameTable, $this -> cv -> nameColumns, "id_backup");
+        $operacion = $this -> cv -> ejecutarMultSentMySQLi($sql);
+        $arreglo = array(
+            "SenteciasSQL" => $sql,
+            "Result" => $operacion
+        );
+        return $arreglo;
+    }
 }
