@@ -124,3 +124,4 @@ ALTER TABLE backup_preferences_duplicado ADD UNIQUE(id_backup, key_name);
 INSERT IGNORE INTO backup_preferences_duplicado SELECT * FROM backup_preferences ORDER BY id_backup;
 RENAME TABLE backup_preferences TO duplicate_backup_preferences, backup_preferences_duplicado TO backup_preferences;
 /*************************Inconsistencia backup_preferences*************************/
+
