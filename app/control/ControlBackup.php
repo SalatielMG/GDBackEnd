@@ -67,18 +67,31 @@ class ControlBackup
     public function buscarBackupsUserCantidad() {
         $email = Form::getValue('email');
         $cantidad = Form::getValue('cantidad');
-
-        $form = new Form();
-        $form -> validarDatos($email, 'Correo electronico', 'required');
-        $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
-
         $arreglo = array();
-        if (count($form -> errores) > 0) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
-            $arreglo["msj"] = $form -> errores;
-            return $arreglo;
+
+        if ($email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($email, 'Correo electronico', 'email');
+            $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        } else {
+            $form = new Form();
+            $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
         }
+
+
+
         //$consulta = $this -> ;
 
     }

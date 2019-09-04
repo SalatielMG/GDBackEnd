@@ -12,7 +12,7 @@ $db_user = 'root';
 $db_pass = '';
 $date = new DateTime();
 
-// $dump = "mysqldump -h$db_host -u$db_user -p$db_pass --opt $db_name | gzip -c > MiRespaldo`date +%Y%m%d_%H%M%S`.sql.gz";
+// $dump = "mysqldump -h$db_host -u$db_user -p$db_pass --opt --where='1 limit 1000' $db_name | gzip -c > MiRespaldo.sql.gz";
 $dump = "mysqldump -h$db_host -u$db_user -p$db_pass --opt --where='1 limit 1000' $db_name > MiRespaldo_".$date->getTimestamp().".sql";
 
 system($dump, $output);
