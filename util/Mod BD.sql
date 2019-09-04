@@ -57,10 +57,18 @@ DECLARE nameCategory VARCHAR(50);
   END$$
 DELIMITER ;
 
-/*
-IdUSER:
-41
-*/
+/*************************Vistas tabla duplicate_backup sin duplicidades*************************/
+CREATE VIEW full_backup_accounts AS SELECT DISTINCTROW * FROM duplicate_backup_accounts;
+CREATE VIEW full_backup_automatics AS SELECT DISTINCTROW * FROM duplicate_backup_automatics;
+CREATE VIEW full_backup_budgets AS SELECT DISTINCTROW * FROM duplicate_backup_budgets;
+CREATE VIEW full_backup_cardviews AS SELECT DISTINCTROW * FROM duplicate_backup_cardviews;
+CREATE VIEW full_backup_categories AS SELECT DISTINCTROW * FROM duplicate_backup_categories;
+CREATE VIEW full_backup_currencies AS SELECT DISTINCTROW * FROM duplicate_backup_currencies;
+CREATE VIEW full_backup_extras AS SELECT DISTINCTROW * FROM duplicate_backup_extras;
+CREATE VIEW full_backup_movements AS SELECT DISTINCTROW * FROM duplicate_backup_movements;
+CREATE VIEW full_backup_preferences AS SELECT DISTINCTROW * FROM duplicate_backup_preferences;
+/*************************Vistas tabla duplicate_backup sin duplicidades*************************/
+
 
 /*************************Inconsistencia backup_accounts*************************/
 CREATE TABLE backup_accounts_duplicado LIKE backup_accounts;

@@ -64,6 +64,24 @@ class ControlBackup
         }
         return $arreglo;
     }
+    public function buscarBackupsUserCantidad() {
+        $email = Form::getValue('email');
+        $cantidad = Form::getValue('cantidad');
+
+        $form = new Form();
+        $form -> validarDatos($email, 'Correo electronico', 'required');
+        $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
+
+        $arreglo = array();
+        if (count($form -> errores) > 0) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+            $arreglo["msj"] = $form -> errores;
+            return $arreglo;
+        }
+        //$consulta = $this -> ;
+
+    }
     public function eliminarBackup() {
         $id = Form::getValue('id');
 
