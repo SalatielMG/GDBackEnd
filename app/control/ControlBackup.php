@@ -81,8 +81,25 @@ class ControlBackup extends Valida
             $arreglo["msj"] = $form -> errores;
             return $arreglo;
         }
-        $where = "1 ORDER BY tabla.cantRep desc";
-        $select = "tabla.*";
+        /*
+         * 1.- Buscar al usuario.
+         * 2.- Buscar los backups del usuario
+         * */
+        if ($email != "Generales") {
+            $where = "email = '$email'";
+            $select = "id_user, email";
+            $table = "users";
+            $consultaUser = $this -> b -> mostrar($where, $select, $table);
+            if (!$consultaUser) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+                $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
+                return $arreglo;
+            }
+        }
+
+        $where = "1 ORDER BY tabla.cantRep desc limit 0,10";
+        $select = "tabla.*, 0 as collapsed";
         $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) >= $cantidad) AS tabla)";
         $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);
         //return $arreglo;
