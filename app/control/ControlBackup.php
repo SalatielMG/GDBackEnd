@@ -7,7 +7,7 @@
  */
 require_once(APP_PATH.'model/Backup.php');
 
-class ControlBackup
+class ControlBackup extends Valida
 {
     private $b;
     public function __construct()
@@ -69,31 +69,35 @@ class ControlBackup
         $cantidad = Form::getValue('cantidad');
         $arreglo = array();
 
+        $form = new Form();
+        $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
+
         if ($email != "Generales") {
-            $form = new Form();
             $form -> validarDatos($email, 'Correo electronico', 'email');
-            $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
-            if (count($form -> errores) > 0) {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
-                $arreglo["msj"] = $form -> errores;
-                return $arreglo;
-            }
-        } else {
-            $form = new Form();
-            $form -> validarDatos($cantidad, 'Cantidad de backups', 'required|enterosPositivos');
-            if (count($form -> errores) > 0) {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
-                $arreglo["msj"] = $form -> errores;
-                return $arreglo;
-            }
         }
-
-
-
-        //$consulta = $this -> ;
-
+        if (count($form -> errores) > 0) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+            $arreglo["msj"] = $form -> errores;
+            return $arreglo;
+        }
+        $where = "1 ORDER BY tabla.cantRep desc";
+        $select = "tabla.*";
+        $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) >= $cantidad) AS tabla)";
+        $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);
+        //return $arreglo;
+        $consulta = $this -> b -> mostrar($where, $select, $table);
+        if ($consulta) {
+            $arreglo["error"] = false;
+            $arreglo["backups"] = $consulta;
+            $arreglo["titulo"] = "¡ BACKUPS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron mas de $cantidad backups ". (($email == "Generales") ? "de todos los usuarios generales" : "del usuario: $email");
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron mas de $cantidad backups ". (($email == "Generales") ? "de todos los usuarios generales" : "del usuario: $email");
+        }
+        return $arreglo;
     }
     public function eliminarBackup() {
         $id = Form::getValue('id');
