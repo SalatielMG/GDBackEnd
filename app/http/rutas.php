@@ -2,6 +2,7 @@
 
     /*Rutas de prueba*/
 	Ruta::get("contraseña","Prueba@encriptacion");
+	Ruta::get("backupBD","Prueba@backupBD");
 
 	/*Usuario*/
 	Ruta::post("login","ControlUsuario@login");

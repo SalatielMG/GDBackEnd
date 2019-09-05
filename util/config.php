@@ -3,7 +3,7 @@
 		"mysql" => [
 			"host" => "localhost",
 			"us" => "root",
-			"pass" => "",
+			"pass" => 'w$cp@HCJ',
 			"puerto" =>3306,
 			"db" => "gastos5_app"
 		],
