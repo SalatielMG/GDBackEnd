@@ -42,6 +42,7 @@ class ControlBackup extends Valida
     }
     public function buscarBackups() {
         $idUser = Form::getValue('idUser');
+        $OrdeBy = Form::getValue('orderby');
         $arreglo = array();
         $paginacion = $this -> construirPaginacion($idUser);
         if ($paginacion["error"]){
@@ -51,7 +52,7 @@ class ControlBackup extends Valida
             return $arreglo;
         }
         $arreglo["paginacion"] = $paginacion;
-        $select = $this -> b -> mostrar("id_user = $idUser");
+        $select = $this -> b -> mostrar("id_user = $idUser order by id_backup $OrdeBy");
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["backups"] = $select;
@@ -98,7 +99,7 @@ class ControlBackup extends Valida
             }
         }
 
-        $where = "1 ORDER BY tabla.cantRep desc limit 0,10";
+        $where = "1 ORDER BY tabla.cantRep desc limit 0,50";
         $select = "tabla.*, 0 as collapsed";
         $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) >= $cantidad) AS tabla)";
         $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);
@@ -130,6 +131,23 @@ class ControlBackup extends Valida
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BACKUP NO ELIMINADA !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar el backup: $id";
+        }
+        return $arreglo;
+    }
+    public function limpiarBackupsUser() {
+        $idUSer = Form::getValue("idUser");
+        $rango = Form::getValue("rango");
+        $arreglo = array();
+        $where = "id_backup in (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.* FROM (SELECT @rownum:=0) r, `backups` b where b.id_user = $idUSer ORDER BY `b`.`id_backup` DESC) as tabla) where tabla.pos > $rango)";
+        $delete = $this -> b -> eliminarBackupUser($where);
+        if ($delete) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ BACKUPS ELIMINADOS !";
+            $arreglo["msj"] = "Los bakups han sido eliminados satisfactoriamente";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ BACKUPS NO ELIMINADOS !";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar algunos o todos los backups";
         }
         return $arreglo;
     }

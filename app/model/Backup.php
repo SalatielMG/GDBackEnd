@@ -14,4 +14,8 @@ class Backup extends DB
     public function eliminar($id) {
         return $this -> delete("backups", "id_backup = $id");
     }
+    public function eliminarBackupUser($where) {
+        return $this -> delete("backups", $where);
+
+    }
 }
