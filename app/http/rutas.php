@@ -16,6 +16,7 @@
     Ruta::delete("eliminarBackup","ControlBackup@eliminarBackup");
     Ruta::get("buscarBackups","ControlBackup@buscarBackups");
     Ruta::get("buscarBackupUserCantidad","ControlBackup@buscarBackupsUserCantidad");
+    Ruta::delete("limpiarBackups","ControlBackup@limpiarBackups");
 
     /*Accounts*/
     Ruta::get("buscarAccountsBackup","ControlAccount@buscarAccountsBackup");
