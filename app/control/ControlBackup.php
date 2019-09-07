@@ -14,6 +14,7 @@ class ControlBackup extends Valida
     private $rango;
     private $cantidad;
     private $email;
+    private $pagina = 0;
 
     public function __construct()
     {
@@ -73,6 +74,7 @@ class ControlBackup extends Valida
     public function buscarBackupsUserCantidad() {
         $this -> email = Form::getValue('email');
         $this -> rango = Form::getValue('cantidad');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
 
         $form = new Form();
@@ -108,7 +110,13 @@ class ControlBackup extends Valida
                 return $arreglo;
             }
         }
-        $where = "1 ORDER BY tabla.cantRep desc limit 0,50";
+        /*$inicial=50;
+        $x=1;
+        $x++;
+        $result=$x*inicial;
+        $result2=($x-1)*$inicial;*/
+        $this -> pagina = $this -> pagina * 10;
+        $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina,10";
         $select = "tabla.*, 0 as collapsed";
         $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'".$this -> email."'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) > $this->rango) AS tabla)";
         $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);
@@ -151,7 +159,7 @@ class ControlBackup extends Valida
 
         $form = new Form();
         $form -> validarDatos($this -> idUser,"Usuario","required|enterosPositivos");
-        if ($this -> idUser == 0) { //Limpieza general
+        if ($this -> idUser == 0) { // Limpieza general
             if (count($form -> errores) > 0) {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
@@ -160,23 +168,32 @@ class ControlBackup extends Valida
             }
             $this -> email = "Generales";
             $UsuariosGralBack = $this -> buscarBackupsUC();
-            /*
-             * Recorrer el
-             * */
             $arreglo["UsuariosGralBack "] = $UsuariosGralBack;
             if (!$UsuariosGralBack["error"]) {
-                $arreglo["QuePedo?"] = "Todo bien";
-                $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ EXCELENT !";
-                $arreglo["msj"] = "¡ EXCELENT ! Todo bien";
+                $error = 0;
+                foreach ($UsuariosGralBack["backups"] as $key => $value) {
+                    $this -> idUser = $value -> id_user;
+                    $this -> cantidad = $value -> cantRep;
+                    $this -> cantidad = $this -> cantidad - $this -> rango;
+                    $this -> email = $value -> email;
+                    $limpiarBackupsUser = $this -> limpiarBackupsUser();
+                    if ($limpiarBackupsUser["error"]) {
+                        $error++;
+                        $arreglo["error"] = true;
+                        $arreglo["titulo"] = ($error == 1) ? "¡ ERROR DE AJUSTE DE 1 USUARIO !" : "¡ ERROR DE AJUTE DE $error USUARIOS !";
+                        $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $error usuario" . (($error == 1) ? "": "s");
+                        $arreglo["errorUser"][$this -> idUser] =  $limpiarBackupsUser;
+                    }
+                }
+                if ($error == 0){
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ BACKUPS AJUSTADOS !";
+                    $arreglo["msj"] = "Se ajustaron correctamente todos los backups de los usuarios que tenian mas de $this->rango Respaldos.";
+                }
             } else {
-                $arreglo["QuePedo?"] = "! Ni Madres ¡";
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR !";
-                $arreglo["msj"] = "¡ ERROR ! ! Ni Madres ¡";
+                $arreglo = $UsuariosGralBack;
             }
-
-        } else { //Limpieza de un solo usuario
+        } else { // Limpieza de un solo usuario
             $this -> email = Form::getValue("email");
             $this -> cantidad = Form::getValue("cantidad");
             $this -> cantidad = $this -> cantidad - $this -> rango;
@@ -196,11 +213,11 @@ class ControlBackup extends Valida
         $delete = $this -> b -> eliminarBackupUser($where);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP ELIMINADO !" : "¡ BACKUPS ELIMINADOS !";
+            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP AJUSTADO !" : "¡ BACKUPS AJUSTADOS !";
             $arreglo["msj"] = (($this -> cantidad == 1) ? "El backup ha sido eliminado satisfactoriamente" : "Los bakups han sido eliminados satisfactoriamente") . " del usuario : " . $this -> email;
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP NO ELIMINADO !" : "¡ BACKUPS NO ELIMINADOS !";
+            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP NO AJUSTADO !" : "¡ BACKUPS NO AJUSTADOS !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar " . (($this -> cantidad == 1) ? "el backup" : " algunos o todos los backups") . " del usuario : " . $this -> email;
         }
         return $arreglo;
