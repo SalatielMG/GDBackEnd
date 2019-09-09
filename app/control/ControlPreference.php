@@ -10,6 +10,7 @@ require_once (APP_PATH."model/Preference.php");
 class ControlPreference extends Valida
 {
     private $p;
+    private $pagina = 0;
     public function __construct()
     {
         $this -> p = new Preference();
@@ -32,6 +33,7 @@ class ControlPreference extends Valida
     }
     public function inconsistenciaPreference(){
         $email = Form::getValue('email');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -43,9 +45,10 @@ class ControlPreference extends Valida
                 return $arreglo;
             }
         }
+        $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bp.*, COUNT(bp.id_backup) cantidadRepetida";
         $table = "backup_preferences bp, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = bp.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> p -> nameColumns, "bp.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $where = "b.id_user = u.id_user AND b.id_backup = bp.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> p -> nameColumns, "bp.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> p -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -61,7 +64,7 @@ class ControlPreference extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> p -> nameTable, $this -> p -> nameColumns, "id_backup");
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> p -> nameTable, ['id_backup', 'key_name'], "id_backup");
         $operacion = $this -> p -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

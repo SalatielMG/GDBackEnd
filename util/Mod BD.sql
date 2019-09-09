@@ -57,6 +57,14 @@ DECLARE nameCategory VARCHAR(50);
   END$$
 DELIMITER ;
 
+--
+-- Trigger mntBackup`
+-- gastos5
+CREATE TRIGGER `automatizarBackups` AFTER INSERT ON `backups` FOR EACH ROW BEGIN
+	DELETE FROM backups WHERE id_backup in (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.id_backup FROM (SELECT @rownum:=0) r, `backups` b
+	where b.id_user = new.id_user ORDER BY `b`.`id_backup` DESC) as tabla) where tabla.pos > 10);
+END
+
 /*************************Vistas tabla duplicate_backup sin duplicidades*************************/
 CREATE VIEW full_backup_accounts AS SELECT DISTINCTROW * FROM duplicate_backup_accounts;
 CREATE VIEW full_backup_automatics AS SELECT DISTINCTROW * FROM duplicate_backup_automatics;
@@ -132,4 +140,3 @@ ALTER TABLE backup_preferences_duplicado ADD UNIQUE(id_backup, key_name);
 INSERT IGNORE INTO backup_preferences_duplicado SELECT * FROM backup_preferences ORDER BY id_backup;
 RENAME TABLE backup_preferences TO duplicate_backup_preferences, backup_preferences_duplicado TO backup_preferences;
 /*************************Inconsistencia backup_preferences*************************/
-

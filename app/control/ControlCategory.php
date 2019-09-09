@@ -9,6 +9,7 @@ require_once (APP_PATH."model/Category.php");
 class ControlCategory extends Valida
 {
     private $c;
+    private $pagina = 0;
     public function __construct()
     {
         $this -> c = new Category();
@@ -32,6 +33,7 @@ class ControlCategory extends Valida
 
     public function inconsistenciaCategory() {
         $email = Form::getValue('email');
+        $this -> pagina = form::getValue('pagina');
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -43,9 +45,10 @@ class ControlCategory extends Valida
                 return $arreglo;
             }
         }
+        $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
         $table = "backup_categories bc, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = bc.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> c -> nameColumns, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $where = "b.id_user = u.id_user AND b.id_backup = bc.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> c -> nameColumns, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> c -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -61,7 +64,7 @@ class ControlCategory extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c -> nameColumns, "id_backup");
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup', 'id_category', 'id_account'], "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

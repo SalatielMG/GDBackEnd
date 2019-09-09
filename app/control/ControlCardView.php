@@ -9,6 +9,7 @@ require_once (APP_PATH."model/CardView.php");
 class ControlCardView extends Valida
 {
     private $cv;
+    private $pagina = 0;
     public function __construct()
     {
         $this -> cv = new CardView();
@@ -32,6 +33,7 @@ class ControlCardView extends Valida
     }
     public function inconsistenciaCardView() {
         $email = Form::getValue('email');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -43,9 +45,10 @@ class ControlCardView extends Valida
                 return $arreglo;
             }
         }
+        $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "cv.*, COUNT(cv.id_backup) cantidadRepetida";
         $table = "backup_cardviews cv, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = cv.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> cv -> nameColumns, "cv.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $where = "b.id_user = u.id_user AND b.id_backup = cv.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> cv -> nameColumns, "cv.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> cv -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -61,7 +64,7 @@ class ControlCardView extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> cv -> nameTable, $this -> cv -> nameColumns, "id_backup");
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> cv -> nameTable, ['id_backup','id_card'], "id_backup");
         $operacion = $this -> cv -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

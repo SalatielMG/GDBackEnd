@@ -9,6 +9,7 @@ require_once (APP_PATH."model/Budget.php");
 class ControlBudget extends Valida
 {
     private $b;
+    private $pagina = 0;
     public function __construct()
     {
         $this -> b = new Budget();
@@ -41,6 +42,7 @@ class ControlBudget extends Valida
 
     public function inconsistenciaBudget() {
         $email = Form::getValue('email');
+        $this -> pagina = form::getValue('pagina');
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -52,9 +54,10 @@ class ControlBudget extends Valida
                 return $arreglo;
             }
         }
+        $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bd.*, COUNT(bd.id_backup) cantidadRepetida";
         $table = "backup_budgets bd, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = bd.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> b -> nameColumns, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $where = "b.id_user = u.id_user AND b.id_backup = bd.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> b -> nameColumns, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> b -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -70,7 +73,7 @@ class ControlBudget extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> b -> nameTable, $this -> b -> nameColumns, "id_backup");
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> b -> nameTable, ['id_backup','id_account','id_category','period','amount','budget'], "id_backup");
         $operacion = $this -> b -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

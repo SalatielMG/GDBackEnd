@@ -10,6 +10,7 @@ require_once (APP_PATH."model/Extra.php");
 class ControlExtra extends Valida
 {
     private $e;
+    private $pagina = 0;
     public function __construct()
     {
         $this -> e = new Extra();
@@ -32,6 +33,7 @@ class ControlExtra extends Valida
     }
     public function inconsistenciaExtra(){
         $email = Form::getValue('email');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -43,9 +45,10 @@ class ControlExtra extends Valida
                 return $arreglo;
             }
         }
+        $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "be.*, COUNT(be.id_backup) cantidadRepetida";
         $table = "backup_extras be, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = be.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> e -> nameColumns, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $where = "b.id_user = u.id_user AND b.id_backup = be.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> e -> nameColumns, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> e -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -61,7 +64,7 @@ class ControlExtra extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> e -> nameTable, $this -> e -> nameColumns, "id_backup");
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> e -> nameTable, ['id_backup', 'id_extra'], "id_backup");
         $operacion = $this -> e -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

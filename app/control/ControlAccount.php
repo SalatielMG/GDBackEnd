@@ -10,6 +10,7 @@ require_once(APP_PATH.'model/Account.php');
 class ControlAccount extends Valida
 {
     private $a;
+    private $pagina = 0;
     public function __construct()
     {
         $this -> a = new Account();
@@ -37,6 +38,7 @@ class ControlAccount extends Valida
 
     public function inconsistenciaAccounts() {
         $email = Form::getValue('email');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -48,9 +50,10 @@ class ControlAccount extends Valida
                 return $arreglo;
             }
         }
+        $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_accounts ba, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = ba.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit 1, $this->limit";
+        $where = "b.id_user = u.id_user AND b.id_backup = ba.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -67,7 +70,7 @@ class ControlAccount extends Valida
     }
 
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> nameColumns, "id_backup");
+        $sql = $this -> senetenciaInconsistenicaSQL($this -> a -> nameTable, ['id_backup', 'id_account'], "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,
