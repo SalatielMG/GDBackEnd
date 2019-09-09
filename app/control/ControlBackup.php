@@ -49,16 +49,18 @@ class ControlBackup extends Valida
     public function buscarBackups() {
         $idUser = Form::getValue('idUser');
         $OrdeBy = Form::getValue('orderby');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
-        $paginacion = $this -> construirPaginacion($idUser);
+        /*$paginacion = $this -> construirPaginacion($idUser);
         if ($paginacion["error"]){
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron backups del usuario solicitado.";
             return $arreglo;
         }
-        $arreglo["paginacion"] = $paginacion;
-        $select = $this -> b -> mostrar("id_user = $idUser order by id_backup $OrdeBy");
+        $arreglo["paginacion"] = $paginacion;*/
+        $this -> pagina = $this -> pagina * 10;
+        $select = $this -> b -> mostrar("id_user = $idUser order by id_backup $OrdeBy " . $this -> condicionarLimit($this -> pagina));
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["backups"] = $select;
@@ -116,7 +118,7 @@ class ControlBackup extends Valida
         $result=$x*inicial;
         $result2=($x-1)*$inicial;*/
         $this -> pagina = $this -> pagina * 10;
-        $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina,10";
+        $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina, $this->limit";
         $select = "tabla.*, 0 as collapsed";
         $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'".$this -> email."'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) > $this->rango) AS tabla)";
         $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);

@@ -3,7 +3,7 @@
 // require_once(APP_PATH."model/Usuario.php");
 // require_once(APP_PATH."model/Permiso.php");
 class Valida {
-    protected $limit = 5;
+    protected $limit = 50;
     protected $having_Count = 2;
 
     public function namesColumns($arreglo, $aliasTable = "") {
@@ -16,6 +16,9 @@ class Valida {
                 $name = $name . $aliasTable. $value . ", ";
         }
         return $name;
+    }
+    public function condicionarLimit($pagina, $condicion = -10) {
+        return ($pagina == $condicion) ? "" : "limit $pagina,$this->limit";
     }
     public function condicionarConsulta($dato, $columna, $condicion = "0") {
         return ($dato == $condicion) ? "" : "AND $columna = $dato";
