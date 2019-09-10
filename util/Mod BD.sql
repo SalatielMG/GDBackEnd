@@ -60,7 +60,28 @@ DELIMITER ;
 --
 -- Trigger mntBackup`
 -- gastos5
-CREATE TRIGGER `automatizarBackups` AFTER INSERT ON `backups` FOR EACH ROW BEGIN
+CREATE TRIGGER `automatizarBackups` AFTER INSERT ON `backups` FOR EACH ROW
+BEGIN
+
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE idP INT;
+  DECLARE consulta CURSOR FOR (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.id_backup FROM (SELECT @rownum:=0) r, `backups` b
+	where b.id_user = new.id_user ORDER BY `b`.`id_backup` DESC) as tabla) where tabla.pos > 10);
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  OPEN consulta;
+
+  read_loop: LOOP
+    FETCH consulta INTO idP;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+    delete from backups where id_backup = idP;
+  END LOOP;
+
+  CLOSE consulta;
+
+
 	DELETE FROM backups WHERE id_backup in (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.id_backup FROM (SELECT @rownum:=0) r, `backups` b
 	where b.id_user = new.id_user ORDER BY `b`.`id_backup` DESC) as tabla) where tabla.pos > 10);
 END
