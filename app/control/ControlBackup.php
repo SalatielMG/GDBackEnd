@@ -20,45 +20,11 @@ class ControlBackup extends Valida
     {
         $this -> b = new Backup();
     }
-    private function contarRegistrosBackupsUser($idUser) {
-        $select = $this -> b -> mostrar("id_user = $idUser", "count(*) total");
-        return ($select) ? $select[0] -> total: 0;
-    }
-    private function construirPaginacion($idUser) {
-        $paginacion = array();
-        $totalBackups = $this -> contarRegistrosBackupsUser($idUser);
-        if ($totalBackups != 0) {
-            /*
-             * Paginas de 10
-             *
-             * */
-            if ($totalBackups >= 10) {
-                //totalBackups = 87;
-                $paginacion["resultado"] = $totalBackups/10;
-                $paginacion["resultadoRedondeado_ceil"] = ceil($paginacion["resultado"]);
-            } else {
-                $paginacion["resultado"] = $totalBackups;
-            }
-            $paginacion["error"] = false;
-
-        } else {
-            $paginacion["error"] = true;
-        }
-        return $paginacion;
-    }
     public function buscarBackups() {
         $idUser = Form::getValue('idUser');
         $OrdeBy = Form::getValue('orderby');
         $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
-        /*$paginacion = $this -> construirPaginacion($idUser);
-        if ($paginacion["error"]){
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron backups del usuario solicitado.";
-            return $arreglo;
-        }
-        $arreglo["paginacion"] = $paginacion;*/
         $this -> pagina = $this -> pagina * $this -> limit;
         $select = $this -> b -> mostrar("id_user = $idUser order by id_backup $OrdeBy " . $this -> condicionarLimit($this -> pagina, "-$this->limit"));
         if ($select) {
@@ -73,10 +39,10 @@ class ControlBackup extends Valida
         }
         return $arreglo;
     }
-        public function buscarBackupsUserCantidad() {
-            $this -> email = Form::getValue('email');
-            $this -> rango = Form::getValue('cantidad');
-            $this -> pagina = Form::getValue('pagina');
+    public function buscarBackupsUserCantidad() {
+        $this -> email = Form::getValue('email');
+        $this -> rango = Form::getValue('cantidad');
+        $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
 
         $form = new Form();
@@ -96,10 +62,6 @@ class ControlBackup extends Valida
     }
     public function buscarBackupsUC() {
         $arreglo = array();
-        /*
-         * 1.- Buscar al usuario.
-         * 2.- Buscar los backups del usuario
-         * */
         if ($this -> email != "Generales") {
             $where = "email = " . "'".$this -> email."'";
             $select = "id_user, email";
@@ -112,11 +74,6 @@ class ControlBackup extends Valida
                 return $arreglo;
             }
         }
-        /*$inicial=50;
-        $x=1;
-        $x++;
-        $result=$x*inicial;
-        $result2=($x-1)*$inicial;*/
         $this -> pagina = $this -> pagina * $this -> limit;
         $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina, $this->limit";
         $select = "tabla.*, 0 as collapsed";
@@ -158,7 +115,6 @@ class ControlBackup extends Valida
         $this -> idUser = Form::getValue("idUser");
         $this -> rango = Form::getValue("rango");
         $arreglo = array();
-
         $form = new Form();
         $form -> validarDatos($this -> idUser,"Usuario","required|enterosPositivos");
         if ($this -> idUser == 0) { // Limpieza general

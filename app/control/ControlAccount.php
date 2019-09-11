@@ -39,6 +39,7 @@ class ControlAccount extends Valida
     public function inconsistenciaAccounts() {
         $email = Form::getValue('email');
         $this -> pagina = Form::getValue('pagina');
+        $idUser = 0;
         $arreglo = array();
         if ($email != "Generales") {
             $form = new Form();
@@ -49,11 +50,39 @@ class ControlAccount extends Valida
                 $arreglo["msj"] = $form -> errores;
                 return $arreglo;
             }
+            $where = "email = " . "'".$email."'";
+            $select = "id_user, email";
+            $table = "users";
+            $consultaUser = $this -> a -> mostrar($where, $select, $table);
+            if (!$consultaUser) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+                $arreglo["msj"] = " El usuario solicitado no se encuentra registrado en la base de datos ";
+                return $arreglo;
+            } else {
+                $idUser = $consultaUser[0] -> id_user;
+            }
         }
+        //----------------------------------------------------------------
+        //Buscar id_backups del usuario solicitado: (iUser == 0) ? "Usuarios en General": "Usuario en particular";
+        $where = "" . (($idUser == 0) ? "1" : "id_user = $idUser"). " ORDER BY id_backup DESC";
+        $select = "id_backup";
+        $table = "backups";
+        $backupsUser =  $this -> a -> mostrar($where, $select, $table);
+        if (!$backupsUser) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+            $arreglo["msj"] = ($idUser == 0) ? "No se lograron encontrar respaldos en la base de datos de ningun usuario" : " El usuario solicitado no ha realizado respaldos";
+            return $arreglo;
+        }
+        array_unshift($backupsUser, array('id_backup' => '0'));
+        $arreglo["backupsUser"] = $backupsUser;
+
+        //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
-        $table = "backup_accounts ba, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = ba.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $table = "backup_accounts ba, backups b";
+        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($idUser, "b.id_user", 0) ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
