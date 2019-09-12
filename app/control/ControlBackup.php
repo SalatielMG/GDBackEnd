@@ -53,7 +53,7 @@ class ControlBackup extends Valida
                 $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
                 return $arreglo;
             }
-            $this -> where = "b.id_user = " . $consultaUser[0] -> id_user;
+            $this -> where = "b.id_user = " . $consultaUser[0] -> id_user . "  ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit      ";
             $this -> select = "b.*";
             $this -> table = "backups b";
         }
