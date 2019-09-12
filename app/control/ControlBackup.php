@@ -15,12 +15,63 @@ class ControlBackup extends Valida
     private $cantidad;
     private $email;
     private $pagina = 0;
+    private $where = "";
+    private $select = "";
+    private $table = "";
 
     public function __construct()
     {
         $this -> b = new Backup();
     }
-    public function buscarBackups() {
+    public function buscarBackupsUserEmail() {
+        $this -> email = Form::getValue('email');
+        $OrdeBy = Form::getValue('orderby');
+        $this -> pagina = Form::getValue('pagina');
+
+        $this -> pagina = $this -> pagina * $this -> limit;
+
+        $arreglo = array();
+        $this -> where = "b.id_user = u.id_user ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit";
+        $this -> select = "b.*, u.email";
+        $this -> table = "backups b, users u";
+        if ($this -> email != "Generales") {
+            $form = new Form();
+            $form -> validarDatos($this -> email, 'Correo electronico', 'email');
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+            $this -> where = "email = " . "'".$this -> email."'";
+            $this -> select = "id_user, email";
+            $this -> table = "users";
+            $consultaUser = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
+            if (!$consultaUser) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+                $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
+                return $arreglo;
+            }
+            $this -> where = "b.id_user = " . $consultaUser[0] -> id_user;
+            $this -> select = "b.*";
+            $this -> table = "backups b";
+        }
+        $arreglo["consultaBackups"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $backups = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
+        if ($backups) {
+            $arreglo["error"] = false;
+            $arreglo["backups"] = $backups;
+            $arreglo["titulo"] = "¡ BACKUPS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
+        }
+        return $arreglo;
+    }
+    public function buscarBackupsUserId() {
         $idUser = Form::getValue('idUser');
         $OrdeBy = Form::getValue('orderby');
         $this -> pagina = Form::getValue('pagina');
@@ -62,6 +113,7 @@ class ControlBackup extends Valida
     }
     public function buscarBackupsUC() {
         $arreglo = array();
+        $idUser = 0;
         if ($this -> email != "Generales") {
             $where = "email = " . "'".$this -> email."'";
             $select = "id_user, email";
@@ -72,6 +124,8 @@ class ControlBackup extends Valida
                 $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
                 $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
                 return $arreglo;
+            } else {
+                $idUser = $consultaUser[0] -> id_user;
             }
         }
         $this -> pagina = $this -> pagina * $this -> limit;

@@ -65,9 +65,32 @@ class ControlAccount extends Valida
         }
         //----------------------------------------------------------------
         //Buscar id_backups del usuario solicitado: (iUser == 0) ? "Usuarios en General": "Usuario en particular";
+        if ($idUser != 0) {
+            $where = "id_user = $idUser ORDER BY id_backup DESC";
+            $select = "count(id_backup) as cantidad";
+            $table = "backups";
+            $arreglo["consultabackupsUser"] = $this -> consultaSQL($select,$table, $where);
+            $backupsUser =  $this -> a -> mostrar($where, $select, $table);
+            if ($backupsUser) {
+                if ($backupsUser[0] -> cantidad == 0) {
+                    $arreglo["error"] = true;
+                    $arreglo["backupsUser"] = $backupsUser;
+                    $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+                    $arreglo["msj"] = "El usuario : $email todavia realizado respaldos";
+                    return $arreglo;
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR EN LA CONSULTA !";
+                $arreglo["msj"] = "Ocurrio un error en la consulta sobre la cantidad total de backups del usuario : $email";
+            }
+        }
+        /*
         $where = "" . (($idUser == 0) ? "1" : "id_user = $idUser"). " ORDER BY id_backup DESC";
         $select = "id_backup";
         $table = "backups";
+        $arreglo["consultabackupsUser"] = $this -> consultaSQL($select,$table, $where);
+        //return $arreglo;
         $backupsUser =  $this -> a -> mostrar($where, $select, $table);
         if (!$backupsUser) {
             $arreglo["error"] = true;
@@ -77,13 +100,14 @@ class ControlAccount extends Valida
         }
         array_unshift($backupsUser, array('id_backup' => '0'));
         $arreglo["backupsUser"] = $backupsUser;
-
+        return $arreglo;*/
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_accounts ba, backups b";
         $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($idUser, "b.id_user", 0) ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        // return $arreglo;
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
             $arreglo["error"] = false;
