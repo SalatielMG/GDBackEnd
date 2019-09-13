@@ -32,8 +32,8 @@ class ControlBackup extends Valida
 
         $arreglo = array();
         $this -> where = "b.id_user = u.id_user ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit";
-        $this -> select = "b.*, u.email";
-        $this -> table = "backups b, users u";
+        $this -> select = "@rownum:=@rownum+1 AS pos, b.*, u.email";
+        $this -> table = "backups b, users u, (SELECT @rownum:=$this->pagina) r";
         if ($this -> email != "Generales") {
             $form = new Form();
             $form -> validarDatos($this -> email, 'Correo electronico', 'email');
@@ -54,13 +54,15 @@ class ControlBackup extends Valida
                 return $arreglo;
             }
             $this -> where = "b.id_user = " . $consultaUser[0] -> id_user . "  ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit      ";
-            $this -> select = "b.*";
-            $this -> table = "backups b";
+            $this -> select = "@rownum:=@rownum+1 AS pos, b.*";
+            $this -> table = "backups b, (SELECT @rownum:=$this->pagina) r";
         }
         $arreglo["consultaBackups"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $backups = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         if ($backups) {
             $arreglo["error"] = false;
+            if ($this -> pagina == 0) array_unshift($backups, array('id_backup' => '0'));
+
             $arreglo["backups"] = $backups;
             $arreglo["titulo"] = "¡ BACKUPS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
