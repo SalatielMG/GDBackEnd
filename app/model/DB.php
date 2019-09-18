@@ -78,26 +78,27 @@ class DB {
             $this -> conectaMYSQLI();
             $this -> result = $this -> conexion -> multi_query($sql);
             $resultado = array(
-              0 => "No se pudo crear una copia exacta de la tabla ",
-              1 => "No se pudo agregar el indice unico a la nueva tabla creada ",
-              2 => "No se pudo insertar los datos sin duplicidad en la nueva tabla creada ",
-              3 => "No se pudieron renombrar la tabla nueva con la tabla original "
+              0 => array("error" => true, "msj" => "No se pudo crear una copia exacta de la tabla "),
+              1 => array("error" => true, "msj" => "No se pudo agregar el indice unico a la nueva tabla creada "),
+              2 => array("error" => true, "msj" => "No se pudo insertar los datos sin duplicidad en la nueva tabla creada "),
+              3 => array("error" => true, "msj" => "No se pudieron renombrar la tabla nueva con la tabla original ")
             );
             $indice = 0;
             if ($this -> result) {
                 do {
-                    $resultado[$indice] = ($indice + 1) . "° Sentencia ejecutada correctamente";
+                    $resultado[$indice]["msj"] = ($indice + 1) . "° Sentencia ejecutada correctamente";
+                    $resultado[$indice]["error"] = false;
                     $indice++;
                     if (!$this -> conexion -> more_results()) {
                         if ($this -> conexion -> errno) {
-                            $resultado[$indice] = $resultado[$indice] ." [ERROR]:= ". $this -> conexion -> error;
+                            $resultado[$indice]["msj"] = $resultado[$indice]["msj"] ." [ERROR]:= ". $this -> conexion -> error;
                         }
                         break;
                     }
 
                 } while ($this -> conexion -> next_result());
             } else if ($this -> conexion -> errno) {
-                $resultado[$indice] = $resultado[$indice] . $this -> conexion -> error;
+                $resultado[$indice]["msj"] = $resultado[$indice]["msj"] . $this -> conexion -> error;
             }
             $this -> conexion -> close();
             $this -> result = null;

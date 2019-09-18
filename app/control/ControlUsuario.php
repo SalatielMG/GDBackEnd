@@ -14,15 +14,11 @@ class ControlUsuario
     }
 
     public function login() {
-
         $data = json_decode(Form::getValue("data",false,false));
         $form = new Form();
-
         $form -> validarDatos($data -> email, 'Correo electronico', 'required');
         $form -> validarDatos($data -> pass, 'Contraseña', 'required');
-
         $arreglo = array();
-
         $errores = count($form -> errores);
         if ($errores > 0) {
             $arreglo["error"] = true;
@@ -30,9 +26,7 @@ class ControlUsuario
             $arreglo["msj"] = $form -> errores;
             return $arreglo;
         }
-
         $email = $data -> email;
-
         $usuario = $this -> u -> mostrar("email = '$email'", "id, email, password" );
         if (count($usuario) > 0) {
             $usuario = $usuario[0];
