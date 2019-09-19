@@ -27,7 +27,7 @@ class Valida {
     public function consultaSQL($select = "", $table = "", $where = "") {
         return "SELECT $select FROM $table WHERE $where";
     }
-    public function senetenciaInconsistenicaSQL($nameTable, $namesColumns, $colOrderBy) {
+    public function sentenciaInconsistenicaSQL($nameTable, $namesColumns, $colOrderBy) {
         $sql = "CREATE TABLE duplicado_$nameTable LIKE $nameTable;";
         $sql.= "ALTER TABLE duplicado_$nameTable ADD UNIQUE(". $this -> namesColumns($namesColumns) .");";
         $sql.= "INSERT IGNORE INTO duplicado_$nameTable SELECT * FROM $nameTable ORDER BY $colOrderBy;";

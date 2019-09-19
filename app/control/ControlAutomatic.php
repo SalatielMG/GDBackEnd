@@ -77,7 +77,7 @@ class ControlAutomatic extends Valida
     }
 
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> a -> nameTable, ['id_backup', 'id_operation', 'id_account','id_category','period','amount','initial_date'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, ['id_backup', 'id_operation', 'id_account','id_category','period','amount','initial_date'], "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

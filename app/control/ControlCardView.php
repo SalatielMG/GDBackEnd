@@ -64,7 +64,7 @@ class ControlCardView extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> cv -> nameTable, ['id_backup','id_card'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> cv -> nameTable, ['id_backup','id_card'], "id_backup");
         $operacion = $this -> cv -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

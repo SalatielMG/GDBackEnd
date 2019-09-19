@@ -64,7 +64,7 @@ class ControlExtra extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> e -> nameTable, ['id_backup', 'id_extra'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> e -> nameTable, ['id_backup', 'id_extra'], "id_backup");
         $operacion = $this -> e -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

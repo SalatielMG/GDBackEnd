@@ -73,7 +73,7 @@ class ControlBudget extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> b -> nameTable, ['id_backup','id_account','id_category','period','amount','budget'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> b -> nameTable, ['id_backup','id_account','id_category','period','amount','budget'], "id_backup");
         $operacion = $this -> b -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

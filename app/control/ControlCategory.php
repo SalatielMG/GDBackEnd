@@ -64,7 +64,7 @@ class ControlCategory extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup', 'id_category', 'id_account'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup', 'id_category', 'id_account'], "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

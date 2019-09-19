@@ -64,7 +64,7 @@ class ControlCurrency extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup','iso_code'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup','iso_code'], "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,

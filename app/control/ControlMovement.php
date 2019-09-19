@@ -74,7 +74,7 @@ class ControlMovement extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
-        $sql = $this -> senetenciaInconsistenicaSQL($this -> m -> nameTable, ['id_backup', 'id_account', 'id_category', 'amount', 'detail', 'date_idx'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> m -> nameTable, ['id_backup', 'id_account', 'id_category', 'amount', 'detail', 'date_idx'], "id_backup");
         $operacion = $this -> m -> ejecutarMultSentMySQLi($sql);
         $arreglo = array(
             "SenteciasSQL" => $sql,
