@@ -39,6 +39,7 @@ class ControlAccount extends Valida
     public function inconsistenciaAccounts() {
         $email = Form::getValue('email');
         $this -> pagina = Form::getValue('pagina');
+        $backups = json_decode(Form::getValue('backups', false, false));
         $idUser = 0;
         $arreglo = array();
         if ($email != "Generales") {
