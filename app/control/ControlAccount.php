@@ -66,7 +66,7 @@ class ControlAccount extends Valida
         }
         //----------------------------------------------------------------
         //Buscar id_backups del usuario solicitado: (iUser == 0) ? "Usuarios en General": "Usuario en particular";
-        if ($idUser != 0) {
+        if ($idUser != 0) { //Especifio
             $where = "id_user = $idUser ORDER BY id_backup DESC";
             $select = "count(id_backup) as cantidad";
             $table = "backups";
@@ -77,31 +77,16 @@ class ControlAccount extends Valida
                     $arreglo["error"] = true;
                     $arreglo["backupsUser"] = $backupsUser;
                     $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
-                    $arreglo["msj"] = "El usuario : $email todavia realizado respaldos";
+                    $arreglo["msj"] = "El usuario : $email todavia no ha realizado respaldos";
                     return $arreglo;
                 }
             } else {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ ERROR EN LA CONSULTA !";
                 $arreglo["msj"] = "Ocurrio un error en la consulta sobre la cantidad total de backups del usuario : $email";
+                return $arreglo;
             }
         }
-        /*
-        $where = "" . (($idUser == 0) ? "1" : "id_user = $idUser"). " ORDER BY id_backup DESC";
-        $select = "id_backup";
-        $table = "backups";
-        $arreglo["consultabackupsUser"] = $this -> consultaSQL($select,$table, $where);
-        //return $arreglo;
-        $backupsUser =  $this -> a -> mostrar($where, $select, $table);
-        if (!$backupsUser) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
-            $arreglo["msj"] = ($idUser == 0) ? "No se lograron encontrar respaldos en la base de datos de ningun usuario" : " El usuario solicitado no ha realizado respaldos";
-            return $arreglo;
-        }
-        array_unshift($backupsUser, array('id_backup' => '0'));
-        $arreglo["backupsUser"] = $backupsUser;
-        return $arreglo;*/
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
