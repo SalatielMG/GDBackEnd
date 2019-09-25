@@ -31,6 +31,7 @@ class ControlBackup extends Valida
         $this -> pagina = $this -> pagina * $this -> limit;
 
         $arreglo = array();
+        $arreglo["id_user"] = 0;
         $this -> where = "b.id_user = u.id_user ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit";
         $this -> select = "@rownum:=@rownum+1 AS pos, b.*, u.email";
         $this -> table = "backups b, users u, (SELECT @rownum:=$this->pagina) r";
@@ -53,7 +54,8 @@ class ControlBackup extends Valida
                 $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
                 return $arreglo;
             }
-            $this -> where = "b.id_user = " . $consultaUser[0] -> id_user . "  ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit      ";
+            $arreglo["id_user"] = $consultaUser[0] -> id_user;
+            $this -> where = "b.id_user = " . $arreglo["id_user"] . "  ORDER BY id_backup $OrdeBy limit $this->pagina,$this->limit      ";
             $this -> select = "@rownum:=@rownum+1 AS pos, b.*";
             $this -> table = "backups b, (SELECT @rownum:=$this->pagina) r";
         }

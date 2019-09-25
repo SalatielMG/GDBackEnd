@@ -36,13 +36,26 @@ class ControlAccount extends Valida
         return $arreglo;
     }
 
+    private function inBackups($arreglo) {
+        $condicion = "";
+        if ($arreglo[0] != "0") {
+            $condicion = " AND ba.id_backup in (";
+            foreach ($arreglo as $key => $value) {
+                $condicion.= $value . ",";
+            }
+            $condicion = substr_replace($condicion, ")", strlen($condicion) - 1);
+        }
+        return $condicion;
+    }
     public function inconsistenciaAccounts() {
-        $email = Form::getValue('email');
+        $data = json_decode(Form::getValue('dataUser', false, false));
+        $data -> id;
         $this -> pagina = Form::getValue('pagina');
         $backups = json_decode(Form::getValue('backups', false, false));
-        $idUser = 0;
+        // return $backups;
+        // return $this -> inBackups($backups);
         $arreglo = array();
-        if ($email != "Generales") {
+        /*if ($email != "Generales") {
             $form = new Form();
             $form -> validarDatos($email, 'Correo electronico', 'email');
             if (count($form -> errores) > 0) {
@@ -86,12 +99,12 @@ class ControlAccount extends Valida
                 $arreglo["msj"] = "Ocurrio un error en la consulta sobre la cantidad total de backups del usuario : $email";
                 return $arreglo;
             }
-        }
+        }*/
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_accounts ba, backups b";
-        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($idUser, "b.id_user", 0) ." GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         // return $arreglo;
         $consulta = $this -> a -> mostrar($where, $select, $table);
@@ -99,11 +112,11 @@ class ControlAccount extends Valida
             $arreglo["error"] = false;
             $arreglo["accounts"] = $consulta;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Accounts ". (($email != "Generales") ? "del usuario: $email" : "");
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Accounts ". (($email != "Generales") ? "del usuario: $email" : "");
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
