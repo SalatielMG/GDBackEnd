@@ -32,44 +32,45 @@ class ControlCurrency extends Valida
     }
 
     public function inconsistenciaCurrency(){
-        $email = Form::getValue('email');
+        $data = json_decode(Form::getValue('dataUser', false, false));
         $this -> pagina = Form::getValue('pagina');
+        $backups = json_decode(Form::getValue('backups', false, false));
         $arreglo = array();
-        if ($email != "Generales") {
-            $form = new Form();
-            $form -> validarDatos($email, 'Correo electronico', 'email');
-            if (count($form -> errores) > 0) {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
-                $arreglo["msj"] = $form -> errores;
-                return $arreglo;
-            }
-        }
+
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
-        $table = "backup_currencies bc, users u, backups b";
-        $where = "b.id_user = u.id_user AND b.id_backup = bc.id_backup ". $this -> condicionarConsulta("'$email'", "u.email", "'Generales'") ." GROUP BY ". $this -> namesColumns($this -> c -> nameColumns, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $table = "backup_currencies bc, backups b";
+        $where = "b.id_backup = bc.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> nameColumns, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> c -> mostrar($where, $select, $table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["currencies"] = $consulta;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Currency ". (($email != "Generales") ? "del usuario: $email" : "");
+            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Currency ". (($email != "Generales") ? "del usuario: $email" : "");
+            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $indices = $this -> c -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> c -> nameTable);
+        $arreglo = array();
+        $arreglo["indice"] = false;
+        foreach ($indices as $key => $value) {
+            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
+                $arreglo["indice"] = true;
+                $arreglo["msj"] = "Ya existe el campo unico en la tabla Currencies, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
+                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
+                return $arreglo;
+            }
+        }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup','iso_code'], "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
-        $arreglo = array(
-            "SenteciasSQL" => $sql,
-            "Result" => $operacion
-        );
+        $arreglo["SenteciasSQL"] = $sql;
+        $arreglo["Result"] = $operacion;
         return $arreglo;
     }
 }

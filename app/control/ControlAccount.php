@@ -36,77 +36,17 @@ class ControlAccount extends Valida
         return $arreglo;
     }
 
-    private function inBackups($arreglo) {
-        $condicion = "";
-        if ($arreglo[0] != "0") {
-            $condicion = " AND ba.id_backup in (";
-            foreach ($arreglo as $key => $value) {
-                $condicion.= $value . ",";
-            }
-            $condicion = substr_replace($condicion, ")", strlen($condicion) - 1);
-        }
-        return $condicion;
-    }
     public function inconsistenciaAccounts() {
         $data = json_decode(Form::getValue('dataUser', false, false));
-        $data -> id;
         $this -> pagina = Form::getValue('pagina');
         $backups = json_decode(Form::getValue('backups', false, false));
-        // return $backups;
-        // return $this -> inBackups($backups);
         $arreglo = array();
-        /*if ($email != "Generales") {
-            $form = new Form();
-            $form -> validarDatos($email, 'Correo electronico', 'email');
-            if (count($form -> errores) > 0) {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
-                $arreglo["msj"] = $form -> errores;
-                return $arreglo;
-            }
-            $where = "email = " . "'".$email."'";
-            $select = "id_user, email";
-            $table = "users";
-            $consultaUser = $this -> a -> mostrar($where, $select, $table);
-            if (!$consultaUser) {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
-                $arreglo["msj"] = " El usuario solicitado no se encuentra registrado en la base de datos ";
-                return $arreglo;
-            } else {
-                $idUser = $consultaUser[0] -> id_user;
-            }
-        }
-        //----------------------------------------------------------------
-        //Buscar id_backups del usuario solicitado: (iUser == 0) ? "Usuarios en General": "Usuario en particular";
-        if ($idUser != 0) { //Especifio
-            $where = "id_user = $idUser ORDER BY id_backup DESC";
-            $select = "count(id_backup) as cantidad";
-            $table = "backups";
-            $arreglo["consultabackupsUser"] = $this -> consultaSQL($select,$table, $where);
-            $backupsUser =  $this -> a -> mostrar($where, $select, $table);
-            if ($backupsUser) {
-                if ($backupsUser[0] -> cantidad == 0) {
-                    $arreglo["error"] = true;
-                    $arreglo["backupsUser"] = $backupsUser;
-                    $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
-                    $arreglo["msj"] = "El usuario : $email todavia no ha realizado respaldos";
-                    return $arreglo;
-                }
-            } else {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR EN LA CONSULTA !";
-                $arreglo["msj"] = "Ocurrio un error en la consulta sobre la cantidad total de backups del usuario : $email";
-                return $arreglo;
-            }
-        }*/
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_accounts ba, backups b";
         $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        // return $arreglo;
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
             $arreglo["error"] = false;
@@ -122,12 +62,21 @@ class ControlAccount extends Valida
     }
 
     public function corregirInconsitencia() {
+        $indices = $this -> a -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> a -> nameTable);
+        $arreglo = array();
+        $arreglo["indice"] = false;
+        foreach ($indices as $key => $value) {
+            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
+                $arreglo["indice"] = true;
+                $arreglo["msj"] = "Ya existe el campo unico en la tabla Accounts, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
+                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
+                return $arreglo;
+            }
+        }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, ['id_backup', 'id_account'], "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
-        $arreglo = array(
-            "SenteciasSQL" => $sql,
-            "Result" => $operacion
-        );
+        $arreglo["SenteciasSQL"] = $sql;
+        $arreglo["Result"] = $operacion;
         return $arreglo;
     }
 

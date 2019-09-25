@@ -18,6 +18,17 @@ class Valida {
         }
         return $name;
     }
+    public function inBackups($arreglo, $variable = "ba.id_backup") {
+        $condicion = "";
+        if ($arreglo[0] != "0") {
+            $condicion = " AND $variable in (";
+            foreach ($arreglo as $key => $value) {
+                $condicion.= $value . ",";
+            }
+            $condicion = substr_replace($condicion, ")", strlen($condicion) - 1);
+        }
+        return $condicion;
+    }
     public function condicionarLimit($pagina, $condicion = -10) {
         return ($pagina == $condicion) ? "" : "limit $pagina,$this->limit";
     }
@@ -29,7 +40,7 @@ class Valida {
     }
     public function sentenciaInconsistenicaSQL($nameTable, $namesColumns, $colOrderBy) {
         $sql = "CREATE TABLE duplicado_$nameTable LIKE $nameTable;";
-        $sql.= "ALTER TABLE duplicado_$nameTable ADD UNIQUE(". $this -> namesColumns($namesColumns) .");";
+        $sql.= "ALTER TABLE duplicado_$nameTable ADD UNIQUE indiceUnico (". $this -> namesColumns($namesColumns) .");";
         $sql.= "INSERT IGNORE INTO duplicado_$nameTable SELECT * FROM $nameTable ORDER BY $colOrderBy;";
         $sql.= "RENAME TABLE $nameTable TO duplicate_$nameTable, duplicado_$nameTable TO $nameTable;";
 
