@@ -81,7 +81,10 @@ class ControlBackup extends Valida
         $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
         $this -> pagina = $this -> pagina * $this -> limit;
-        $select = $this -> b -> mostrar("id_user = $idUser order by id_backup $OrdeBy " . $this -> condicionarLimit($this -> pagina, "-$this->limit"));
+        $this -> where = "b.id_user = $idUser order by b.id_backup $OrdeBy " . $this -> condicionarLimit($this -> pagina, "-$this->limit");
+        $this -> select = "@rownum:=@rownum+1 AS pos, b.*";
+        $this -> table = "backups b, (SELECT @rownum:=$this->pagina) r";
+        $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["backups"] = $select;
