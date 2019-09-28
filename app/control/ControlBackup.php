@@ -230,15 +230,53 @@ class ControlBackup extends Valida
         $arreglo = array();
         $where = "id_backup in (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.id_backup FROM (SELECT @rownum:=0) r, `backups` b where b.id_user = $this->idUser ORDER BY `b`.`id_backup` DESC) as tabla) where tabla.pos > $this->rango)";
         $delete = $this -> b -> eliminarBackupUser($where);
+        $arreglo["id_user"] = $this -> idUser;
         if ($delete) {
-            $arreglo["error"] = false;
+            $arreglo["error"] = "success";
             $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP AJUSTADO !" : "¡ BACKUPS AJUSTADOS !";
             $arreglo["msj"] = (($this -> cantidad == 1) ? "El backup ha sido eliminado satisfactoriamente" : "Los bakups han sido eliminados satisfactoriamente") . " del usuario : " . $this -> email;
         } else {
-            $arreglo["error"] = true;
+            $arreglo["error"] = "warning";
             $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP NO AJUSTADO !" : "¡ BACKUPS NO AJUSTADOS !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar " . (($this -> cantidad == 1) ? "el backup" : " algunos o todos los backups") . " del usuario : " . $this -> email;
         }
         return $arreglo;
     }
+    // ------------------------ limpiarBackupsUsers ----------------------------
+    public function limpiarBackupsUsers() {
+        $users = json_decode(Form::getValue("users", false, false));
+        $this -> rango = Form::getValue("rangoBackups");
+
+        $arreglo = array();
+
+        $warning = 0;
+        $resultadoLimpiezaUser = array();
+        foreach ($users as $key => $value) {
+            $this -> idUser = $value -> id;
+            $this -> cantidad = $value -> cantidadBackups;
+            $this -> cantidad = $this -> cantidad - $this -> rango;
+            $this -> email = $value -> email;
+            $res = $this -> limpiarBackupsUser();
+            array_push($resultadoLimpiezaUser, $res);
+            //$resultadoLimpiezaUser[$this -> idUser] = $this -> limpiarBackupsUser();
+            //$arreglo["resultCleanBackupsUser"][$this -> idUser] = $this -> limpiarBackupsUser();
+            //$limpiarBackupsUser = $this -> limpiarBackupsUser();
+            if ($res["error"] == "warning") {
+                $warning++;
+            }
+        }
+        $arreglo["resultCleanBackupsUser"] = $resultadoLimpiezaUser;
+        if ($warning == 0){
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ BACKUPS AJUSTADOS !";
+            $arreglo["msj"] = "Se ajustaron correctamente todos los backups de los usuarios que tenian mas de $this->rango Respaldos.";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = ($warning == 1) ? "¡ ERROR DE AJUSTE DE 1 USUARIO !" : "¡ ERROR DE AJUTE DE $warning USUARIOS !";
+            $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $warning usuario" . (($warning == 1) ? "": "s");
+        }
+        return $arreglo;
+
+    }
+    // ------------------------ limpiarBackupsUsers ----------------------------
 }
