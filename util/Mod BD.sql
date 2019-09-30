@@ -82,7 +82,8 @@ BEGIN
   CLOSE consulta;
 
 
-	DELETE FROM backups WHERE id_backup in (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.id_backup FROM (SELECT @rownum:=0) r, `backups` b
+	DELETE FROM backups WHERE id_
+	backup in (select tabla.id_backup from ((SELECT @rownum:=@rownum+1 AS pos, b.id_backup FROM (SELECT @rownum:=0) r, `backups` b
 	where b.id_user = new.id_user ORDER BY `b`.`id_backup` DESC) as tabla) where tabla.pos > 10);
 END
 
