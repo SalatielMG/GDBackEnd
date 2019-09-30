@@ -29,7 +29,7 @@ class Valida {
         }
         return $condicion;
     }
-    public function condicionarLimit($pagina, $condicion = -10) {
+    public function condicionarLimit($pagina, $condicion) {
         return ($pagina == $condicion) ? "" : "limit $pagina,$this->limit";
     }
     public function condicionarConsulta($dato, $columna, $condicion = "0") {

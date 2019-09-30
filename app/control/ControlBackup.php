@@ -81,9 +81,10 @@ class ControlBackup extends Valida
         $this -> pagina = Form::getValue('pagina');
         $arreglo = array();
         $this -> pagina = $this -> pagina * $this -> limit;
-        $this -> where = "b.id_user = $idUser order by b.id_backup $OrdeBy " . $this -> condicionarLimit($this -> pagina, "-$this->limit");
+        $newLimit = "-$this->limit";
+        $this -> where = "b.id_user = $idUser order by b.id_backup $OrdeBy " . $this -> condicionarLimit($this -> pagina, $newLimit);
         $this -> select = "@rownum:=@rownum+1 AS pos, b.*";
-        $this -> table = "backups b, (SELECT @rownum:=$this->pagina) r";
+        $this -> table = "backups b, (SELECT @rownum:=" . (($this -> pagina == $newLimit) ?  0:  $this -> pagina) . ") r";
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         if ($select) {
             $arreglo["error"] = false;
@@ -118,6 +119,7 @@ class ControlBackup extends Valida
         $arreglo = $this -> buscarBackupsUC();
         return $arreglo;
     }
+
     public function buscarBackupsUC() {
         $arreglo = array();
         $idUser = 0;
@@ -135,9 +137,11 @@ class ControlBackup extends Valida
                 $idUser = $consultaUser[0] -> id_user;
             }
         }
+        //$filtrosSearch = "(SELECT JSON_PRETTY({\"id_backup\":{\"value\" : \"\", \"valueAnt\" : \"\", \"isFilter\" : false}, \"automatic\":{\"value\" : \"-1\", \"valueAnt\" : \"\", \"isFilter\" : false}, \"date_creation\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false},\"date_download\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false},\"created_in\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false}})) as filtrosSearch";
+        //$filtrosSearch = "{\"id_backup\":{value : '', valueAnt : '', isFilter : false}, automatic:{value : '-1', valueAnt : '', isFilter : false}, date_creation:{value : '',valueAnt : '',isFilter : false},date_creation:{value : '',valueAnt : '',isFilter : false},date_download:{value : '',valueAnt : '',isFilter : false},created_in:{value : '',valueAnt : '',isFilter : false}} as filtrosSearch";
         $this -> pagina = $this -> pagina * $this -> limit;
         $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina, $this->limit";
-        $select = "tabla.*, 0 as collapsed";
+        $select = "tabla.*";
         $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'".$this -> email."'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) > $this->rango) AS tabla)";
         $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);
         //return $arreglo;
@@ -250,22 +254,20 @@ class ControlBackup extends Valida
         $arreglo = array();
 
         $warning = 0;
-        $resultadoLimpiezaUser = array();
+        $resultCleanBackupsUser = array();
         foreach ($users as $key => $value) {
             $this -> idUser = $value -> id;
             $this -> cantidad = $value -> cantidadBackups;
             $this -> cantidad = $this -> cantidad - $this -> rango;
             $this -> email = $value -> email;
-            $res = $this -> limpiarBackupsUser();
-            array_push($resultadoLimpiezaUser, $res);
-            //$resultadoLimpiezaUser[$this -> idUser] = $this -> limpiarBackupsUser();
-            //$arreglo["resultCleanBackupsUser"][$this -> idUser] = $this -> limpiarBackupsUser();
-            //$limpiarBackupsUser = $this -> limpiarBackupsUser();
-            if ($res["error"] == "warning") {
+            $limpiarBackupsUser = $this -> limpiarBackupsUser();
+            array_push($resultCleanBackupsUser, $limpiarBackupsUser);
+            if ($limpiarBackupsUser["error"] == "warning") {
                 $warning++;
             }
         }
-        $arreglo["resultCleanBackupsUser"] = $resultadoLimpiezaUser;
+        $arreglo["warning"] = $warning;
+        $arreglo["resultCleanBackupsUser"] = $resultCleanBackupsUser;
         if ($warning == 0){
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ BACKUPS AJUSTADOS !";
@@ -276,7 +278,6 @@ class ControlBackup extends Valida
             $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $warning usuario" . (($warning == 1) ? "": "s");
         }
         return $arreglo;
-
     }
     // ------------------------ limpiarBackupsUsers ----------------------------
 }
