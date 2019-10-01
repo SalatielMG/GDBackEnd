@@ -280,4 +280,14 @@ class ControlBackup extends Valida
         return $arreglo;
     }
     // ------------------------ limpiarBackupsUsers ----------------------------
+    public function actualizarBackup() {
+        /*$id_backup = Form::getValue("id_backup");
+        $automatic = Form::getValue("automatic");
+        $date_creation = Form::getValue("date_creation");
+        $date_download = Form::getValue("date_download");
+        $created_in = Form::getValue("created_in");*/
+        $backup = json_decode(Form::getValue("backup", false, false));
+
+        return $backup;
+    }
 }
