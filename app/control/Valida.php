@@ -12,9 +12,9 @@ class Valida {
         $length = count($arreglo) - 1;
         foreach ($arreglo as $key => $value) {
             if ($key == $length)
-                $name = $name . $aliasTable. $value;
+                $name = $name . $aliasTable . $value;
             else
-                $name = $name . $aliasTable. $value . ", ";
+                $name = $name . $aliasTable . $value . ", ";
         }
         return $name;
     }

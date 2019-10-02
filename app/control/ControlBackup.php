@@ -119,7 +119,6 @@ class ControlBackup extends Valida
         $arreglo = $this -> buscarBackupsUC();
         return $arreglo;
     }
-
     public function buscarBackupsUC() {
         $arreglo = array();
         $idUser = 0;

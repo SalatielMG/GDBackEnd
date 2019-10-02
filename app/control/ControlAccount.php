@@ -11,6 +11,10 @@ class ControlAccount extends Valida
 {
     private $a;
     private $pagina = 0;
+    private $where = "";
+    private $select = "";
+    private $table = "";
+    // private $limitt = 3;
     public function __construct()
     {
         $this -> a = new Account();
@@ -18,11 +22,20 @@ class ControlAccount extends Valida
 
     public function buscarAccountsBackup() {
         $idBackup = Form::getValue('idBack');
-        $select = $this -> a -> mostrar("ba.id_backup = bc.id_backup AND ba.id_backup = $idBackup 
-             GROUP by ba.`id_backup`,ba.`id_account`,ba.`name`,ba.`detail`,ba.`sign`,ba.`income`,ba.`expense`,ba.`initial_balance`,ba.`final_balance`,ba.`month`,ba.`year`,ba.`positive_limit`,ba.`negative_limit`,ba.`positive_max`,ba.`negative_max`,ba.`iso_code`,ba.`selected`,ba.`value_type`,ba.`include_total`,ba.`rate`,ba.`icon_name` HAVING COUNT( * ) >= 1 ",
-                "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida", "backup_accounts ba, backup_currencies bc");
-        // $sql = "SELECT ba.*, bc.symbol FROM backup_accounts ba, backup_currencies bc WHERE ba.id_backup = bc.id_backup AND ba.id_backup = $idBackup";
-            $arreglo = array();
+        $this -> pagina = Form::getValue("pagina");
+        /*$this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = 18342";
+        $this -> select = "DISTINCTROW ba.*, bc.symbol";
+        $this -> table = "backup_accounts ba, backup_currencies bc";*/
+        $this -> pagina = $this -> pagina * $this -> limit;
+
+        $this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = $idBackup GROUP by " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 limit $this->pagina,$this->limit";
+        $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
+        $this -> table = "backup_accounts ba, backup_currencies bc";
+
+        $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
+        $arreglo = array();
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["accounts"] = $select;
@@ -45,7 +58,7 @@ class ControlAccount extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_accounts ba, backups b";
-        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> nameColumns, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -73,7 +86,7 @@ class ControlAccount extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, ['id_backup', 'id_account'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> nameColumnsIndexUnique, "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
