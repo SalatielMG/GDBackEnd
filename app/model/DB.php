@@ -58,7 +58,7 @@ class DB {
                 return false;
             }
         }catch (Exception $e){
-            echo $e -> getMessage();
+            echo $e;
             exit();
         }
     }
@@ -143,6 +143,7 @@ class DB {
         $sql .= implode(", ", $u)." WHERE $where";
         
         return $this -> solicitud($sql);
+        //return $sql;
     }
 
     //creando metodo de borrado

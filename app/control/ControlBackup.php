@@ -287,7 +287,47 @@ class ControlBackup extends Valida
         $date_download = Form::getValue("date_download");
         $created_in = Form::getValue("created_in");*/
         $backup = json_decode(Form::getValue("backup", false, false));
-
-        return $backup;
+        $update = $this -> b -> actualizar($backup);
+        $arreglo = array();
+        //return $update;
+        if ($update) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ BACKUP ACTUALIZADO !";
+            $arreglo["msj"] = "El backup con id $backup->id_backup se actualizo correctamente";
+            $this -> id_backup = $backup->id_backup;
+            $queryBackupUpdate = $this -> consultarBackup(false);
+            if (!$queryBackupUpdate["error"]) {
+                $arreglo["backup"]["error"] = false;
+                $arreglo["backup"]["update"] = $queryBackupUpdate["backup"][0];
+            } else {
+                $arreglo["backup"]["error"] = true;
+                $arreglo["backup"]["titulo"] = "";
+                $arreglo["backup"]["msj"] = "No se pudo cagar los nuevos en la tabla. Porfavor recargue esa página";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ BACKUP NO ACTUALIZADO !";
+            $arreglo["msj"] = "El backup con id $backup->id_backup no se actualizo correctamente";
+        }
+        return $arreglo;
+    }
+    private $id_backup = 0;
+    public function consultarBackup($isQuery = true) {
+        if ($isQuery) {
+            $this -> id_backup = Form::getValue("id_backup");
+        }
+        $arreglo = array();
+        $query = $this -> b -> mostrar("id_backup = $this->id_backup");
+        if ($query) {
+            $arreglo["backup"] = $query;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ BACKUP LOCALIZADO !";
+            $arreglo["msj"] = "El backup con id $this->id_backup se encuentra en l base de daos";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ BACKUP NO LOCALIZADO !";
+            $arreglo["msj"] = "El backup con id $this->id_backup no se encuentra en la base de datos";
+        }
+        return $arreglo;
     }
 }
