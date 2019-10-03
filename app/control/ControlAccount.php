@@ -92,5 +92,13 @@ class ControlAccount extends Valida
         $arreglo["Result"] = $operacion;
         return $arreglo;
     }
+    public function agregarAccount() {
 
+    }
+    public function actualizarAccount() {
+
+    }
+    public function eliminarAccount() {
+
+    }
 }
