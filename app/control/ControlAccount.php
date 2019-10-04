@@ -101,4 +101,5 @@ class ControlAccount extends Valida
     public function eliminarAccount() {
 
     }
+
 }
