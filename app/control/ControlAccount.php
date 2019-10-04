@@ -92,6 +92,23 @@ class ControlAccount extends Valida
         $arreglo["Result"] = $operacion;
         return $arreglo;
     }
+    public function obtNewId_account() {
+        $idBackup = Form::getValue("idBack");
+        $arreglo = array();
+        $query = $this -> a -> mostrar("id_backup = $idBackup", "max(id_account) as max");
+        if ($query) {
+            $newId_Account = $query[0] -> max + 1;
+            $arreglo["newId_account"] = $newId_Account;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ ID ACCOUNT CALCULADO !";
+            $arreglo["msj"] = "Se calculo correctamente el id_ account de la nueva cuenta a ingresar";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ ID ACCOUNT NO CALCULADO !";
+            $arreglo["msj"] = "NO se calculo correctamente el id_ account de la nueva cuenta a ingresar";
+        }
+        return $arreglo;
+    }
     public function agregarAccount() {
 
     }
