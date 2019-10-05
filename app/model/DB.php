@@ -152,4 +152,8 @@ class DB {
         return $this -> solicitud($sql);
     }
 
+    public function signValue($sign) {
+        return ($sign == "1") ? "+" : "-";
+    }
+
 }

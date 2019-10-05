@@ -301,7 +301,7 @@ class ControlBackup extends Valida
             } else {
                 $arreglo["backup"]["error"] = true;
                 $arreglo["backup"]["titulo"] = "";
-                $arreglo["backup"]["msj"] = "No se pudo cagar los nuevos en la tabla. Porfavor recargue esa página";
+                $arreglo["backup"]["msj"] = "No se pudo cargar lo datos del backup actualizado. Porfavor recargue esta página";
             }
         } else {
             $arreglo["error"] = true;
@@ -321,7 +321,7 @@ class ControlBackup extends Valida
             $arreglo["backup"] = $query;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ BACKUP LOCALIZADO !";
-            $arreglo["msj"] = "El backup con id $this->id_backup se encuentra en l base de daos";
+            $arreglo["msj"] = "El backup con id $this->id_backup se encuentra en la base de daos";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BACKUP NO LOCALIZADO !";
