@@ -6,6 +6,7 @@
  * Time: 11:40 PM
  */
 require_once(APP_PATH.'model/Account.php');
+require_once(APP_PATH.'model/Currency.php');
 
 class ControlAccount extends Valida
 {
@@ -29,14 +30,20 @@ class ControlAccount extends Valida
             $this -> id_backup = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
             /*$this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = 18342";
-            $this -> select = "DISTINCTROW ba.*, bc.symbol";
+            $this -> select = "c ba.*, bc.symbol";
             $this -> table = "backup_accounts ba, backup_currencies bc";*/
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-
-        $this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = $this->id_backup " . $this -> condicionId_Account($isQuery, "ba.") . " GROUP by " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
-        $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
-        $this -> table = "backup_accounts ba, backup_currencies bc";
+        $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            $this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = $this->id_backup AND ba.iso_code = bc.iso_code" . $this -> condicionId_Account($isQuery, "ba.") . " GROUP by " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
+            $this -> table = "backup_accounts ba, backup_currencies bc";
+        } else {
+            $this -> select = "ba.*, (SELECT symbolCurrency($this->id_backup, ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
+            $this -> table = "backup_accounts ba";
+            $this -> where = "ba.id_backup = $this->id_backup " . $this -> condicionId_Account($isQuery, "ba.") . " GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+        }
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -81,16 +88,10 @@ class ControlAccount extends Valida
     }
 
     public function corregirInconsitencia() {
-        $indices = $this -> a -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> a -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Accounts, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> nameColumnsIndexUnique, "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);

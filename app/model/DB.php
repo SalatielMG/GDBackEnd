@@ -73,6 +73,21 @@ class DB {
         return $this -> solicitud($sql);
     }
 
+    public function verifyIfExistsIndexUnique($nameTable) {
+        $indices = $this -> ejecutarCodigoSQL("SHOW INDEX from " . $nameTable);
+        $arreglo = array();
+        $arreglo["indice"] = false;
+        foreach ($indices as $key => $value) {
+            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
+                $arreglo["indice"] = true;
+                $arreglo["msj"] = "Ya existe el campo unico en la tabla $nameTable, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
+                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
+                break;
+            }
+        }
+        return $arreglo;
+    }
+
     public function ejecutarMultSentMySQLi($sql) {
         try{
             $this -> conectaMYSQLI();

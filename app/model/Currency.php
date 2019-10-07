@@ -9,6 +9,7 @@
 class Currency extends DB
 {
     public $nameTable = "backup_currencies";
+    public $nameColumnsIndexUnique = ['id_backup','iso_code'];
     public $nameColumns = ['id_backup','iso_code','symbol','icon_name','selected'];
     public function mostrar($where = "1", $select = "*", $tabla = "backup_currencies"){
         return $this -> getDatos($tabla, $select, $where);

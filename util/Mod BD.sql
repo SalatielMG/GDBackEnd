@@ -14,18 +14,42 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 
 insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 1, 1, 1, 1);
 
-
 --
--- Procedimiento almacenado `nombreCuenta`
+-- Procedimiento almacenado `symbolCurrency`
 --
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `nombreCuenta`(`idBackup` INT(10), `idAccount` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8
+CREATE DEFINER=`root`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8
+BEGIN
+  DECLARE symbol CHAR(5) DEFAULT '';
+  if (idAccount != 0) then
+    SET isoCode = (SELECT iso_code FROM backup_accounts WHERE  id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
+    if (isoCode IS NULL) then
+      return symbol;
+    END if;
+  END if;
+
+  SET symbol = (SELECT symbol FROM backup_currencies WHERE id_backup = idBackup AND iso_code = isoCode GROUP BY id_backup, iso_code HAVING COUNT( * ) >= 1);
+
+  if (symbol IS NULL) then
+  	SET symbol = '';
+  END if;
+
+  return symbol;
+END$$
+DELIMITER ;
+
+
+--
+-- Procedimiento almacenado `nameAccount`
+--
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `nameAccount`(`idBackup` INT(10), `idAccount` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8
 BEGIN
   DECLARE nameAccount VARCHAR(50);
-  SET nameAccount = (SELECT name FROM backup_accounts WHERE id_backup = idBackup AND id_account = idAccount);
+  SET nameAccount = (SELECT name FROM backup_accounts WHERE id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
 
   if (nameAccount IS NULL) then
-  	SET nameAccount = (SELECT account FROM backup_extras WHERE id_extra = idAccount and id_backup = idBackup LIMIT 1, 1);
+  	SET nameAccount = (SELECT account FROM backup_extras WHERE id_extra = idAccount and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
   	if(nameAccount IS NULL) then
   		SET nameAccount = 'Cuenta no encontrada';
   	END if;
@@ -36,17 +60,17 @@ END$$
 DELIMITER ;
 
 --
--- Procedimiento almacenado `nombreCategoria`
+-- Procedimiento almacenado `nameCategory`
 --
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `nombreCategoria`(`idBackup` INT(10), `idCategory` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8
+CREATE DEFINER=`root`@`localhost` FUNCTION `nameCategory`(`idBackup` INT(10), `idCategory` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8
     NO SQL
 BEGIN
-DECLARE nameCategory VARCHAR(50);
-  SET nameCategory = (SELECT name FROM backup_categories WHERE id_backup = idBackup AND id_category = idCategory);
+  DECLARE nameCategory VARCHAR(50);
+  SET nameCategory = (SELECT name FROM backup_categories WHERE id_backup = idBackup AND id_category = idCategory GROUP BY id_backup, id_category, id_account HAVING COUNT( * ) >= 1);
 
   if (nameCategory IS NULL) then
-  	SET nameCategory = (SELECT category FROM backup_extras WHERE id_extra = idCategory and id_backup = idBackup LIMIT 1, 1);
+  	SET nameCategory = (SELECT category FROM backup_extras WHERE id_extra = idCategory and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
   	if(nameCategory IS NULL) then
   		SET nameCategory = 'Categoria no encontrada';
   	END if;
