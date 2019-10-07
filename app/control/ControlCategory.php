@@ -10,10 +10,43 @@ class ControlCategory extends Valida
 {
     private $c;
     private $pagina = 0;
-    public function __construct()
+    private $where = "";
+    private $select = "";
+    private $table = "";
+    private $id_backup = 0;
+
+    public function __construct($id_backup = 0)
     {
         $this -> c = new Category();
+        $this -> id_backup = $id_backup;
     }
+
+    public function setId_Backup($id_backup) {
+        $this -> id_backup = $id_backup;
+    }
+
+    public function getId_Backup() {
+        return $this -> id_backup;
+    }
+
+    public function obtCategoriesBackup() {
+        $arreglo = array();
+        $this -> select = "id_category, name";
+        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
+        if ($categoriesBackup) {
+            $arreglo["categories"] = $categoriesBackup;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ CATEGORIES ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron categories del Respaldo con id_backup: $this->id_backup.";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ CATEGORIES NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron categories del Respaldo con id_backup: $this->id_backup.";
+        }
+        return $arreglo;
+    }
+
     public function buscarCategoriesBackup() {
         $idBackup = Form::getValue('idBack');
         $select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = $idBackup", "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");
@@ -67,7 +100,7 @@ class ControlCategory extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup', 'id_category', 'id_account'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c ->nameColumnsIndexUnique, "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;

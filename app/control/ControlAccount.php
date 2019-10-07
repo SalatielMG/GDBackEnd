@@ -18,13 +18,42 @@ class ControlAccount extends Valida
     private $id_backup = 0;
     private $id_account = 0;
     // private $limitt = 3;
-    public function __construct()
+    public function __construct($id_backup = 0)
     {
         $this -> a = new Account();
+        $this -> id_backup = $id_backup;
     }
+
     private function condicionId_Account($isQuery, $alias) {
         return (!$isQuery) ? "AND " . $alias . "id_account = $this->id_account" : "";
     }
+
+    public function setId_Backup($id_backup) {
+        $this -> id_backup = $id_backup;
+    }
+
+    public function getId_Backup() {
+        return $this -> id_backup;
+    }
+
+    public function obtAccountsBackup() {
+        $arreglo = array();
+        $this -> select = "id_account, name";
+        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
+        if ($accountsBackup) {
+            $arreglo["accounts"] = $accountsBackup;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ ACCOUNTS NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
+        }
+        return $arreglo;
+    }
+
     public function buscarAccountsBackup($isQuery = true) {
         if ($isQuery) {
             $this -> id_backup = Form::getValue('idBack');

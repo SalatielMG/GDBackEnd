@@ -6,9 +6,14 @@
  * Time: 12:25
  */
 require_once (APP_PATH."model/Automatic.php");
+require_once ("ControlAccount.php");
+require_once ("ControlCategory.php");
 class ControlAutomatic extends Valida
 {
+
     private $a;
+    private $ctrlCategory;
+    private $ctrlAccount;
     private $pagina = 0;
     private $id_backup = 0;
     private $where = "";
@@ -52,6 +57,12 @@ class ControlAutomatic extends Valida
             $arreglo["automatics"] = $select;
             $arreglo["titulo"] = "¡ AUTOMATICS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron automatics del Respaldo con id_backup: $this->id_backup.";
+            if ($isQuery) {
+                $this -> ctrlAccount = new ControlAccount($this -> id_backup);
+                $this -> ctrlCategory = new ControlCategory($this -> id_backup);
+                $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup();
+                $arreglo["categoriesBackup"] = $this -> ctrlCategory -> obtCategoriesBackup();
+            }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ AUTOMATICS NO ENCONTRADOS !";
@@ -96,5 +107,41 @@ class ControlAutomatic extends Valida
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
         return $arreglo;
+    }
+
+    public function obtNewId_OperationAccountsCategories() {
+        $this -> id_backup = Form::getValue("idBack");
+        $arreglo = array();
+        $queryIdMaxOperation = $this -> a -> mostrar("id_backup = $this->id_backup", "max(id_operation) as max");
+        if ($queryIdMaxOperation) {
+            $newId_Operation = $queryIdMaxOperation[0] -> max + 1;
+            $arreglo["newId_Operation"] = $newId_Operation;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ ID OPERATION CALCULADO !";
+            $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
+
+            $this -> ctrlAccount = new ControlAccount($this -> id_backup);
+            $this -> ctrlCategory = new ControlCategory($this -> id_backup);
+            $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup();
+            $arreglo["categoriesBackup"] = $this -> ctrlCategory -> obtCategoriesBackup();
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ ID OPERATION NO CALCULADO !";
+            $arreglo["msj"] = "NO se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
+
+        }
+        return $arreglo;
+    }
+
+    public function agregarAutomatic() {
+
+    }
+
+    public function actualizarAutomatic() {
+
+    }
+
+    public function eliminarAutomatic() {
+
     }
 }
