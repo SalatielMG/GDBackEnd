@@ -31,7 +31,7 @@ class ControlCategory extends Valida
 
     public function obtCategoriesBackup() {
         $arreglo = array();
-        $this -> select = "id_category, name";
+        $this -> select = "*";
         $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
