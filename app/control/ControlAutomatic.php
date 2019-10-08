@@ -12,7 +12,6 @@ class ControlAutomatic extends Valida
 {
 
     private $a;
-    private $ctrlCategory;
     private $ctrlAccount;
     private $pagina = 0;
     private $id_backup = 0;
@@ -42,26 +41,14 @@ class ControlAutomatic extends Valida
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
-
-        /*$select = $this -> a -> mostrar("1 ORDER BY CC.initial_date",
-            "CC.*",
-            "(SELECT ba.*, bc.symbol, bac.name as account, bcat.name as category FROM backup_automatics ba, backup_currencies bc, backup_accounts bac, backup_categories bcat WHERE ba.id_backup = bc.id_backup AND ba.id_backup = bac.id_backup AND ba.id_account = bac.id_account AND ba.id_backup = bcat.id_backup AND ba.id_category = bcat.id_category AND ba.id_backup = $idBackup
-            UNION
-            SELECT ba.*, bc.symbol, bac.name as account, '' as category FROM backup_automatics ba, backup_currencies bc, backup_accounts bac WHERE ba.id_backup = bc.id_backup AND ba.id_backup = bac.id_backup AND ba.id_account = bac.id_account AND ba.id_category >= 10000 AND ba.id_backup = $idBackup) as CC");
-        */
-        // $selectMiddle = "SELECT ba.*, bc.symbol, bac.name as account, bcat.name as category FROM backup_automatics ba, backup_currencies bc, backup_accounts bac, backup_categories bcat WHERE ba.id_backup = bc.id_backup AND ba.id_backup = bac.id_backup AND ba.id_account = bac.id_account AND ba.id_backup = bcat.id_backup AND ba.id_category = bcat.id_category AND ba.id_backup = $idBackup";
-        // $selectFull = "SELECT ba.*, bc.symbol, bac.name as account, '' as category FROM backup_automatics ba, backup_currencies bc, backup_accounts bac WHERE ba.id_backup = bc.id_backup AND ba.id_backup = bac.id_backup AND ba.id_account = bac.id_account AND ba.id_category >= 10000 AND ba.id_backup = $idBackup";
-        // $sqlDone = "SELECT ba.*, bc.symbol, (SELECT nombreCuenta(179, ba.id_account)) AS ACCOUNT, (SELECT nombreCategoria(179, ba.id_category)) as category FROM backup_automatics ba, backup_currencies bc WHERE ba.id_backup = bc.id_backup AND ba.id_backup = 179"
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["automatics"] = $select;
             $arreglo["titulo"] = "¡ AUTOMATICS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron automatics del Respaldo con id_backup: $this->id_backup.";
-            if ($isQuery) {
+            if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> id_backup);
-                $this -> ctrlCategory = new ControlCategory($this -> id_backup);
-                $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup();
-                $arreglo["categoriesBackup"] = $this -> ctrlCategory -> obtCategoriesBackup();
+                $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
             }
         } else {
             $arreglo["error"] = true;
@@ -120,10 +107,10 @@ class ControlAutomatic extends Valida
             $arreglo["titulo"] = "¡ ID OPERATION CALCULADO !";
             $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
 
-            $this -> ctrlAccount = new ControlAccount($this -> id_backup);
+            /*$this -> ctrlAccount = new ControlAccount($this -> id_backup);
             $this -> ctrlCategory = new ControlCategory($this -> id_backup);
             $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup();
-            $arreglo["categoriesBackup"] = $this -> ctrlCategory -> obtCategoriesBackup();
+            $arreglo["categoriesBackup"] = $this -> ctrlCategory -> obtCategoriesBackup();*/
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ID OPERATION NO CALCULADO !";

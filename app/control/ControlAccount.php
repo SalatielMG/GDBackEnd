@@ -7,7 +7,7 @@
  */
 require_once(APP_PATH.'model/Account.php');
 require_once(APP_PATH.'model/Currency.php');
-
+require_once('ControlCategory.php');
 class ControlAccount extends Valida
 {
     private $a;
@@ -17,6 +17,7 @@ class ControlAccount extends Valida
     private $table = "";
     private $id_backup = 0;
     private $id_account = 0;
+    private $ctrlCategory;
     // private $limitt = 3;
     public function __construct($id_backup = 0)
     {
@@ -36,13 +37,32 @@ class ControlAccount extends Valida
         return $this -> id_backup;
     }
 
-    public function obtAccountsBackup() {
+    public function obtAccountsBackup($isQuery = true) {
+        if ($isQuery) {
+            $this -> id_backup = Form::getValue("id_backup");
+        }
         $arreglo = array();
         $this -> select = "id_account, name";
         $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
-            $arreglo["accounts"] = $accountsBackup;
+            $arrayAccounts = [];
+            $this -> ctrlCategory = new ControlCategory();
+            $this -> ctrlCategory -> setId_Backup($this -> id_backup);
+            foreach ($accountsBackup as $key => $value) {
+                $this -> ctrlCategory -> setId_Account($value -> id_account);
+                $categoriesAccount = $this -> ctrlCategory -> obtCategoriesAccountBackup(false);
+
+                $arrayAccounts[$key]["id_account"] = $value -> id_account;
+                $arrayAccounts[$key]["name"] = $value -> name;
+                $arrayAccounts[$key]["categoriesAccount"] = (!$categoriesAccount["error"]) ? $categoriesAccount["categories"]: [];
+
+            }
+
+            //$arreglo["accounts"] = array_fill_keys(array_keys($arrayAccounts), array_values($arrayAccounts));
+            // $arreglo["accounts"] = array_keys($arrayAccounts);
+            // $arreglo["accounts"] = json_decode(json_encode($arrayAccounts));
+            $arreglo["accounts"] = $arrayAccounts;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron accounts del Respaldo con id_backup: $this->id_backup.";

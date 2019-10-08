@@ -14,6 +14,7 @@ class ControlCategory extends Valida
     private $select = "";
     private $table = "";
     private $id_backup = 0;
+    private $id_account = 0;
 
     public function __construct($id_backup = 0)
     {
@@ -29,20 +30,32 @@ class ControlCategory extends Valida
         return $this -> id_backup;
     }
 
-    public function obtCategoriesBackup() {
+    public function setId_Account($id_account) {
+        $this -> id_account = $id_account;
+    }
+
+    public function getId_Account() {
+        return $this -> id_account;
+    }
+
+    public function obtCategoriesAccountBackup($isQuery = true) {
+        if ($isQuery) {
+            $this -> id_backup = Form::getValue("id_backup");
+            $this -> id_account = Form::getValue("id_account");
+        }
         $arreglo = array();
-        $this -> select = "*";
-        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $this -> select = "id_category, name";
+        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
             $arreglo["categories"] = $categoriesBackup;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ CATEGORIES ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron categories del Respaldo con id_backup: $this->id_backup.";
+            $arreglo["msj"] = "Se encontraron categories del Respaldo con id_backup: $this->id_backup con el id_account: $this->id_account.";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CATEGORIES NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron categories del Respaldo con id_backup: $this->id_backup.";
+            $arreglo["msj"] = "No se encontraron categories del Respaldo con id_backup: $this->id_backup con el id_account: $this->id_account.";
         }
         return $arreglo;
     }
