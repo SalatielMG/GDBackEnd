@@ -14,6 +14,9 @@ class ControlAutomatic extends Valida
     private $ctrlAccount;
     private $pagina = 0;
     private $id_backup = 0;
+
+    private $pk_Automatic = array();
+
     private $where = "";
     private $select = "";
     private $table = "";
@@ -23,9 +26,12 @@ class ControlAutomatic extends Valida
         $this -> a = new Automatic();
     }
 
+    private function condition_pk_Automatic($isQuery, $alias){
+        return (!$isQuery) ? " AND $alias.id_operation = " . $this -> pk_Automatic["id_operation"] . " AND $alias.id_account = " . $this -> pk_Automatic["id_account"] . " AND $alias.id_category = " . $this -> pk_Automatic["id_category"] : "";
+    }
     public function buscarAutomaticsBackup($isQuery = true) {
         if ($isQuery) {
-            $this -> id_backup = Form::getValue('idBack');
+            $this -> pk_Automatic["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
@@ -33,9 +39,9 @@ class ControlAutomatic extends Valida
         if ($exixstIndexUnique["indice"]) {
 
         } else {
-            $this -> select = "ba.*, (SELECT symbolCurrency($this->id_backup, '', ba.id_account)) AS symbol, (SELECT nameAccount($this->id_backup, ba.id_account)) AS nameAccount, (SELECT nameCategory($this->id_backup, ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
+            $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_automatics ba";
-            $this -> where = "ba.id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = "ba.id_backup = " . $this -> pk_Automatic["id_backup"] . $this -> condition_pk_Automatic($isQuery, "ba") . " GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -44,15 +50,15 @@ class ControlAutomatic extends Valida
             $arreglo["error"] = false;
             $arreglo["automatics"] = $select;
             $arreglo["titulo"] = "¡ AUTOMATICS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron automatics del Respaldo con id_backup: $this->id_backup.";
+            $arreglo["msj"] = "Se encontraron automatics del Respaldo con id_backup: " . $this -> pk_Automatic["id_backup"];
             if ($isQuery && $this -> pagina == 0) {
-                $this -> ctrlAccount = new ControlAccount($this -> id_backup);
+                $this -> ctrlAccount = new ControlAccount($this -> pk_Automatic["id_backup"]);
                 $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
             }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ AUTOMATICS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron automatics del Respaldo con id_backup: $this->id_backup.";
+            $arreglo["msj"] = "No se encontraron automatics del Respaldo con id_backup: " . $this -> pk_Automatic["id_backup"];
         }
         return $arreglo;
     }
@@ -117,22 +123,100 @@ class ControlAutomatic extends Valida
         return $arreglo;
     }
 
+    public function verifyExistsIndexUnique($indexUnique) {
+        $isExists = false;
+        $this -> where = "id_backup = $indexUnique->id_backup AND id_operation = $indexUnique->id_operation AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category";
+        $result = $this -> a -> mostrar($this -> where);
+        if ($result)  // if exissts => No Insert Or No Update
+            $isExists = true;
+        return $isExists;
+    }
+
     public function agregarAutomatic() {
+        $arreglo = array();
         $automatic = json_decode(Form::getValue("automatic", false, false));
-        // Buscar si existe el indexUnique
-        return compact("automatic");
+        if (!$this -> verifyExistsIndexUnique($automatic)) { //Insert :)
+            $insert = $this -> a -> agregar($automatic);
+            if ($insert) {
+                $arreglo["error"] = false;
+                $arreglo["titulo"] = "¡ AUTOMATIC AGREGADO !";
+                $arreglo["msj"] = "Se agrego correctamente la operación automática con id_operation: $automatic->id_operation, id_account: $automatic->id_account e id_category: $automatic->id_category del Respaldo con id_backup: $automatic->id_backup";
+
+                $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
+                $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
+                $this -> pk_Automatic["id_account"] = $automatic -> id_account;
+                $this -> pk_Automatic["id_category"] = $automatic -> id_category;
+                $queryAutomaticNew = $this -> buscarAutomaticsBackup(false);
+                $arreglo["automatic"]["error"]  = $queryAutomaticNew["error"];
+                $arreglo["automatic"]["titulo"] = $queryAutomaticNew["titulo"];
+                $arreglo["automatic"]["msj"]    = $queryAutomaticNew["msj"];
+                if (!$arreglo["automatic"]["error"])
+                    $arreglo["automatic"]["new"] = $queryAutomaticNew["automatics"][0];
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ AUTOMATIC NO AGREGADO !";
+                $arreglo["msj"] = "Ocurrio un error al ingresar la operación automática con id_operation: $automatic->id_operation, id_account: $automatic->id_account e id_category: $automatic->id_category del Respaldo con id_backup: $automatic->id_backup";
+            }
+        } else { // NO Insert :(
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede registrar la nueva operación automática, puesto que ya existe un registro en la BD con el mismo id_operation, id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
+        }
+        return $arreglo;
     }
 
     public function actualizarAutomatic() {
         $automatic = json_decode(Form::getValue("automatic", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         // Buscar si existe el indexUnique
+        $arreglo = array();
+        $isExistsIndexUnique = false;
+        if (($automatic -> id_operation != $indexUnique -> id_operation) && ($automatic -> id_account != $indexUnique -> id_account ) && ($automatic -> id_category != $indexUnique -> id_category)) { // Verify IndexUnique
+            $isExistsIndexUnique = $this -> verifyExistsIndexUnique($indexUnique);
+        }
+        if ($isExistsIndexUnique) { // No Update :(
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede actualizar la operación automática, puesto que ya existe un registro en la BD con el mismo id_operation, id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
+        } else { // Update :)
+            $update = $this -> a -> actualizar($automatic, $indexUnique);
+            if ($update) {
+                $arreglo["error"] = false;
+                $arreglo["titulo"] = "¡ AUTOMATIC ACTUALIZADO !";
+                $arreglo["msj"] = "La operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup se ha actualizado correctamente";
 
-        return compact("automatic", "indexUnique");
+                $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
+                $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
+                $this -> pk_Automatic["id_account"] = $automatic -> id_account;
+                $this -> pk_Automatic["id_category"] = $automatic -> id_category;
+                $queryAutomaticUpdate = $this -> buscarAutomaticsBackup(false);
+                $arreglo["automatic"]["error"]  = $queryAutomaticUpdate["error"];
+                $arreglo["automatic"]["titulo"] = $queryAutomaticUpdate["titulo"];
+                $arreglo["automatic"]["msj"]    = $queryAutomaticUpdate["msj"];
+                if (!$arreglo["automatic"]["error"])
+                    $arreglo["automatic"]["update"] = $queryAutomaticUpdate["automatics"][0];
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ AUTOMATIC NO ACTUALIZADA !";
+                $arreglo["msj"] = "Ocurrio un error al intentar actualizar la operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup";
+            }
+        }
+        return $arreglo;
     }
 
     public function eliminarAutomatic() {
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
-        return compact("indexUnique");
+        $arreglo = array();
+        $delete = $this -> a -> eliminar($indexUnique);
+        if ($delete) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ AUTOMATIC ELIMINADA !";
+            $arreglo["msj"] = "La operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup ha sido eliminado correctamente";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ AUTOMATIC NO ELIMINADA !";
+            $arreglo["msj"] = "La operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup no ha sido eliminado correctamente";
+        }
+        return $arreglo;
     }
 }

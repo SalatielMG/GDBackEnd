@@ -18,15 +18,11 @@ class ControlAccount extends Valida
     private $id_backup = 0;
     private $id_account = 0;
     private $ctrlCategory;
-    // private $limitt = 3;
+
     public function __construct($id_backup = 0)
     {
         $this -> a = new Account();
         $this -> id_backup = $id_backup;
-    }
-
-    private function condicionId_Account($isQuery, $alias) {
-        return (!$isQuery) ? "AND " . $alias . "id_account = $this->id_account" : "";
     }
 
     public function setId_Backup($id_backup) {
@@ -35,6 +31,10 @@ class ControlAccount extends Valida
 
     public function getId_Backup() {
         return $this -> id_backup;
+    }
+
+    private function condicionId_Account($isQuery, $alias) {
+        return (!$isQuery) ? "AND " . $alias . "id_account = $this->id_account" : "";
     }
 
     public function obtAccountsBackup($isQuery = true) {
@@ -58,10 +58,6 @@ class ControlAccount extends Valida
                 $arrayAccounts[$key]["categoriesAccount"] = (!$categoriesAccount["error"]) ? $categoriesAccount["categories"]: [];
 
             }
-
-            //$arreglo["accounts"] = array_fill_keys(array_keys($arrayAccounts), array_values($arrayAccounts));
-            // $arreglo["accounts"] = array_keys($arrayAccounts);
-            // $arreglo["accounts"] = json_decode(json_encode($arrayAccounts));
             $arreglo["accounts"] = $arrayAccounts;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
@@ -78,9 +74,6 @@ class ControlAccount extends Valida
         if ($isQuery) {
             $this -> id_backup = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
-            /*$this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = 18342";
-            $this -> select = "c ba.*, bc.symbol";
-            $this -> table = "backup_accounts ba, backup_currencies bc";*/
             $this -> pagina = $this -> pagina * $this -> limit;
         }
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
@@ -223,7 +216,7 @@ class ControlAccount extends Valida
             $arreglo["titulo"] = "¡ ACCOUNT ELIMINADA !";
             $arreglo["msj"] = "La cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup ha sido eliminado correctamente";
         } else {
-            $arreglo["error"] = false;
+            $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNT NO ELIMINADA !";
             $arreglo["msj"] = "La cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup no ha sido eliminado correctamente";
         }
