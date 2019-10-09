@@ -7,7 +7,6 @@
  */
 require_once (APP_PATH."model/Automatic.php");
 require_once ("ControlAccount.php");
-require_once ("ControlCategory.php");
 class ControlAutomatic extends Valida
 {
 
@@ -97,7 +96,7 @@ class ControlAutomatic extends Valida
     }
 
     public function obtNewId_OperationAccountsCategories() {
-        $this -> id_backup = Form::getValue("idBack");
+        $this -> id_backup = Form::getValue("id_backup");
         $arreglo = array();
         $queryIdMaxOperation = $this -> a -> mostrar("id_backup = $this->id_backup", "max(id_operation) as max");
         if ($queryIdMaxOperation) {
@@ -107,10 +106,8 @@ class ControlAutomatic extends Valida
             $arreglo["titulo"] = "¡ ID OPERATION CALCULADO !";
             $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
 
-            /*$this -> ctrlAccount = new ControlAccount($this -> id_backup);
-            $this -> ctrlCategory = new ControlCategory($this -> id_backup);
+            $this -> ctrlAccount = new ControlAccount($this -> id_backup);
             $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup();
-            $arreglo["categoriesBackup"] = $this -> ctrlCategory -> obtCategoriesBackup();*/
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ID OPERATION NO CALCULADO !";
@@ -121,14 +118,21 @@ class ControlAutomatic extends Valida
     }
 
     public function agregarAutomatic() {
-
+        $automatic = json_decode(Form::getValue("automatic", false, false));
+        // Buscar si existe el indexUnique
+        return compact("automatic");
     }
 
     public function actualizarAutomatic() {
+        $automatic = json_decode(Form::getValue("automatic", false, false));
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        // Buscar si existe el indexUnique
 
+        return compact("automatic", "indexUnique");
     }
 
     public function eliminarAutomatic() {
-
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        return compact("indexUnique");
     }
 }
