@@ -105,4 +105,29 @@ class ControlBudget extends Valida
         $arreglo["Result"] = $operacion;
         return $arreglo;
     }
+
+    public function agregarBudget() {
+        $budget = json_decode(Form::getValue("budget", false, false));
+        $arreglo = array();
+        $arreglo["error"] = true;
+        $arreglo["budget"] = $budget;
+        return $arreglo;
+    }
+    public function actualizarBudget() {
+        $budget = json_decode(Form::getValue("budget", false, false));
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $arreglo["error"] = true;
+        $arreglo["budget"] = $budget;
+        $arreglo["indexUnique"] = $indexUnique;
+        return $arreglo;
+    }
+    public function eliminarBudget() {
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $arreglo["error"] = true;
+        $arreglo["indexUnique"] = $indexUnique;
+        return $arreglo;
+    }
+
 }
