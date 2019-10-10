@@ -7,6 +7,7 @@
  */
 require_once (APP_PATH."model/Automatic.php");
 require_once ("ControlAccount.php");
+
 class ControlAutomatic extends Valida
 {
 

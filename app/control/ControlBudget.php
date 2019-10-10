@@ -6,36 +6,59 @@
  * Time: 12:35
  */
 require_once (APP_PATH."model/Budget.php");
+require_once ("ControlAccount.php");
+
 class ControlBudget extends Valida
 {
     private $b;
+    private $ctrlAccount;
     private $pagina = 0;
+
+    private $pk_Budget = array();
+
+    private $where = "";
+    private $select = "";
+    private $table = "";
+
     public function __construct()
     {
         $this -> b = new Budget();
     }
 
-    public function buscarBudgetsBackup() {
-        $idBackup = Form::getValue('idBack');
+    private function condition_pk_Budget($isQuery, $alias){
+        return (!$isQuery) ? " AND $alias.id_account = " . $this -> pk_Budget["id_account"] . " AND $alias.id_category = " . $this -> pk_Budget["id_category"] : "";
+    }
 
-        $select = $this -> b -> mostrar("1",
-            "CC.*",
-            "(SELECT bd.*, bc.symbol, bac.name as account, bcat.name as category FROM backup_budgets bd, backup_currencies bc, backup_accounts bac, backup_categories bcat WHERE bd.id_backup = bc.id_backup AND bd.id_backup = bac.id_backup AND bd.id_account = bac.id_account AND bd.id_backup = bcat.id_backup AND bd.id_category = bcat.id_category AND bd.id_backup = $idBackup
-            UNION
-            SELECT bd.*, bc.symbol, 'Cuenta no encontrada' as account, 'Categoria no encontrada' as category FROM backup_budgets bd, backup_currencies bc WHERE bd.id_backup = bc.id_backup AND (bd.id_account >= 10000 OR bd.id_category >= 10000) AND bd.id_backup = $idBackup) as CC");
-        /*$select = $this -> b -> mostrar("bd.id_backup = bc.id_backup AND bd.id_backup = bac.id_backup AND bd.id_account = bac.id_account AND bd.id_backup = bcat.id_backup AND bd.id_category = bcat.id_category AND bd.id_backup = $idBackup",
-            "bd.*, bc.symbol, bac.name as account, bcat.name as category",
-            "backup_budgets bd, backup_currencies bc, backup_accounts bac, backup_categories bcat");*/
+    public function buscarBudgetsBackup($isQuery = true) {
+        if ($isQuery) {
+            $this -> pk_Budget["id_backup"] = Form::getValue('idBack');
+            $this -> pagina = Form::getValue("pagina");
+            $this -> pagina = $this -> pagina * $this -> limit;
+        }
+        $exixstIndexUnique = $this -> b -> verifyIfExistsIndexUnique($this -> b -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+
+        } else {
+            $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
+            $this -> table = "backup_budgets bd";
+            $this -> where = "bd.id_backup = " . $this -> pk_Budget["id_backup"] . $this -> condition_pk_Budget($isQuery, "bd") . " GROUP BY " . $this -> namesColumns($this -> b -> nameColumnsIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+        }
+        $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["budgets"] = $select;
             $arreglo["titulo"] = "¡ BUDGETS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron budgets del respaldo solicitado.";
+            $arreglo["msj"] = "Se encontraron budgets del Respaldo con id_backup: " . $this -> pk_Budget["id_backup"];
+            if ($isQuery && $this -> pagina == 0) {
+                $this -> ctrlAccount = new ControlAccount($this -> pk_Budget["id_backup"]);
+                $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
+            }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BUDGETS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron budgets del respaldo solicitado.";
+            $arreglo["msj"] = "No se encontraron budgets del Respaldo con id_backup: " . $this -> pk_Budget["id_backup"];
         }
         return $arreglo;
     }
