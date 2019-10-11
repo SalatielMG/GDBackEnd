@@ -105,7 +105,10 @@ class ControlAutomatic extends Valida
     public function obtNewId_OperationAccountsCategories() {
         $this -> id_backup = Form::getValue("id_backup");
         $arreglo = array();
-        $queryIdMaxOperation = $this -> a -> mostrar("id_backup = $this->id_backup", "max(id_operation) as max");
+        $this -> where = "id_backup = $this->id_backup";
+        $this -> select = "max(id_operation) as max";
+        $queryIdMaxOperation = $this -> a -> mostrar($this -> where, $this -> select);
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> a -> nameTable, $this -> where);
         if ($queryIdMaxOperation) {
             $newId_Operation = $queryIdMaxOperation[0] -> max + 1;
             $arreglo["newId_Operation"] = $newId_Operation;
@@ -126,7 +129,7 @@ class ControlAutomatic extends Valida
 
     public function verifyExistsIndexUnique($indexUnique) {
         $isExists = false;
-        $this -> where = "id_backup = $indexUnique->id_backup AND id_operation = $indexUnique->id_operation AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category";
+        $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category";
         $result = $this -> a -> mostrar($this -> where);
         if ($result)  // if exissts => No Insert Or No Update
             $isExists = true;
@@ -161,7 +164,7 @@ class ControlAutomatic extends Valida
         } else { // NO Insert :(
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede registrar la nueva operación automática, puesto que ya existe un registro en la BD con el mismo id_operation, id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
+            $arreglo["msj"] = "NO se puede registrar la nueva operación automática, puesto que ya existe un registro en la BD con el mismo id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
         }
         return $arreglo;
     }
@@ -172,13 +175,13 @@ class ControlAutomatic extends Valida
         // Buscar si existe el indexUnique
         $arreglo = array();
         $isExistsIndexUnique = false;
-        if (($automatic -> id_operation != $indexUnique -> id_operation) && ($automatic -> id_account != $indexUnique -> id_account ) && ($automatic -> id_category != $indexUnique -> id_category)) { // Verify IndexUnique
+        if (($automatic -> id_account != $indexUnique -> id_account ) || ($automatic -> id_category != $indexUnique -> id_category)) { // Verify IndexUnique
             $isExistsIndexUnique = $this -> verifyExistsIndexUnique($automatic);
         }
         if ($isExistsIndexUnique) { // No Update :(
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede actualizar la operación automática, puesto que ya existe un registro en la BD con el mismo id_operation, id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
+            $arreglo["msj"] = "NO se puede actualizar la operación automática, puesto que ya existe un registro en la BD con el mismo id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
         } else { // Update :)
             $update = $this -> a -> actualizar($automatic, $indexUnique);
             if ($update) {

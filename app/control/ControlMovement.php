@@ -50,7 +50,7 @@ class ControlMovement extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bm.*, COUNT(bm.id_backup) cantidadRepetida";
         $table = "backup_movements bm, backups b";
-        $where = "b.id_backup = bm.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bm.id_backup") . " GROUP BY ". $this -> namesColumns($this -> m -> nameColumns, "bm.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = bm.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bm.id_backup") . " GROUP BY ". $this -> namesColumns($this -> m -> nameColumnsIndexUnique, "bm.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> m -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -77,7 +77,7 @@ class ControlMovement extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> m -> nameTable, ['id_backup', 'id_account', 'id_category', 'amount', 'detail', 'date_idx'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> m -> nameTabl, $this -> m -> nameColumnsIndexUnique,"id_backup");
         $operacion = $this -> m -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;

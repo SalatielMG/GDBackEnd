@@ -20,15 +20,16 @@ insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4L
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8
 BEGIN
-  DECLARE symbol CHAR(5) DEFAULT '';
+  DECLARE symbol CHAR(5);
   if (idAccount != 0) then
     SET isoCode = (SELECT iso_code FROM backup_accounts WHERE  id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
     if (isoCode IS NULL) then
+     	SET symbol = '';
       return symbol;
     END if;
   END if;
 
-  SET symbol = (SELECT symbol FROM backup_currencies WHERE id_backup = idBackup AND iso_code = isoCode GROUP BY id_backup, iso_code HAVING COUNT( * ) >= 1);
+  SET symbol = (SELECT bc.symbol FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
 
   if (symbol IS NULL) then
   	SET symbol = '';

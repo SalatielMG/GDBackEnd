@@ -67,11 +67,11 @@ class ControlCategory extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["categories"] = $select;
-            $arreglo["titulo"] = "¡ CARDVIEWS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ CATEGORIES ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron categories del respaldo solicitado.";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CARDVIEWS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ CATEGORIES NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron categories del respaldo solicitado.";
         }
         return $arreglo;
@@ -86,7 +86,7 @@ class ControlCategory extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
         $table = "backup_categories bc, backups b";
-        $where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> nameColumns, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
+        $where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> c -> mostrar($where, $select, $table);
         if ($consulta) {

@@ -9,6 +9,7 @@
 class Movement extends DB
 {
     public $nameTable = "backup_movements";
+    public $nameColumnsIndexUnique = ['id_backup', 'id_account', 'id_category', 'amount', 'detail', 'date_idx'];
     public $nameColumns = ['id_backup', 'id_account', 'id_category', 'amount', 'sign', 'detail', 'date_record', 'time_record', 'confirmed', 'transfer', 'date_idx', 'day', 'week', 'fortnight', 'month', 'year', 'operation_code', 'picture', 'iso_code'];
     public function mostrar($where = "1", $select = "*", $tabla = "backup_movements"){
         return $this -> getDatos($tabla, $select, $where);

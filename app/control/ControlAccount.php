@@ -159,38 +159,64 @@ class ControlAccount extends Valida
         }
         return $arreglo;
     }
+    public function verifyExistsNameAccount($nameUnique) {
+        $isExists = false;
+        $this -> where = "id_backup = $nameUnique->id_backup AND UPPER(name) = UPPER('$nameUnique->name')";
+        $result = $this -> a -> mostrar($this -> where);
+        if ($result) $isExists = true;
+        return $isExists;
+    }
     public function agregarAccount() {
         $account = json_decode(Form::getValue("account", false, false));
-        $insert = $this -> a -> agregar($account);
         $arreglo = array();
-        if ($insert) {
-            $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
-            $arreglo["msj"] = "Se agrego correctamente la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
 
-            $this -> id_backup = $account -> id_backup;
-            $this -> id_account = $account -> id_account;
-            $queryAccountNew = $this -> buscarAccountsBackup(false);
-            $arreglo["account"]["error"] =  $queryAccountNew["error"];
-            $arreglo["account"]["titulo"] = $queryAccountNew["titulo"];
-            $arreglo["account"]["msj"] = $queryAccountNew["msj"];
-            if (!$arreglo["account"]["error"])
-                $arreglo["account"]["new"] = $queryAccountNew["accounts"][0];
+        if (!$this -> verifyExistsNameAccount($account)) {
+            $insert = $this -> a -> agregar($account);
+            if ($insert) {
+                $arreglo["error"] = false;
+                $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
+                $arreglo["msj"] = "Se agrego correctamente la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
+
+                $this -> id_backup = $account -> id_backup;
+                $this -> id_account = $account -> id_account;
+                $queryAccountNew = $this -> buscarAccountsBackup(false);
+                $arreglo["account"]["error"] =  $queryAccountNew["error"];
+                $arreglo["account"]["titulo"] = $queryAccountNew["titulo"];
+                $arreglo["account"]["msj"] = $queryAccountNew["msj"];
+                if (!$arreglo["account"]["error"])
+                    $arreglo["account"]["new"] = $queryAccountNew["accounts"][0];
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ACCOUNT NO AGREGADO !";
+                $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
+            }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ACCOUNT NO AGREGADO !";
-            $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede registrar la nueva cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie el nombre y vuelva a intentarlo.";
         }
         return $arreglo;
     }
     public function actualizarAccount() {
         $account = json_decode(Form::getValue("account", false, false));
-        $update = $this -> a -> actualizar($account);
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
+
+        $isExistsNameUnique = false;
+        if (strtoupper($account -> name) != strtoupper($indexUnique -> name)) {
+            $isExistsNameUnique = $this -> verifyExistsNameAccount($account);
+        }
+        if ($isExistsNameUnique) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede actualizar la cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie el nombre y vuelva a intentarlo.";
+            return $arreglo;
+        }
+        $update = $this -> a -> actualizar($account, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNT ACTUALIZADO !";
-            $arreglo["msj"] = "La Cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup se actualizo correctamente";
+            $arreglo["msj"] = "La Cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup se actualizo correctamente";
 
             $this -> id_backup = $account -> id_backup;
             $this -> id_account = $account -> id_account;
@@ -203,23 +229,22 @@ class ControlAccount extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNT NO ACTUALIZADO !";
-            $arreglo["msj"] = "La Cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup no se actualizo correctamente";
+            $arreglo["msj"] = "La Cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup no se actualizo correctamente";
         }
         return $arreglo;
     }
     public function eliminarAccount() {
-        $this -> id_backup = Form::getValue("id_backup");
-        $this -> id_account = Form::getValue("id_account");
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
-        $delete = $this -> a -> eliminar($this -> id_backup, $this -> id_account);
+        $delete = $this -> a -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNT ELIMINADA !";
-            $arreglo["msj"] = "La cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup ha sido eliminado correctamente";
+            $arreglo["msj"] = "La cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNT NO ELIMINADA !";
-            $arreglo["msj"] = "La cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup no ha sido eliminado correctamente";
+            $arreglo["msj"] = "La cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup no ha sido eliminado correctamente";
         }
         return $arreglo;
     }

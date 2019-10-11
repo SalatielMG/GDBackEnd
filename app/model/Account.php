@@ -40,7 +40,7 @@ class Account extends DB
         ];
         return $this -> insert($this -> nameTable, $account);
     }
-    public function actualizar ($data) {
+    public function actualizar ($data, $indexUnique) {
         $account = [
             'name' => "'$data->name'",
             'detail' => "'$data->detail'",
@@ -62,9 +62,9 @@ class Account extends DB
             'rate' => $data->rate,
             'icon_name' => "'$data->icon_name'"
         ];
-        return $this -> update($this-> nameTable, $account, "id_backup = $data->id_backup and id_account = $data->id_account");
+        return $this -> update($this-> nameTable, $account, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account");
     }
-    public function eliminar($id_backup, $id_account) {
-        return $this -> delete($this -> nameTable, "id_backup = $id_backup and id_account = $id_account");
+    public function eliminar($indexUnique) {
+        return $this -> delete($this -> nameTable, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account");
     }
 }

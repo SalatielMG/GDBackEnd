@@ -10,23 +10,40 @@ class ControlCurrency extends Valida
 {
     private $c;
     private $pagina = 0;
+    private $select = "";
+    private $table = "";
+    private $where = "";
+
+    private $pk_Currency = array();
+
     public function __construct()
     {
         $this -> c = new Currency();
     }
-    public function buscarCurrenciesBackup() {
-        $idBackup = Form::getValue('idBack');
-        $select = $this -> c -> mostrar("id_backup = $idBackup");
+    public function buscarCurrenciesBackup($isQuery = true) {
+        $isCurrenciesAccount = 0;
+        if ($isQuery) {
+            $this -> pk_Currency["id_backup"] = Form::getValue("id_backup");
+            $isCurrenciesAccount = Form::getValue("isCurrenciesAccount");
+            if ($isCurrenciesAccount == 0) {
+                $this -> pagina = Form::getValue("pagina");
+                $this -> pagina = $this -> pagina * $this -> limit;
+            }
+        }
+        $this -> select = ($isCurrenciesAccount == 1) ? "iso_code" : "*, count(id_backup) as repeated";
+        $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . " HAVING COUNT( * ) >= 1 " . (($isQuery && $isCurrenciesAccount == 0) ? "limit $this->pagina,$this->limit": "");
+
+        $select = $this -> c -> mostrar($this -> where, $this -> select);
         $arreglo = array();
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["currencies"] = $select;
             $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron currencies del respaldo solicitado.";
+            $arreglo["msj"] = "Se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron currencies del respaldo solicitado.";
+            $arreglo["msj"] = "No se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
         }
         return $arreglo;
     }
@@ -40,7 +57,7 @@ class ControlCurrency extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
         $table = "backup_currencies bc, backups b";
-        $where = "b.id_backup = bc.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> nameColumns, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = bc.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> c -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -67,7 +84,7 @@ class ControlCurrency extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, ['id_backup','iso_code'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c -> nameColumnsIndexUnique, "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
