@@ -173,7 +173,7 @@ class ControlAutomatic extends Valida
         $arreglo = array();
         $isExistsIndexUnique = false;
         if (($automatic -> id_operation != $indexUnique -> id_operation) && ($automatic -> id_account != $indexUnique -> id_account ) && ($automatic -> id_category != $indexUnique -> id_category)) { // Verify IndexUnique
-            $isExistsIndexUnique = $this -> verifyExistsIndexUnique($indexUnique);
+            $isExistsIndexUnique = $this -> verifyExistsIndexUnique($automatic);
         }
         if ($isExistsIndexUnique) { // No Update :(
             $arreglo["error"] = true;

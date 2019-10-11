@@ -67,6 +67,7 @@ class ControlAccount extends Valida
             $arreglo["titulo"] = "¡ ACCOUNTS NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
         }
+        //sleep(5);
         return $arreglo;
     }
 
