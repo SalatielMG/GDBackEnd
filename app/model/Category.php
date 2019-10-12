@@ -14,5 +14,30 @@ class Category extends DB
     public function mostrar($where = "1", $select = "*", $tabla = "backup_categories"){
         return $this -> getDatos($tabla, $select, $where);
     }
-
+    public function agregar($dataCategory) {
+        $category = [
+            "id_backup" => $dataCategory -> id_backup,
+            "id_category" => $dataCategory -> id_category,
+            "id_account" => $dataCategory -> id_account,
+            "name" => "'$dataCategory->name'",
+            "sign" => "'" . $this -> signValue($dataCategory -> sign) . "'",
+            "icon_name" => "'$dataCategory->icon_name'",
+            "number" => $dataCategory -> number,
+        ];
+        return $this -> insert($this -> nameTable, $category);
+    }
+    public function actualizar($dataCategory, $indexUnique) {
+        $category = [
+            "id_category" => $dataCategory -> id_category,
+            "id_account" => $dataCategory -> id_account,
+            "name" => "'$dataCategory->name'",
+            "sign" => "'" . $this -> signValue($dataCategory -> sign) . "'",
+            "icon_name" => "'$dataCategory->icon_name'",
+            "number" => $dataCategory -> number,
+        ];
+        return $this -> update($this -> nameTable, $category, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+    }
+    public function eliminar($indexUnique) {
+        return $this -> delete($this -> nameTable, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+    }
 }

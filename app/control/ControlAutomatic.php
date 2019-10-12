@@ -117,7 +117,7 @@ class ControlAutomatic extends Valida
             $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
 
             $this -> ctrlAccount = new ControlAccount($this -> id_backup);
-            $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup();
+            $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ID OPERATION NO CALCULADO !";

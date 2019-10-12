@@ -112,7 +112,7 @@ class ControlBudget extends Valida
         $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category";
         $result = $this -> b -> mostrar($this -> where);
         $array["result"] = $result;
-        $array["consultaSQL"] = $this ->consultaSQL("*", $this -> b -> nameTable, $this -> where);
+        $array["consultaSQL"] = $this -> consultaSQL("*", $this -> b -> nameTable, $this -> where);
         if ($result)  // if exissts => No Insert Or No Update
             $isExists = true;
         $array["isExists"] = $isExists;

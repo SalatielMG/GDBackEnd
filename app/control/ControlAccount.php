@@ -15,14 +15,16 @@ class ControlAccount extends Valida
     private $where = "";
     private $select = "";
     private $table = "";
+    private $categorieSearch = 1;
     private $id_backup = 0;
     private $id_account = 0;
     private $ctrlCategory;
 
-    public function __construct($id_backup = 0)
+    public function __construct($id_backup = 0, $categorieSearch = 1)
     {
         $this -> a = new Account();
         $this -> id_backup = $id_backup;
+        $this -> $categorieSearch = $this->categorieSearch;
     }
 
     public function setId_Backup($id_backup) {
@@ -40,25 +42,28 @@ class ControlAccount extends Valida
     public function obtAccountsBackup($isQuery = true) {
         if ($isQuery) {
             $this -> id_backup = Form::getValue("id_backup");
+            $this -> categorieSearch = Form::getValue("categoriesSearch");
         }
         $arreglo = array();
         $this -> select = "id_account, name";
         $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
-            $arrayAccounts = [];
-            $this -> ctrlCategory = new ControlCategory();
-            $this -> ctrlCategory -> setId_Backup($this -> id_backup);
-            foreach ($accountsBackup as $key => $value) {
-                $this -> ctrlCategory -> setId_Account($value -> id_account);
-                $categoriesAccount = $this -> ctrlCategory -> obtCategoriesAccountBackup(false);
+            if ($this -> categorieSearch == 1) {
+                $arrayAccounts = [];
+                $this -> ctrlCategory = new ControlCategory();
+                $this -> ctrlCategory -> setId_Backup($this -> id_backup);
+                foreach ($accountsBackup as $key => $value) {
+                    $this -> ctrlCategory -> setId_Account($value -> id_account);
+                    $categoriesAccount = $this -> ctrlCategory -> obtCategoriesAccountBackup(false);
 
-                $arrayAccounts[$key]["id_account"] = $value -> id_account;
-                $arrayAccounts[$key]["name"] = $value -> name;
-                $arrayAccounts[$key]["categoriesAccount"] = (!$categoriesAccount["error"]) ? $categoriesAccount["categories"]: [];
+                    $arrayAccounts[$key]["id_account"] = $value -> id_account;
+                    $arrayAccounts[$key]["name"] = $value -> name;
+                    $arrayAccounts[$key]["categoriesAccount"] = (!$categoriesAccount["error"]) ? $categoriesAccount["categories"]: [];
 
+                }
+                $arreglo["accounts"] = $arrayAccounts;
             }
-            $arreglo["accounts"] = $arrayAccounts;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
