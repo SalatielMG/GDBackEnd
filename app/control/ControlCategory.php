@@ -15,6 +15,7 @@ class ControlCategory extends Valida
     private $table = "";
     private $id_backup = 0;
     private $id_account = 0;
+    private $pk_Category = array();
 
     public function __construct($id_backup = 0)
     {
@@ -61,8 +62,9 @@ class ControlCategory extends Valida
     }
 
     public function buscarCategoriesBackup() {
-        $idBackup = Form::getValue('idBack');
-        $select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = $idBackup", "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");
+        $this -> pk_Category["id_backup"] = Form::getValue("id_backup");
+        // $idBackup = Form::getValue('idBack');
+        $select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = " . $this -> pk_Category["id_backup"], "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");
         $arreglo = array();
         if ($select) {
             $arreglo["error"] = false;
