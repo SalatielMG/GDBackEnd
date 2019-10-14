@@ -49,6 +49,7 @@ class ControlAccount extends Valida
         $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
+            $arreglo["accounts"] = $accountsBackup;
             if ($this -> categorieSearch == 1) {
                 $arrayAccounts = [];
                 $this -> ctrlCategory = new ControlCategory();

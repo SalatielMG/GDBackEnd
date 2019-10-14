@@ -147,9 +147,9 @@ class ControlCategory extends Valida
     public function obtNewId_Category() {
         $arreglo = array();
         $this -> pk_Category["id_backup"] = Form::getValue("id_backup");
-        $this -> pk_Category["id_account"] = Form::getValue("id_account");
-        $this -> where = "id_backup = " . $this -> pk_Category["id_backup"] . " AND id_account = " . $this -> pk_Category["id_account"];
-        $this -> select = "max(id_category as max)";
+        // $this -> pk_Category["id_account"] = Form::getValue("id_account");
+        $this -> where = "id_backup = " . $this -> pk_Category["id_backup"];
+        $this -> select = "max(id_category)as max";
         $result = $this -> c -> mostrar($this -> where, $this -> select);
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         if ($result) {
@@ -157,18 +157,19 @@ class ControlCategory extends Valida
             $arreglo["newId_Category"] = $newId_Category;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ID CATEGORY CALCULADO !";
-            $arreglo["msj"] = "Se calculo correctamente la nueva id_category de la cuenta seleccionada con id_account: " . $this -> pk_Category["id_account"] . " del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
+            $arreglo["msj"] = "Se calculo correctamente la nueva id_category del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ID CATEGORY NO CALCULADO !";
-            $arreglo["msj"] = "NO se pudo calcular correctamente la nueva id_category de la cuenta seleccionada con id_account: " . $this -> pk_Category["id_account"] . " del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
+            $arreglo["msj"] = "NO se pudo calcular correctamente la nueva id_category del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
         }
         return $arreglo;
     }
     public function verifyExistsIndexUniqueCategory($indexUnique) {
-        $array["isExists"] = false;
-        $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND UPPER() = UPPER('$indexUnique->name')";
+        $arreglo["isExists"] = false;
+        $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND UPPER(name) = UPPER('$indexUnique->name')";
         $result = $this -> c -> mostrar($this -> where);
+        $arreglo["result"] =  $result;
         $arreglo["consultaSQL"] = $this -> consultaSQL("*", $this -> c -> nameTable, $this -> where);
         if ($result)
             $array["isExists"] = true;
@@ -177,7 +178,8 @@ class ControlCategory extends Valida
     public function agregarCategoria() {
         $category = json_decode(Form::getValue("category", false, false));
         $arreglo = array();
-        if (!$this -> verifyExistsIndexUniqueCategory($category)["isExists"]) {
+        $arreglo["verifyExistsIndexUniqueCategory"] = $this -> verifyExistsIndexUniqueCategory($category);
+        if (!$arreglo["verifyExistsIndexUniqueCategory"]["isExists"]) {
             $insert = $this -> c -> agregar($category);
             if ($insert) {
                 $arreglo["error"] = false;
@@ -210,8 +212,10 @@ class ControlCategory extends Valida
         $arreglo = array();
 
         $isExistsIndexUnique = false;
-        if (($category -> id_account != $indexUnique -> id_category) || strtoupper(($category -> name)) != strtoupper($indexUnique -> name)) {
-            $isExistsIndexUnique = $this -> verifyExistsIndexUniqueCategory($category)["isExists"];
+        if (($category -> id_account != $indexUnique -> id_account) || strtoupper(($category -> name)) != strtoupper($indexUnique -> name)) {
+            $arreglo["verifyExistsIndexUniqueCategory"] = $this -> verifyExistsIndexUniqueCategory($category);
+            $isExistsIndexUnique = $arreglo["verifyExistsIndexUniqueCategory"]["isExists"];
+            // return $isExistsIndexUnique;
         }
         if ($isExistsIndexUnique) {
             $arreglo["error"] = true;
