@@ -6,11 +6,10 @@ class DB {
     private $usuario;
     private $contrasena;
     private $puerto;
-    protected $result;  
-    
+    protected $result;
+
     function __construct() {
         $config = $GLOBALS['config']["mysql"];
-        
         try { 
             $this -> servidor = $config["host"];
             $this -> usuario = $config["us"];

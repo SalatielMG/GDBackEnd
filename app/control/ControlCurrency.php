@@ -20,6 +20,27 @@ class ControlCurrency extends Valida
     {
         $this -> c = new Currency();
     }
+    public function insertCurrencies() {
+        $arreglo = array();
+        $result = $this -> c -> mostrar("1", "*", "table_currencies");
+        if (!$result) { // No tiene regitros => Hay que ingresarlos
+            $insert = $this -> c -> agregarCurrencies();
+            if ($insert) {
+                $arreglo["error"] = false;
+                $arreglo["titulo"] = "¡ DATOS AGREGADOS !";
+                $arreglo["msj"] = "Se agregaron correctamente los registros a la tabla table_currencies";
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR INSERT !";
+                $arreglo["msj"] = "Ocurrio un error al intentar agregar los registros a la tabla table_currencies";
+            }
+        } else { // Ya tiene registros
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ TABLA CON REGISTROS !";
+            $arreglo["msj"] = "No se puede realizar las insercciones de datos, puesto que ya existen los registros en la tabla: table_currencies";
+        }
+        return $arreglo;
+    }
     public function buscarCurrenciesBackup($isQuery = true) {
         $isCurrenciesAccount = 0;
         if ($isQuery) {

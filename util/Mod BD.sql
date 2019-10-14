@@ -15,6 +15,21 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 1, 1, 1, 1);
 
 --
+-- Table structure for table `usuarios`
+--
+
+CREATE TABLE IF NOT EXISTS `table_currencies` (
+   `_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `iso_code` char(3) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+   `symbol` char(5) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+   `icon` varchar(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+   `selected` tinyint(1) NOT NULL DEFAULT 0)
+  ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+
+
+--
 -- Procedimiento almacenado `symbolCurrency`
 --
 DELIMITER $$
@@ -81,6 +96,10 @@ BEGIN
 
   END$$
 DELIMITER ;
+
+
+
+-- PENDIENTE --
 
 --
 -- Trigger mntBackup`

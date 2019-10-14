@@ -5,11 +5,12 @@
  * Date: 20/08/2019
  * Time: 11:40 PM
  */
-require_once(APP_PATH.'model/Account.php');
-require_once(APP_PATH.'model/Currency.php');
+require_once(APP_PATH . 'model/Account.php');
+// require_once(APP_PATH . 'model/Currency.php');
 require_once('ControlCategory.php');
 class ControlAccount extends Valida
 {
+    // private $currency;
     private $a;
     private $pagina = 0;
     private $where = "";
@@ -22,6 +23,7 @@ class ControlAccount extends Valida
 
     public function __construct($id_backup = 0, $categorieSearch = 1)
     {
+        // $this -> currency = new Currency();
         $this -> a = new Account();
         $this -> id_backup = $id_backup;
         $this -> $categorieSearch = $this->categorieSearch;
@@ -45,7 +47,7 @@ class ControlAccount extends Valida
             $this -> categorieSearch = Form::getValue("categoriesSearch");
         }
         $arreglo = array();
-        $this -> select = "id_account, name";
+        $this -> select = "id_account, name, sign";
         $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
@@ -103,6 +105,11 @@ class ControlAccount extends Valida
             $arreglo["accounts"] = $select;
             $arreglo["titulo"] = ($isQuery) ? "¡ ACCOUNTS ENCONTRADOS !" : "¡ ACCOUNT ENCONTRADO !";
             $arreglo["msj"] = ($isQuery) ? "Se encontraron accounts del Respaldo con id_backup: $this->id_backup." : "Se recupero la Cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup";
+            if ($isQuery && $this -> pagina == 0) {
+                $this -> categorieSearch = 0;
+                $arreglo["accountsBackup"] = $this -> obtAccountsBackup(false);
+                // $arreglo["currenciesJSON"] = $this -> currency -> Currencies;
+            }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ?"¡ ACCOUNTS NO ENCONTRADOS !" : "¡ ACCOUNT NO ENCONTRADO !";
