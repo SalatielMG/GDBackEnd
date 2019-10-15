@@ -148,6 +148,16 @@ class DB {
         return $this -> solicitud($sql);
     }
 
+    public function insertMultipleData($tabla, $arreglo) {
+        $sql = "INSERT INTO $tabla ";
+        foreach ($arreglo as $key => $value) {
+            if ($key == 0) $sql .= "(" . implode(", ", array_keys($value) ) . ") VALUES ";
+            $sql .= "(" . implode(", ", array_values($value)) . "),";
+        }
+        $sql = substr_replace($sql, ";", strlen($sql) - 1);
+        return $this -> solicitud($sql);
+    }
+
     //creando metodo de actualizacion
     public function update($tabla, $datos, $where){
         $sql = "UPDATE ".$tabla." SET ";
