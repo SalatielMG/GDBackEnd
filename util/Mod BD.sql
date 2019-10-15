@@ -35,22 +35,27 @@ CREATE TABLE IF NOT EXISTS `table_currencies` (
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8
 BEGIN
+
   DECLARE symbol CHAR(5);
-  if (idAccount != 0) then
+  IF (idAccount != 0) then
     SET isoCode = (SELECT iso_code FROM backup_accounts WHERE  id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
-    if (isoCode IS NULL) then
+    IF (isoCode IS NULL) then
      	SET symbol = '';
       return symbol;
-    END if;
-  END if;
+    END IF;
+  END IF;
 
-  SET symbol = (SELECT bc.symbol FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
+  SET symbol = (SELECT tc.symbol FROM table_currencies tc WHERE tc.iso_code = isoCode);
 
-  if (symbol IS NULL) then
-  	SET symbol = '';
-  END if;
+  IF (symbol IS NULL) THEN
+    SET symbol = (SELECT bc.symbol FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
+    IF (symbol IS NULL) THEN
+      SET symbol = '';
+    END IF;
+  END IF;
 
-  return symbol;
+  RETURN symbol;
+
 END$$
 DELIMITER ;
 

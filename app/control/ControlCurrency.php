@@ -10,15 +10,18 @@ class ControlCurrency extends Valida
 {
     private $c;
     private $pagina = 0;
+    private $isCurrenciesAccount = 0;
     private $select = "";
     private $table = "";
     private $where = "";
 
     private $pk_Currency = array();
 
-    public function __construct()
+    public function __construct($id_backup = 0, $isCurrencyAccount = 0)
     {
         $this -> c = new Currency();
+        $this -> pk_Currency["id_backup"] = $id_backup;
+        $this -> isCurrenciesAccount = $isCurrencyAccount;
     }
     public function insertCurrencies() {
         $arreglo = array();
@@ -42,25 +45,37 @@ class ControlCurrency extends Valida
         return $arreglo;
     }
     public function buscarCurrenciesBackup($isQuery = true) {
-        $isCurrenciesAccount = 0;
         if ($isQuery) {
             $this -> pk_Currency["id_backup"] = Form::getValue("id_backup");
-            $isCurrenciesAccount = Form::getValue("isCurrenciesAccount");
-            if ($isCurrenciesAccount == 0) {
+            $this -> isCurrenciesAccount = Form::getValue("isCurrenciesAccount");
+            if ($this -> isCurrenciesAccount == 0) {
                 $this -> pagina = Form::getValue("pagina");
                 $this -> pagina = $this -> pagina * $this -> limit;
             }
         }
-        $this -> select = ($isCurrenciesAccount == 1) ? "iso_code" : "*, count(id_backup) as repeated";
-        $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . " HAVING COUNT( * ) >= 1 " . (($isQuery && $isCurrenciesAccount == 0) ? "limit $this->pagina,$this->limit": "");
+        $this -> select = ($this -> isCurrenciesAccount == 1) ? "iso_code, symbol" : "*, count(id_backup) as repeated";
+        $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . " HAVING COUNT( * ) >= 1 " . (($isQuery && $this -> isCurrenciesAccount == 0) ? "limit $this->pagina,$this->limit": "");
 
         $select = $this -> c -> mostrar($this -> where, $this -> select);
         $arreglo = array();
         if ($select) {
             $arreglo["error"] = false;
-            $arreglo["currencies"] = $select;
+            $arreglo["currenciesSelected"] = $select;
             $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
+
+            if ($this -> isCurrenciesAccount == 1) {
+                $where = "(";
+                foreach ($select as $key => $value) {
+                    $where .= "'$value->iso_code',";
+                }
+                $where = substr_replace($where, ")", strlen($where) - 1);
+                $this -> where = "iso_code NOT IN $where";
+                $currencies = $this -> c -> mostrar($this -> where, $this -> select, "table_currencies");
+                $currencies = array_merge($currencies, $select);
+                sort($currencies);
+                $arreglo["currencies"] = $currencies;
+            }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";

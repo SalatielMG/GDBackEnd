@@ -53,7 +53,7 @@ class ControlBudget extends Valida
             $arreglo["msj"] = "Se encontraron budgets del Respaldo con id_backup: " . $this -> pk_Budget["id_backup"];
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Budget["id_backup"]);
-                $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
+                $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false, "'-'");
             }
         } else {
             $arreglo["error"] = true;

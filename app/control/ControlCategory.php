@@ -46,14 +46,18 @@ class ControlCategory extends Valida
         return (!$isQuery) ? " AND $alias.id_account = " . $this -> pk_Category["id_account"] . " AND $alias.id_category = " . $this -> pk_Category["id_category"] : "";
     }
 
-    public function obtCategoriesAccountBackup($isQuery = true) {
+    public function obtCategoriesAccountBackup($isQuery = true, $signCategories = "both") {
         if ($isQuery) {
             $this -> id_backup = Form::getValue("id_backup");
             $this -> id_account = Form::getValue("id_account");
+            $signCategories = Form::getValue("signCategories");
+            if ($signCategories != "both") {
+                $signCategories = ($signCategories == 0) ? "'-'": "'+'";
+            }
         }
         $arreglo = array();
-        $this -> select = "id_category, name";
-        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $this -> select = "id_category, name, sign";
+        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account " . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
             $arreglo["categories"] = $categoriesBackup;

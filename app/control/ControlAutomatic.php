@@ -129,7 +129,7 @@ class ControlAutomatic extends Valida
 
     public function verifyExistsIndexUnique($indexUnique) {
         $isExists = false;
-        $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category";
+        $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category AND sign = '" . $this -> a -> signValue($indexUnique -> sign) . "'";
         $result = $this -> a -> mostrar($this -> where);
         if ($result)  // if exissts => No Insert Or No Update
             $isExists = true;
@@ -139,32 +139,32 @@ class ControlAutomatic extends Valida
     public function agregarAutomatic() {
         $arreglo = array();
         $automatic = json_decode(Form::getValue("automatic", false, false));
-        if (!$this -> verifyExistsIndexUnique($automatic)) { //Insert :)
-            $insert = $this -> a -> agregar($automatic);
-            if ($insert) {
-                $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ AUTOMATIC AGREGADO !";
-                $arreglo["msj"] = "Se agrego correctamente la operación automática con id_operation: $automatic->id_operation, id_account: $automatic->id_account e id_category: $automatic->id_category del Respaldo con id_backup: $automatic->id_backup";
-
-                $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
-                $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
-                $this -> pk_Automatic["id_account"] = $automatic -> id_account;
-                $this -> pk_Automatic["id_category"] = $automatic -> id_category;
-                $queryAutomaticNew = $this -> buscarAutomaticsBackup(false);
-                $arreglo["automatic"]["error"]  = $queryAutomaticNew["error"];
-                $arreglo["automatic"]["titulo"] = $queryAutomaticNew["titulo"];
-                $arreglo["automatic"]["msj"]    = $queryAutomaticNew["msj"];
-                if (!$arreglo["automatic"]["error"])
-                    $arreglo["automatic"]["new"] = $queryAutomaticNew["automatics"][0];
-            } else {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ AUTOMATIC NO AGREGADO !";
-                $arreglo["msj"] = "Ocurrio un error al ingresar la operación automática con id_operation: $automatic->id_operation, id_account: $automatic->id_account e id_category: $automatic->id_category del Respaldo con id_backup: $automatic->id_backup";
-            }
-        } else { // NO Insert :(
+        /*if ($this -> verifyExistsIndexUnique($automatic)) {  // NO Insert :(
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede registrar la nueva operación automática, puesto que ya existe un registro en la BD con el mismo id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
+            $arreglo["msj"] = "NO se puede registrar la nueva operación automática, puesto que ya existe un registro en la BD con el mismo id_account, id_category and sign. Porfavor cambie estos valores y vuelva a intentarlo.";
+            return $arreglo;
+        }*/
+        $insert = $this -> a -> agregar($automatic);
+        if ($insert) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ AUTOMATIC AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente la operación automática con id_operation: $automatic->id_operation, id_account: $automatic->id_account e id_category: $automatic->id_category del Respaldo con id_backup: $automatic->id_backup";
+
+            $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
+            $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
+            $this -> pk_Automatic["id_account"] = $automatic -> id_account;
+            $this -> pk_Automatic["id_category"] = $automatic -> id_category;
+            $queryAutomaticNew = $this -> buscarAutomaticsBackup(false);
+            $arreglo["automatic"]["error"]  = $queryAutomaticNew["error"];
+            $arreglo["automatic"]["titulo"] = $queryAutomaticNew["titulo"];
+            $arreglo["automatic"]["msj"]    = $queryAutomaticNew["msj"];
+            if (!$arreglo["automatic"]["error"])
+                $arreglo["automatic"]["new"] = $queryAutomaticNew["automatics"][0];
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ AUTOMATIC NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al ingresar la operación automática con id_operation: $automatic->id_operation, id_account: $automatic->id_account e id_category: $automatic->id_category del Respaldo con id_backup: $automatic->id_backup";
         }
         return $arreglo;
     }
@@ -174,36 +174,36 @@ class ControlAutomatic extends Valida
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         // Buscar si existe el indexUnique
         $arreglo = array();
-        $isExistsIndexUnique = false;
-        if (($automatic -> id_account != $indexUnique -> id_account ) || ($automatic -> id_category != $indexUnique -> id_category)) { // Verify IndexUnique
+        /*$isExistsIndexUnique = false;
+        if (($automatic -> id_account != $indexUnique -> id_account ) || ($automatic -> id_category != $indexUnique -> id_category) || ($automatic -> sign != $indexUnique -> sign)) { // Verify IndexUnique
             $isExistsIndexUnique = $this -> verifyExistsIndexUnique($automatic);
         }
         if ($isExistsIndexUnique) { // No Update :(
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede actualizar la operación automática, puesto que ya existe un registro en la BD con el mismo id_account e id_category. Porfavor cambie estos valores y vuelva a intentarlo.";
-        } else { // Update :)
-            $update = $this -> a -> actualizar($automatic, $indexUnique);
-            if ($update) {
-                $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ AUTOMATIC ACTUALIZADO !";
-                $arreglo["msj"] = "La operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup se ha actualizado correctamente";
+            $arreglo["msj"] = "NO se puede actualizar la operación automática, puesto que ya existe un registro en la BD con el mismo id_account, id_category and sign. Porfavor cambie estos valores y vuelva a intentarlo.";
+            return $arreglo;
+        }*/
+        $update = $this -> a -> actualizar($automatic, $indexUnique);
+        if ($update) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ AUTOMATIC ACTUALIZADO !";
+            $arreglo["msj"] = "La operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup se ha actualizado correctamente";
 
-                $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
-                $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
-                $this -> pk_Automatic["id_account"] = $automatic -> id_account;
-                $this -> pk_Automatic["id_category"] = $automatic -> id_category;
-                $queryAutomaticUpdate = $this -> buscarAutomaticsBackup(false);
-                $arreglo["automatic"]["error"]  = $queryAutomaticUpdate["error"];
-                $arreglo["automatic"]["titulo"] = $queryAutomaticUpdate["titulo"];
-                $arreglo["automatic"]["msj"]    = $queryAutomaticUpdate["msj"];
-                if (!$arreglo["automatic"]["error"])
-                    $arreglo["automatic"]["update"] = $queryAutomaticUpdate["automatics"][0];
-            } else {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ AUTOMATIC NO ACTUALIZADA !";
-                $arreglo["msj"] = "Ocurrio un error al intentar actualizar la operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup";
-            }
+            $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
+            $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
+            $this -> pk_Automatic["id_account"] = $automatic -> id_account;
+            $this -> pk_Automatic["id_category"] = $automatic -> id_category;
+            $queryAutomaticUpdate = $this -> buscarAutomaticsBackup(false);
+            $arreglo["automatic"]["error"]  = $queryAutomaticUpdate["error"];
+            $arreglo["automatic"]["titulo"] = $queryAutomaticUpdate["titulo"];
+            $arreglo["automatic"]["msj"]    = $queryAutomaticUpdate["msj"];
+            if (!$arreglo["automatic"]["error"])
+                $arreglo["automatic"]["update"] = $queryAutomaticUpdate["automatics"][0];
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ AUTOMATIC NO ACTUALIZADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar la operación automática con id_operation: $indexUnique->id_operation, id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup";
         }
         return $arreglo;
     }

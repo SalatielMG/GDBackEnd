@@ -8,6 +8,7 @@
 require_once(APP_PATH . 'model/Account.php');
 // require_once(APP_PATH . 'model/Currency.php');
 require_once('ControlCategory.php');
+require_once('ControlCurrency.php');
 class ControlAccount extends Valida
 {
     // private $currency;
@@ -17,16 +18,19 @@ class ControlAccount extends Valida
     private $select = "";
     private $table = "";
     private $categorieSearch = 1;
+    private $symbolName = 1;
     private $id_backup = 0;
     private $id_account = 0;
     private $ctrlCategory;
+    private $ctrlCurrency;
 
-    public function __construct($id_backup = 0, $categorieSearch = 1)
+    public function __construct($id_backup = 0, $categorieSearch = 1, $symbolName = 1)
     {
         // $this -> currency = new Currency();
         $this -> a = new Account();
         $this -> id_backup = $id_backup;
-        $this -> $categorieSearch = $this->categorieSearch;
+        $this -> categorieSearch = $categorieSearch;
+        $this -> symbolName = $symbolName;
     }
 
     public function setId_Backup($id_backup) {
@@ -41,10 +45,14 @@ class ControlAccount extends Valida
         return (!$isQuery) ? "AND " . $alias . "id_account = $this->id_account" : "";
     }
 
-    public function obtAccountsBackup($isQuery = true) {
+    public function obtAccountsBackup($isQuery = true, $signCategories = "both") {
         if ($isQuery) {
             $this -> id_backup = Form::getValue("id_backup");
             $this -> categorieSearch = Form::getValue("categoriesSearch");
+            $signCategories = Form::getValue("signCategories");
+            if ($signCategories != "both") {
+                $signCategories = ($signCategories == 0) ? "'-'": "'+'";
+            }
         }
         $arreglo = array();
         $this -> select = "id_account, name, sign";
@@ -58,7 +66,7 @@ class ControlAccount extends Valida
                 $this -> ctrlCategory -> setId_Backup($this -> id_backup);
                 foreach ($accountsBackup as $key => $value) {
                     $this -> ctrlCategory -> setId_Account($value -> id_account);
-                    $categoriesAccount = $this -> ctrlCategory -> obtCategoriesAccountBackup(false);
+                    $categoriesAccount = $this -> ctrlCategory -> obtCategoriesAccountBackup(false, $signCategories);
 
                     $arrayAccounts[$key]["id_account"] = $value -> id_account;
                     $arrayAccounts[$key]["name"] = $value -> name;
@@ -67,6 +75,7 @@ class ControlAccount extends Valida
                 }
                 $arreglo["accounts"] = $arrayAccounts;
             }
+
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
@@ -83,6 +92,7 @@ class ControlAccount extends Valida
         if ($isQuery) {
             $this -> id_backup = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
+            $this -> symbolName = Form::getValue("symbolName");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
@@ -109,6 +119,10 @@ class ControlAccount extends Valida
                 $this -> categorieSearch = 0;
                 $arreglo["accountsBackup"] = $this -> obtAccountsBackup(false);
                 // $arreglo["currenciesJSON"] = $this -> currency -> Currencies;
+                if ($this -> symbolName == 1) {
+                    $this -> ctrlCurrency = new ControlCurrency($this -> id_backup, 1);
+                    $arreglo["currencies"] = $this -> ctrlCurrency -> buscarCurrenciesBackup(false);
+                }
             }
         } else {
             $arreglo["error"] = true;
