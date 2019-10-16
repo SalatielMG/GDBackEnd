@@ -56,7 +56,7 @@ class ControlAccount extends Valida
         }
         $arreglo = array();
         $this -> select = "id_account, name, sign";
-        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "", false) . "  HAVING COUNT( * ) >= 1";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
             $arreglo["accounts"] = $accountsBackup;

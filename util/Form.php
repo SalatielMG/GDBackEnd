@@ -4,6 +4,15 @@ class Form{
 
 	public $errores;
 
+    const typeInt = 'int';
+    const typeTinyint = 'tinyint';
+    const typeSmallint = 'smallint';
+    const typeDecimal = 'decimal';
+    const typeVarchar = 'varchar';
+    const typeChar = 'char';
+    const typeDatetime = 'datetime';
+    const typeDate = 'date';
+
 	public function __construct(){
 		$this->errores = array();
 	}

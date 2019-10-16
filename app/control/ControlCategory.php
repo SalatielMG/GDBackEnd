@@ -57,7 +57,7 @@ class ControlCategory extends Valida
         }
         $arreglo = array();
         $this -> select = "id_category, name, sign";
-        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account " . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account " . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "", false) . "  HAVING COUNT( * ) >= 1";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
             $arreglo["categories"] = $categoriesBackup;

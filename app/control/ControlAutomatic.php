@@ -37,16 +37,20 @@ class ControlAutomatic extends Valida
             $this -> pagina = $this -> pagina * $this -> limit;
         }
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
+
         if ($exixstIndexUnique["indice"]) {
 
         } else {
             $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_automatics ba";
-            $this -> where = "ba.id_backup = " . $this -> pk_Automatic["id_backup"] . $this -> condition_pk_Automatic($isQuery, "ba") . " GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = "ba.id_backup = " . $this -> pk_Automatic["id_backup"] . $this -> condition_pk_Automatic($isQuery, "ba") . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
-        $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        //return $arreglo;
+
+        $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
+
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["automatics"] = $select;
@@ -73,7 +77,7 @@ class ControlAutomatic extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_automatics ba, backups b";
-        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -95,7 +99,7 @@ class ControlAutomatic extends Valida
         if ($exixstIndexUnique["indice"]) {
             return $arreglo = $exixstIndexUnique;
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> nameColumnsIndexUnique, "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;

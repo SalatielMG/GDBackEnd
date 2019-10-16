@@ -9,8 +9,32 @@
 class Automatic extends DB
 {
     public $nameTable = "backup_automatics";
-    public $nameColumnsIndexUnique = ['id_backup', 'id_operation', 'id_account','id_category', 'period', 'amount', 'initial_date'];
-    public $nameColumns = ['id_backup', 'id_operation', 'id_account', 'id_category', 'period', 'repeat_number', 'each_number', 'enabled', 'amount', 'sign', 'detail', 'initial_date', 'next_date', 'operation_code', 'rate', 'counter'];
+    public $columnsTable = [
+        ["name" => "id_backup", "type" => Form::typeInt],
+        ["name" => "id_operation", "type" => Form::typeInt],
+        ["name" => "id_account", "type" => Form::typeSmallint],
+        ["name" => "id_category", "type" => Form::typeSmallint],
+        ["name" => "period", "type" => Form::typeTinyint],
+        ["name" => "repeat_number", "type" => Form::typeTinyint],
+        ["name" => "each_number", "type" => Form::typeTinyint],
+        ["name" => "enabled", "type" => Form::typeTinyint],
+        ["name" => "amount", "type" => Form::typeDecimal],
+        ["name" => "sign", "type" => Form::typeChar],
+        ["name" => "detail", "type" => Form::typeVarchar],
+        ["name" => "initial_date", "type" => Form::typeDate],
+        ["name" => "next_date", "type" => Form::typeDate],
+        ["name" => "operation_code", "type" => Form::typeVarchar],
+        ["name" => "rate", "type" => Form::typeDecimal],
+        ["name" => "counter", "type" => Form::typeSmallint],
+    ];
+    public $columnsTableIndexUnique;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this -> columnsTableIndexUnique = $this->columnsTable;
+    }
+
     public function mostrar($where = "1", $select = "*", $tabla = "backup_automatics"){
         return $this -> getDatos($tabla, $select, $where);
     }

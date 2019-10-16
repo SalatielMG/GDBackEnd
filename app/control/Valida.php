@@ -7,15 +7,16 @@ class Valida {
     protected $limit_Inconsistencia = 10;
     protected $having_Count = 2;
 
-    public function namesColumns($arreglo, $aliasTable = "") {
+    public function namesColumns($arreglo, $aliasTable = "", $bnd = true) {
         $name = "";
-        $length = count($arreglo) - 1;
         foreach ($arreglo as $key => $value) {
-            if ($key == $length)
+            $name .= "$aliasTable" . (($bnd) ? $value["name"] : $value)  . ", ";
+            /*if ($key == $length)
                 $name = $name . $aliasTable . $value;
             else
-                $name = $name . $aliasTable . $value . ", ";
+                $name = $name . $aliasTable . $value . ", ";*/
         }
+        $name = substr_replace($name, "", strlen($name) - 2);
         return $name;
     }
     public function inBackups($arreglo, $variable = "ba.id_backup") {
