@@ -56,7 +56,7 @@ class ControlAccount extends Valida
         }
         $arreglo = array();
         $this -> select = "id_account, name, sign";
-        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "", false) . "  HAVING COUNT( * ) >= 1";
+        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ORDER BY id_account";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
             $arreglo["accounts"] = $accountsBackup;
@@ -97,13 +97,13 @@ class ControlAccount extends Valida
         }
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
         if ($exixstIndexUnique["indice"]) {
-            $this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = $this->id_backup AND ba.iso_code = bc.iso_code" . $this -> condicionId_Account($isQuery, "ba.") . " GROUP by " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = $this->id_backup AND ba.iso_code = bc.iso_code" . $this -> condicionId_Account($isQuery, "ba.") . " GROUP by " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
             $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba, backup_currencies bc";
         } else {
             $this -> select = "ba.*, (SELECT symbolCurrency($this->id_backup, ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba";
-            $this -> where = "ba.id_backup = $this->id_backup " . $this -> condicionId_Account($isQuery, "ba.") . " GROUP BY " . $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = "ba.id_backup = $this->id_backup " . $this -> condicionId_Account($isQuery, "ba.") . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
@@ -141,7 +141,7 @@ class ControlAccount extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
         $table = "backup_accounts ba, backups b";
-        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> nameColumnsIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> a -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -163,7 +163,7 @@ class ControlAccount extends Valida
         if ($exixstIndexUnique["indice"]) {
             return $arreglo = $exixstIndexUnique;
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> nameColumnsIndexUnique, "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> a -> nameTable, $this -> a -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> a -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
@@ -186,41 +186,55 @@ class ControlAccount extends Valida
         }
         return $arreglo;
     }
-    public function verifyExistsNameAccount($nameUnique) {
+    /*public function verifyExistsNameAccount($nameUnique) {
         $isExists = false;
         $this -> where = "id_backup = $nameUnique->id_backup AND UPPER(name) = UPPER('$nameUnique->name')";
         $result = $this -> a -> mostrar($this -> where);
         if ($result) $isExists = true;
         return $isExists;
-    }
+    }*/
     public function agregarAccount() {
         $account = json_decode(Form::getValue("account", false, false));
         $arreglo = array();
 
-        if (!$this -> verifyExistsNameAccount($account)) {
-            $insert = $this -> a -> agregar($account);
-            if ($insert) {
-                $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
-                $arreglo["msj"] = "Se agrego correctamente la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
-
-                $this -> id_backup = $account -> id_backup;
-                $this -> id_account = $account -> id_account;
-                $queryAccountNew = $this -> buscarAccountsBackup(false);
-                $arreglo["account"]["error"] =  $queryAccountNew["error"];
-                $arreglo["account"]["titulo"] = $queryAccountNew["titulo"];
-                $arreglo["account"]["msj"] = $queryAccountNew["msj"];
-                if (!$arreglo["account"]["error"])
-                    $arreglo["account"]["new"] = $queryAccountNew["accounts"][0];
-            } else {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ACCOUNT NO AGREGADO !";
-                $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
-            }
-        } else {
+        // --- Verifiy Index --- //
+        $result = $this -> a -> mostrar("id_backup = $account->id_backup AND id_account = $account->id_account");
+        if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede registrar la nueva cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie el nombre y vuelva a intentarlo.";
+            $arreglo["msj"] = "NO se puede registrar la nueva cuenta, puesto que ya existe un registro en la BD con el mismo ID_ACCOUNT del mismo backup. Porfavor verifique el id e intente cambiarlo";
+            return $arreglo;
+        }
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($account, $this -> a -> columnsTableIndexUnique);
+        $result = $this -> a -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede registrar la nueva cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie l nombre y vuleva a intentarlo";
+            return $arreglo;
+        }
+        // var_dump($arreglo);
+        // return $arreglo;
+        // --- Verifiy Index --- //
+
+        $insert = $this -> a -> agregar($account);
+        if ($insert) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
+
+            $this -> id_backup = $account -> id_backup;
+            $this -> id_account = $account -> id_account;
+            $queryAccountNew = $this -> buscarAccountsBackup(false);
+            $arreglo["account"]["error"] =  $queryAccountNew["error"];
+            $arreglo["account"]["titulo"] = $queryAccountNew["titulo"];
+            $arreglo["account"]["msj"] = $queryAccountNew["msj"];
+            if (!$arreglo["account"]["error"])
+                $arreglo["account"]["new"] = $queryAccountNew["accounts"][0];
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ ACCOUNT NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
         }
         return $arreglo;
     }

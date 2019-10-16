@@ -9,8 +9,27 @@
 class Currency extends DB
 {
     public $nameTable = "backup_currencies";
-    public $nameColumnsIndexUnique = ['id_backup','iso_code'];
-    public $nameColumns = ['id_backup','iso_code','symbol','icon_name','selected'];
+    public $columnsTable = [
+        ['name' => 'id_backup', 'type' => Form::typeInt],
+        ['name' => 'iso_code', 'type' => Form::typeChar],
+        ['name' => 'symbol', 'type' => Form::typeChar],
+        ['name' => 'icon_name', 'type' => Form::typeVarchar],
+        ['name' => 'selected', 'type' => Form::typeTinyint],
+    ];
+    public $columnsTableIndexUnique = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+        foreach ($this -> columnsTable as $key => $value) {
+            if (($value["name"] == "id_backup")
+            || ($value["name"] == "iso_code")
+            || ($value["name"] == "symbol")) {
+                array_push($this -> columnsTableIndexUnique, $value);
+            }
+        }
+    }
+
     public function mostrar($where = "1", $select = "*", $tabla = "backup_currencies"){
         return $this -> getDatos($tabla, $select, $where);
     }

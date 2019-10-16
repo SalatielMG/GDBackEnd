@@ -9,8 +9,42 @@
 class Account extends DB
 {
     public $nameTable = "backup_accounts";
-    public $nameColumnsIndexUnique = ['id_backup', 'id_account', 'name'];
-    public $nameColumns = ['id_backup', 'id_account', 'name', 'detail', 'sign', 'income', 'expense', 'initial_balance', 'final_balance', 'month', 'year', 'positive_limit', 'negative_limit', 'positive_max', 'negative_max', 'iso_code', 'selected', 'value_type', 'include_total', 'rate', 'icon_name'];
+    public $columnsTable = [
+        ['name' => 'id_backup', 'type' => Form::typeInt],
+        ['name' => 'id_account', 'type' => Form::typeSmallint],
+        ['name' => 'name', 'type' => Form::typeVarchar],
+        ['name' => 'detail', 'type' => Form::typeVarchar],
+        ['name' => 'sign', 'type' => Form::typeChar],
+        ['name' => 'income', 'type' => Form::typeDecimal],
+        ['name' => 'expense', 'type' => Form::typeDecimal],
+        ['name' => 'initial_balance', 'type' => Form::typeDecimal],
+        ['name' => 'final_balance', 'type' => Form::typeDecimal],
+        ['name' => 'month', 'type' => Form::typeTinyint],
+        ['name' => 'year', 'type' => Form::typeSmallint],
+        ['name' => 'positive_limit', 'type' => Form::typeTinyint],
+        ['name' => 'negative_limit', 'type' => Form::typeTinyint],
+        ['name' => 'positive_max', 'type' => Form::typeDecimal],
+        ['name' => 'negative_max', 'type' => Form::typeDecimal],
+        ['name' => 'iso_code', 'type' => Form::typeChar],
+        ['name' => 'selected', 'type' => Form::typeTinyint],
+        ['name' => 'value_type', 'type' => Form::typeTinyint],
+        ['name' => 'include_total', 'type' => Form::typeTinyint],
+        ['name' => 'rate', 'type' => Form::typeDecimal],
+        ['name' => 'icon_name', 'type' => Form::typeVarchar],
+    ];
+    public $columnsTableIndexUnique = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+        foreach ($this -> columnsTable as $key => $value) {
+            if (($value["name"] == "id_backup")
+                || ($value["name"] == "name")) {
+                array_push($this -> columnsTableIndexUnique, $value);
+            }
+        }
+    }
+
     public function mostrar($where = "1", $select = "*", $tabla = "backup_accounts"){
         return $this -> getDatos($tabla, $select, $where);
     }

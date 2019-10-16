@@ -40,7 +40,7 @@ class ControlPreference extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bp.*, COUNT(bp.id_backup) cantidadRepetida";
         $table = "backup_preferences bp, backups b";
-        $where = "b.id_backup = bp.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bp.id_backup") . " GROUP BY ". $this -> namesColumns($this -> p -> nameColumns, "bp.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = bp.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bp.id_backup") . " GROUP BY ". $this -> namesColumns($this -> p -> columnsTableIndexUnique, "bp.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> p -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -67,7 +67,7 @@ class ControlPreference extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> p -> nameTable, ['id_backup', 'key_name'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> p -> nameTable, $this -> p -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> p -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;

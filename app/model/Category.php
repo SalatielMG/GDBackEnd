@@ -9,8 +9,29 @@
 class Category extends DB
 {
     public $nameTable = "backup_categories";
-    public $nameColumnsIndexUnique = ['id_backup', 'id_category', 'id_account'];
-    public $nameColumns = ['id_backup', 'id_category', 'id_account', 'name', 'sign', 'icon_name', 'number'];
+    public $columnsTable = [
+         ['name' => 'id_backup', 'type' => Form::typeInt],
+         ['name' => 'id_category', 'type' => Form::typeSmallint],
+         ['name' => 'id_account', 'type' => Form::typeSmallint],
+         ['name' => 'name', 'type' => Form::typeVarchar],
+         ['name' => 'sign', 'type' => Form::typeChar],
+         ['name' => 'icon_name', 'type' => Form::typeVarchar],
+         ['name' => 'number', 'type' => Form::typeSmallint],
+    ];
+    public $columnsTableIndexUnique = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+        foreach ($this -> columnsTable as $key => $value) {
+            if (($value["name"] == "id_backup")
+                || ($value["name"] == "id_account")
+                || ($value["name"] == "name")
+                || ($value["name"] == "sign")) {
+                array_push($this -> columnsTableIndexUnique, $value);
+            }
+        }
+    }
     public function mostrar($where = "1", $select = "*", $tabla = "backup_categories"){
         return $this -> getDatos($tabla, $select, $where);
     }

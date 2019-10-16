@@ -7,10 +7,46 @@ class Valida {
     protected $limit_Inconsistencia = 10;
     protected $having_Count = 2;
 
-    public function namesColumns($arreglo, $aliasTable = "", $bnd = true) {
+    public function conditionVerifyExistsUniqueIndex($dataObjec, $columnsTableIndexUnique) {
+        $sql = "";
+        $dataObject = (array) ($dataObjec);
+        foreach ($columnsTableIndexUnique as $key => $value) {
+            if ($value["type"] == Form::typeTinyint
+                || $value["type"] == Form::typeInt
+                || $value["type"] == Form::typeTinyint
+                || $value["type"] == Form::typeSmallint
+                || $value["type"] == Form::typeDecimal) {
+                $sql .=  $value["name"] . " = " . $dataObject[$value["name"]] . " AND ";
+            } else {
+                if ($value["type"] == Form::typeDate || $value["type"] == Form::typeTime || $value["type"] == Form::typeDatetime) { //NO UPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "sign" && $value["type"] == Form::typeChar){ //NO UPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "period" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "operation_code" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "date_idx" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "picture" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "symbol" && $value["type"] == Form::typeChar) { //NOUPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($value["name"] == "icon_name" && $value["type"] == Form::typeChar) { //NOUPPERCASE
+                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else { //UPPERCASE
+                    $sql .= "UPPER(" . $value["name"] . ") = UPPER('" . $dataObject[$value["name"]] . "') AND ";
+                }
+            }
+        }
+        $sql = substr_replace($sql,"", strlen($sql) - 4);
+        return $sql;
+    }
+
+    public function namesColumns($arreglo, $aliasTable = "") {
         $name = "";
         foreach ($arreglo as $key => $value) {
-            $name .= "$aliasTable" . (($bnd) ? $value["name"] : $value)  . ", ";
+            $name .= "$aliasTable" . $value["name"] . ", ";
             /*if ($key == $length)
                 $name = $name . $aliasTable . $value;
             else

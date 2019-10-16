@@ -12,31 +12,30 @@ class Form{
     const typeChar = 'char';
     const typeDatetime = 'datetime';
     const typeDate = 'date';
+    const typeTime = 'time';
 
 	public function __construct(){
 		$this->errores = array();
 	}
-    static function email($str){
+    static function email($str) {
         return (bool) preg_match("/^[a-zA-Z0-9\._-]+@[a-zA-Z0-9-]{2,}[.][a-zA-Z]{2,4}$/", $str);
     }
-	static function letras($str){
+	static function letras($str) {
 		return (bool) preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚÑñ ]+$/", $str);
 	}
-
-	static function num2Decimales($str){
+	static function num2Decimales($str) {
         return (bool) preg_match("/^([0-9]+\.?[0-9]{0,2})$/", $str);
     }
-
-	static function enteros($str){
+	static function enteros($str) {
 		return (bool) preg_match("/^[\-+]?[0-9]+$/", $str);
 	}
-    static function enterosPositivos($str){
+    static function enterosPositivos($str) {
         return (bool) preg_match("/^[0-9]+$/", $str);
     }
-
-	static function letras_numeros($str){
+	static function letras_numeros($str) {
 		return (bool) preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚÑñ0-9 ]+$/", $str);
 	}
+
     public function validarDatos($campo, $etiqueta, $validacion){
         $validacion = explode("|", $validacion);
         if(is_array($validacion)){

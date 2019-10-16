@@ -40,7 +40,7 @@ class ControlExtra extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "be.*, COUNT(be.id_backup) cantidadRepetida";
         $table = "backup_extras be, backups b";
-        $where = "b.id_backup = be.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "be.id_backup") . " GROUP BY ". $this -> namesColumns($this -> e -> nameColumns, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = be.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "be.id_backup") . " GROUP BY ". $this -> namesColumns($this -> e -> columnsTableIndexUnique, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> e -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -67,7 +67,7 @@ class ControlExtra extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> e -> nameTable, ['id_backup', 'id_extra'], "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> e -> nameTable, $this -> e -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> e -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;

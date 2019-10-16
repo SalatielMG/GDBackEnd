@@ -9,8 +9,31 @@
 class CardView extends DB
 {
     public $nameTable = "backup_cardviews";
-    public $nameColumns = ['id_backup','id_card','name','period','sign','show_card','number'];
+    public $columnsTable = [
+        ['name' => 'id_backup', 'type' => Form::typeInt],
+        ['name' => 'id_card', 'type' => Form::typeInt],
+        ['name' => 'name', 'type' => Form::typeVarchar],
+        ['name' => 'period', 'type' => Form::typeVarchar],
+        ['name' => 'sign', 'type' => Form::typeChar],
+        ['name' => 'show_card', 'type' => Form::typeTinyint],
+        ['name' => 'number', 'type' => Form::typeSmallint],
+    ];
+    public $columnsTableIndexUnique = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+        foreach ($this -> columnsTable as $key => $value) {
+            if (($value["name"] == "id_backup")
+            || ($value["name"] == "id_card")
+            || ($value["name"] == "name")) {
+                array_push($this -> columnsTableIndexUnique, $value);
+            }
+        }
+    }
+
     public function mostrar($where = "1", $select = "*", $tabla = "backup_cardviews"){
         return $this -> getDatos($tabla, $select, $where);
     }
+    
 }

@@ -27,12 +27,22 @@ class Automatic extends DB
         ["name" => "rate", "type" => Form::typeDecimal],
         ["name" => "counter", "type" => Form::typeSmallint],
     ];
-    public $columnsTableIndexUnique;
+    public $columnsTableIndexUnique = [];
 
     public function __construct()
     {
         parent::__construct();
-        $this -> columnsTableIndexUnique = $this->columnsTable;
+        foreach ($this -> columnsTable as $key => $value) {
+            if (($value["name"] == "id_backup")
+                || ($value["name"] == "id_operation")
+                || ($value["name"] == "id_account")
+                || ($value["name"] == "id_category")
+                || ($value["name"] == "period")
+                || ($value["name"] == "amount")
+                || ($value["name"] == "initial_date")) {
+                array_push($this -> columnsTableIndexUnique, $value);
+            }
+        }
     }
 
     public function mostrar($where = "1", $select = "*", $tabla = "backup_automatics"){

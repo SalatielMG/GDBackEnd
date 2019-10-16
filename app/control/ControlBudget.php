@@ -41,7 +41,7 @@ class ControlBudget extends Valida
         } else {
             $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
             $this -> table = "backup_budgets bd";
-            $this -> where = "bd.id_backup = " . $this -> pk_Budget["id_backup"] . $this -> condition_pk_Budget($isQuery, "bd") . " GROUP BY " . $this -> namesColumns($this -> b -> nameColumnsIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = "bd.id_backup = " . $this -> pk_Budget["id_backup"] . $this -> condition_pk_Budget($isQuery, "bd") . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -72,7 +72,7 @@ class ControlBudget extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bd.*, COUNT(bd.id_backup) cantidadRepetida";
         $table = "backup_budgets bd, backups b";
-        $where = "b.id_backup = bd.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bd.id_backup") . " GROUP BY ". $this -> namesColumns($this -> b -> nameColumnsIndexUnique, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $where = "b.id_backup = bd.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bd.id_backup") . " GROUP BY ". $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> b -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -99,7 +99,7 @@ class ControlBudget extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> b -> nameTable, $this -> b -> nameColumnsIndexUnique, "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> b -> nameTable, $this -> b -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> b -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;

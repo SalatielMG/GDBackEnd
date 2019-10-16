@@ -57,7 +57,7 @@ class ControlCategory extends Valida
         }
         $arreglo = array();
         $this -> select = "id_category, name, sign";
-        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account " . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "", false) . "  HAVING COUNT( * ) >= 1";
+        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account " . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
             $arreglo["categories"] = $categoriesBackup;
@@ -84,7 +84,7 @@ class ControlCategory extends Valida
         } else { // Table con inconsistencia de datos.
             $this -> select = "bc.*, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
             $this -> table = $this -> c -> nameTable . " bc";
-            $this -> where = "bc.id_backup = " . $this -> pk_Category["id_backup"] . $this -> condition_pk_Category($isQuery, "bc") . " GROUP BY " . $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
+            $this -> where = "bc.id_backup = " . $this -> pk_Category["id_backup"] . $this -> condition_pk_Category($isQuery, "bc") . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
         }
         $select = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
         //$select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = " . $this -> pk_Category["id_backup"], "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");
@@ -115,7 +115,7 @@ class ControlCategory extends Valida
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
         $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
         $table = "backup_categories bc, backups b";
-        $where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> nameColumnsIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
+        $where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $consulta = $this -> c -> mostrar($where, $select, $table);
         if ($consulta) {
@@ -142,7 +142,7 @@ class ControlCategory extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c ->nameColumnsIndexUnique, "id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c ->columnsTableIndexUnique, "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
