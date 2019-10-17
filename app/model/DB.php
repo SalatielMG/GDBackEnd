@@ -176,7 +176,7 @@ class DB {
         return $this -> solicitud($sql);
     }
 
-    public function signValue($sign) {
+    public static function signValue($sign) {
         return ($sign == "1") ? "+" : "-";
     }
 

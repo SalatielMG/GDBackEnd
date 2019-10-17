@@ -186,42 +186,45 @@ class ControlAccount extends Valida
         }
         return $arreglo;
     }
-    /*public function verifyExistsNameAccount($nameUnique) {
-        $isExists = false;
-        $this -> where = "id_backup = $nameUnique->id_backup AND UPPER(name) = UPPER('$nameUnique->name')";
-        $result = $this -> a -> mostrar($this -> where);
-        if ($result) $isExists = true;
-        return $isExists;
-    }*/
+    public function verifyExistsNameAccount($newAccount, $isUpdate = false, $id_account = 0) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $isDifferentId_Account = true;
+        if ($isUpdate) $isDifferentId_Account = ($newAccount -> id_account != $id_account);
+        if ($isDifferentId_Account) {
+            $result = $this -> a -> mostrar("id_backup = $newAccount->id_backup AND id_account = $newAccount->id_account");
+            if ($result) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+                $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " nueva cuenta, puesto que ya existe un registro en la BD con el mismo ID_ACCOUNT del mismo backup. Porfavor verifique el id e intente cambiarlo";
+                return $arreglo;
+            }
+        }
+
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($newAccount, $this -> a -> columnsTableIndexUnique);
+        $result = $this -> a -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie l nombre y vuleva a intentarlo";
+
+        }
+        return $arreglo;
+    }
     public function agregarAccount() {
         $account = json_decode(Form::getValue("account", false, false));
         $arreglo = array();
 
         // --- Verifiy Index --- //
-        $result = $this -> a -> mostrar("id_backup = $account->id_backup AND id_account = $account->id_account");
-        if ($result) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede registrar la nueva cuenta, puesto que ya existe un registro en la BD con el mismo ID_ACCOUNT del mismo backup. Porfavor verifique el id e intente cambiarlo";
-            return $arreglo;
-        }
-        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($account, $this -> a -> columnsTableIndexUnique);
-        $result = $this -> a -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
-        if ($result) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede registrar la nueva cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie l nombre y vuleva a intentarlo";
-            return $arreglo;
-        }
-        // var_dump($arreglo);
-        // return $arreglo;
+        $arreglo = $this -> verifyExistsNameAccount($account);
+        if ($arreglo["error"]) return $arreglo;
         // --- Verifiy Index --- //
 
         $insert = $this -> a -> agregar($account);
         if ($insert) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
-            $arreglo["msj"] = "Se agrego correctamente la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
+            $arreglo["msj"] = "Se agrego correctamente la cuenta : $account->name del Respaldo con id_backup: $account->id_backup";
 
             $this -> id_backup = $account -> id_backup;
             $this -> id_account = $account -> id_account;
@@ -243,15 +246,10 @@ class ControlAccount extends Valida
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
 
-        $isExistsNameUnique = false;
-        if (strtoupper($account -> name) != strtoupper($indexUnique -> name)) {
-            $isExistsNameUnique = $this -> verifyExistsNameAccount($account);
-        }
-        if ($isExistsNameUnique) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede actualizar la cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie el nombre y vuelva a intentarlo.";
-            return $arreglo;
+        if (($account -> id_account != $indexUnique -> id_account)
+            || (strtoupper($account -> name) != strtoupper($indexUnique -> name))) {
+            $arreglo = $this -> verifyExistsNameAccount($account, true, $indexUnique -> id_account);
+            if ($arreglo["error"]) return $arreglo;
         }
         $update = $this -> a -> actualizar($account, $indexUnique);
         if ($update) {

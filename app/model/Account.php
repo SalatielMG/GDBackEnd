@@ -96,9 +96,9 @@ class Account extends DB
             'rate' => $data->rate,
             'icon_name' => "'$data->icon_name'"
         ];
-        return $this -> update($this-> nameTable, $account, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account");
+        return $this -> update($this-> nameTable, $account, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique) . " AND id_account = $indexUnique->id_account");
     }
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique) . " AND id_account = $indexUnique->id_account");
     }
 }

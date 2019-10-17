@@ -7,7 +7,18 @@ class Valida {
     protected $limit_Inconsistencia = 10;
     protected $having_Count = 2;
 
-    public function conditionVerifyExistsUniqueIndex($dataObjec, $columnsTableIndexUnique) {
+    public function keyValueArray($arreglo){
+        $string = "";
+        $dataObject = (array) ($arreglo);
+
+        foreach ($dataObject as $key => $value) {
+            $string .= "$key: " . (($key == "sign") ? DB::signValue($value) : $value) . ", ";
+        }
+        $string = substr_replace($string, "", strlen($string) - 2);
+        return $string;
+    }
+
+    public static function conditionVerifyExistsUniqueIndex($dataObjec, $columnsTableIndexUnique) {
         $sql = "";
         $dataObject = (array) ($dataObjec);
         foreach ($columnsTableIndexUnique as $key => $value) {
@@ -21,7 +32,7 @@ class Valida {
                 if ($value["type"] == Form::typeDate || $value["type"] == Form::typeTime || $value["type"] == Form::typeDatetime) { //NO UPPERCASE
                     $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "sign" && $value["type"] == Form::typeChar){ //NO UPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $value["name"] . " = '" . DB::signValue($dataObject[$value["name"]]) . "' AND ";
                 } else if ($value["name"] == "period" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
                     $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "operation_code" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE

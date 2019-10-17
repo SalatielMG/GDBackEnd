@@ -34,11 +34,14 @@ class Automatic extends DB
         parent::__construct();
         foreach ($this -> columnsTable as $key => $value) {
             if (($value["name"] == "id_backup")
-                || ($value["name"] == "id_operation")
                 || ($value["name"] == "id_account")
                 || ($value["name"] == "id_category")
                 || ($value["name"] == "period")
+                || ($value["name"] == "repeat_number")
+                || ($value["name"] == "each_number")
                 || ($value["name"] == "amount")
+                || ($value["name"] == "sign")
+                || ($value["name"] == "detail")
                 || ($value["name"] == "initial_date")) {
                 array_push($this -> columnsTableIndexUnique, $value);
             }
@@ -88,11 +91,11 @@ class Automatic extends DB
             'rate' => $dataAutomatic -> rate,
             'counter' => $dataAutomatic -> counter,
         ];
-        return $this -> update($this -> nameTable, $automatic, "id_backup = $indexUnique->id_backup AND id_operation = $indexUnique->id_operation AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+        return $this -> update($this -> nameTable, $automatic, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique) . " AND id_operation = $indexUnique->id_operation");
     }
 
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, "id_backup = $indexUnique->id_backup AND id_operation = $indexUnique->id_operation AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique) . " AND id_operation = $indexUnique->id_operation");
     }
 
 }
