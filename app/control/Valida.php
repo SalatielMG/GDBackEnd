@@ -18,7 +18,7 @@ class Valida {
         return $string;
     }
 
-    public static function conditionVerifyExistsUniqueIndex($dataObjec, $columnsTableIndexUnique) {
+    public static function conditionVerifyExistsUniqueIndex($dataObjec, $columnsTableIndexUnique, $isUPPERCASE = true, $alias = "") {
         $sql = "";
         $dataObject = (array) ($dataObjec);
         foreach ($columnsTableIndexUnique as $key => $value) {
@@ -30,23 +30,25 @@ class Valida {
                 $sql .=  $value["name"] . " = " . $dataObject[$value["name"]] . " AND ";
             } else {
                 if ($value["type"] == Form::typeDate || $value["type"] == Form::typeTime || $value["type"] == Form::typeDatetime) { //NO UPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "sign" && $value["type"] == Form::typeChar){ //NO UPPERCASE
-                    $sql .= $value["name"] . " = '" . DB::signValue($dataObject[$value["name"]]) . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . DB::signValue($dataObject[$value["name"]]) . "' AND ";
                 } else if ($value["name"] == "period" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "operation_code" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "date_idx" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "picture" && $value["type"] == Form::typeVarchar) { //NOUPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "symbol" && $value["type"] == Form::typeChar) { //NOUPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 } else if ($value["name"] == "icon_name" && $value["type"] == Form::typeChar) { //NOUPPERCASE
-                    $sql .= $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
-                } else { //UPPERCASE
-                    $sql .= "UPPER(" . $value["name"] . ") = UPPER('" . $dataObject[$value["name"]] . "') AND ";
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
+                } else if ($isUPPERCASE){ //UPPERCASE
+                    $sql .= "UPPER(" . $alias . $value["name"] . ") = UPPER('" . $dataObject[$value["name"]] . "') AND ";
+                } else {
+                    $sql .= $alias . $value["name"] . " = '" . $dataObject[$value["name"]] . "' AND ";
                 }
             }
         }
@@ -81,7 +83,7 @@ class Valida {
         return ($pagina == $condicion) ? "" : "limit $pagina,$this->limit";
     }
     public function condicionarConsulta($dato, $columna, $condicion = "0") {
-        return ($dato == $condicion) ? "" : "AND $columna = $dato";
+        return ($dato == $condicion) ? "" : " AND $columna = $dato";
     }
     public function consultaSQL($select = "", $table = "", $where = "") {
         return "SELECT $select FROM $table WHERE $where";

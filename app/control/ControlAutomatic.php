@@ -14,7 +14,6 @@ class ControlAutomatic extends Valida
     private $a;
     private $ctrlAccount;
     private $pagina = 0;
-    private $id_backup = 0;
 
     private $pk_Automatic = array();
 
@@ -27,9 +26,6 @@ class ControlAutomatic extends Valida
         $this -> a = new Automatic();
     }
 
-    private function condition_pk_Automatic($isQuery, $alias) {
-        return (!$isQuery) ? " AND $alias.id_operation = " . $this -> pk_Automatic["id_operation"] . " AND $alias.id_account = " . $this -> pk_Automatic["id_account"] . " AND $alias.id_category = " . $this -> pk_Automatic["id_category"] : "";
-    }
     public function buscarAutomaticsBackup($isQuery = true) {
         if ($isQuery) {
             $this -> pk_Automatic["id_backup"] = Form::getValue('idBack');
@@ -43,7 +39,7 @@ class ControlAutomatic extends Valida
         } else {
             $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_automatics ba";
-            $this -> where = "ba.id_backup = " . $this -> pk_Automatic["id_backup"] . $this -> condition_pk_Automatic($isQuery, "ba") . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery) ? "ba.id_backup = " . $this -> pk_Automatic["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Automatic, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND bs.id_operation = " . $this -> pk_Automatic["id_operation"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -107,9 +103,9 @@ class ControlAutomatic extends Valida
     }
 
     public function obtNewId_OperationAccountsCategories() {
-        $this -> id_backup = Form::getValue("id_backup");
+        $this -> pk_Automatic["id_backup"] = Form::getValue("id_backup");
         $arreglo = array();
-        $this -> where = "id_backup = $this->id_backup";
+        $this -> where = "id_backup = " . $this -> pk_Automatic["id_backup"];
         $this -> select = "max(id_operation) as max";
         $queryIdMaxOperation = $this -> a -> mostrar($this -> where, $this -> select);
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> a -> nameTable, $this -> where);
@@ -118,15 +114,14 @@ class ControlAutomatic extends Valida
             $arreglo["newId_Operation"] = $newId_Operation;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ID OPERATION CALCULADO !";
-            $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
+            $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva operación automática a ingresar";
 
-            $this -> ctrlAccount = new ControlAccount($this -> id_backup);
+            $this -> ctrlAccount = new ControlAccount($this -> pk_Automatic["id_backup"]);
             $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ID OPERATION NO CALCULADO !";
-            $arreglo["msj"] = "NO se calculo correctamente el id_operation de la nueva configuración automática a ingresar";
-
+            $arreglo["msj"] = "NO se calculo correctamente el id_operation de la nueva operación automática a ingresar";
         }
         return $arreglo;
     }
@@ -160,34 +155,38 @@ class ControlAutomatic extends Valida
     public function agregarAutomatic() {
         $arreglo = array();
         $automatic = json_decode(Form::getValue("automatic", false, false));
-        /*if ($this -> verifyExistsIndexUnique($automatic)) {  // NO Insert :(
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede registrar la nueva operación automática, puesto que ya existe un registro en la BD con el mismo id_account, id_category and sign. Porfavor cambie estos valores y vuelva a intentarlo.";
-            return $arreglo;
-        }*/
+
         $arreglo = $this -> verifyExistsIndexUnique($automatic);
         if ($arreglo["error"]) return $arreglo;
+
         $insert = $this -> a -> agregar($automatic);
         if ($insert) {
-            $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ AUTOMATIC AGREGADO !";
-            $arreglo["msj"] = "Se agrego correctamente la operación automática con id_operation: $automatic->id_operation del Respaldo con id_backup: $automatic->id_backup";
 
             $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
             $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
             $this -> pk_Automatic["id_account"] = $automatic -> id_account;
             $this -> pk_Automatic["id_category"] = $automatic -> id_category;
+            $this -> pk_Automatic["period"] = $automatic -> period;
+            $this -> pk_Automatic["repeat_number"] = $automatic -> repeat_number;
+            $this -> pk_Automatic["each_number"] = $automatic -> each_number;
+            $this -> pk_Automatic["amount"] = $automatic -> amount;
+            $this -> pk_Automatic["sign"] = $automatic -> sign;
+            $this -> pk_Automatic["detail"] = $automatic -> detail;
+            $this -> pk_Automatic["initial_date"] = $automatic -> initial_date;
             $queryAutomaticNew = $this -> buscarAutomaticsBackup(false);
             $arreglo["automatic"]["error"]  = $queryAutomaticNew["error"];
             $arreglo["automatic"]["titulo"] = $queryAutomaticNew["titulo"];
             $arreglo["automatic"]["msj"]    = $queryAutomaticNew["msj"];
             if (!$arreglo["automatic"]["error"])
                 $arreglo["automatic"]["new"] = $queryAutomaticNew["automatics"][0];
+
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ AUTOMATIC AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente la operación automática con " . $this -> keyValueArray($this -> pk_Automatic);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ AUTOMATIC NO AGREGADO !";
-            $arreglo["msj"] = "Ocurrio un error al ingresar la operación automática con id_operation: $automatic->id_operation del Respaldo con id_backup: $automatic->id_backup";
+            $arreglo["msj"] = "Ocurrio un error al ingresar la operación automática con " . $this -> keyValueArray($automatic);
         }
         return $arreglo;
     }
@@ -195,7 +194,7 @@ class ControlAutomatic extends Valida
     public function actualizarAutomatic() {
         $automatic = json_decode(Form::getValue("automatic", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
-        // Buscar si existe el indexUnique
+
         $arreglo = array();
         if (($automatic -> id_operation != $indexUnique -> id_operation)
             || ($automatic -> id_account != $indexUnique -> id_account)
@@ -220,6 +219,13 @@ class ControlAutomatic extends Valida
             $this -> pk_Automatic["id_operation"] = $automatic -> id_operation;
             $this -> pk_Automatic["id_account"] = $automatic -> id_account;
             $this -> pk_Automatic["id_category"] = $automatic -> id_category;
+            $this -> pk_Automatic["period"] = $automatic -> period;
+            $this -> pk_Automatic["repeat_number"] = $automatic -> repeat_number;
+            $this -> pk_Automatic["each_number"] = $automatic -> each_number;
+            $this -> pk_Automatic["amount"] = $automatic -> amount;
+            $this -> pk_Automatic["sign"] = $automatic -> sign;
+            $this -> pk_Automatic["detail"] = $automatic -> detail;
+            $this -> pk_Automatic["initial_date"] = $automatic -> initial_date;
             $queryAutomaticUpdate = $this -> buscarAutomaticsBackup(false);
             $arreglo["automatic"]["error"]  = $queryAutomaticUpdate["error"];
             $arreglo["automatic"]["titulo"] = $queryAutomaticUpdate["titulo"];

@@ -16,40 +16,23 @@ class ControlCategory extends Valida
     private $where = "";
     private $select = "";
     private $table = "";
-    private $id_backup = 0;
-    private $id_account = 0;
     private $pk_Category = array();
 
     public function __construct($id_backup = 0)
     {
         $this -> c = new Category();
-        $this -> id_backup = $id_backup;
-    }
-
-    public function setId_Backup($id_backup) {
-        $this -> id_backup = $id_backup;
-    }
-
-    public function getId_Backup() {
-        return $this -> id_backup;
+        $this -> pk_Category["id_backup"] = $id_backup;
     }
 
     public function setId_Account($id_account) {
-        $this -> id_account = $id_account;
+        $this -> pk_Category["id_account"] = $id_account;
     }
 
-    public function getId_Account() {
-        return $this -> id_account;
-    }
-
-    private function condition_pk_Category($isQuery, $alias){
-        return (!$isQuery) ? " AND $alias.id_account = " . $this -> pk_Category["id_account"] . " AND $alias.id_category = " . $this -> pk_Category["id_category"] : "";
-    }
 
     public function obtCategoriesAccountBackup($isQuery = true, $signCategories = "both") {
         if ($isQuery) {
-            $this -> id_backup = Form::getValue("id_backup");
-            $this -> id_account = Form::getValue("id_account");
+            $this -> pk_Category["id_backup"] = Form::getValue("id_backup");
+            $this -> pk_Category["id_account"] = Form::getValue("id_account");
             $signCategories = Form::getValue("signCategories");
             if ($signCategories != "both") {
                 $signCategories = ($signCategories == 0) ? "'-'": "'+'";
@@ -57,17 +40,17 @@ class ControlCategory extends Valida
         }
         $arreglo = array();
         $this -> select = "id_category, name, sign";
-        $this -> where = "id_backup = $this->id_backup AND id_account = $this->id_account " . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . "  HAVING COUNT( * ) >= 1";
+        $this -> where = "id_backup = " . $this -> pk_Category["id_backup"] . " AND id_account = " . $this -> pk_Category["id_account"] . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . "  HAVING COUNT( * ) >= 1 ORDER BY id_category";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
             $arreglo["categories"] = $categoriesBackup;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ CATEGORIES ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron categories del Respaldo con id_backup: $this->id_backup con el id_account: $this->id_account.";
+            $arreglo["msj"] = "Se encontraron categorias con " . $this -> keyValueArray($this -> pk_Category);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CATEGORIES NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron categories del Respaldo con id_backup: $this->id_backup con el id_account: $this->id_account.";
+            $arreglo["msj"] = "No se encontraron categorias con " . $this -> keyValueArray($this -> pk_Category);
         }
         return $arreglo;
     }
@@ -84,7 +67,7 @@ class ControlCategory extends Valida
         } else { // Table con inconsistencia de datos.
             $this -> select = "bc.*, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
             $this -> table = $this -> c -> nameTable . " bc";
-            $this -> where = "bc.id_backup = " . $this -> pk_Category["id_backup"] . $this -> condition_pk_Category($isQuery, "bc") . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
+            $this -> where = (($isQuery) ? "bc.id_backup = " . $this -> pk_Category["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Category, $this -> c -> columnsTableIndexUnique, false, "bc.") . " AND bc.id_category = " . $this -> pk_Category["id_category"]) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 ORDER BY bc.id_category " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
         }
         $select = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
         //$select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = " . $this -> pk_Category["id_backup"], "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");
@@ -93,7 +76,7 @@ class ControlCategory extends Valida
             $arreglo["error"] = false;
             $arreglo["categories"] = $select;
             $arreglo["titulo"] = ($isQuery) ? "¡ CATEGORIAS ENCONTRADOS !" : "¡ CATEGORIA ENCONTRADO !";
-            $arreglo["msj"] = ($isQuery) ? "Se encontraron categorias del respaldo con id_backup: " . $this -> pk_Category["id_backup"] : "Se encontro la categoria con id_category: " . $this -> pk_Category["id_category"] . " de la cuenta con id_account: " . $this -> pk_Category["id_account"] . " del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
+            $arreglo["msj"] = (($isQuery) ? "Se encontraron categorias con " : "Se encontro la categoría con ") . $this -> keyValueArray($this -> pk_Category);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Category["id_backup"]);
                 $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
@@ -101,7 +84,7 @@ class ControlCategory extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ? "¡ CATEGORIAS NO ENCONTRADOS !" : "¡ CATEGORIA NO ENCONTRADO !";
-            $arreglo["msj"] = ($isQuery) ? "No se encontraron categorias del respaldo con id_backup: " . $this -> pk_Category["id_backup"] : "No se encontro la categoria con id_category: " . $this -> pk_Category["id_category"] . " de la cuenta con id_account: " . $this -> pk_Category["id_account"] . " del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
+            $arreglo["msj"] = (($isQuery) ? "No se encontraron categorias con " : "No se encontro la categoría con ") . $this -> keyValueArray($this -> pk_Category);
         }
         return $arreglo;
     }
@@ -169,44 +152,60 @@ class ControlCategory extends Valida
         }
         return $arreglo;
     }
-    public function verifyExistsIndexUniqueCategory($indexUnique) {
-        $arreglo["isExists"] = false;
-        $this -> where = "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND UPPER(name) = UPPER('$indexUnique->name')";
-        $result = $this -> c -> mostrar($this -> where);
-        $arreglo["result"] =  $result;
-        $arreglo["consultaSQL"] = $this -> consultaSQL("*", $this -> c -> nameTable, $this -> where);
-        if ($result)
-            $array["isExists"] = true;
+    public function verifyExistsIndexUniqueCategory($newCategory, $isUpdate = false, $id_category = 0) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $isDifferentId_Category = true;
+        if ($isUpdate) $isDifferentId_Category = $newCategory -> id_category != $id_category;
+        if ($isDifferentId_Category) {
+            $result = $this -> c -> mostrar("id_backup = $newCategory->id_backup AND id_category = $newCategory->id_category");
+            if ($result) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+                $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Categoria, puesto que ya existe un registro en la BD con el mismo ID_CATEGORY del mismo backup. Porfavor verifique el id e intente cambiarlo";
+                return $arreglo;
+            }
+        }
+
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($newCategory, $this -> c -> columnsTableIndexUnique);
+        $result = $this -> c -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Categoria, puesto que ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifique los datos y vuelva a intentarlo";
+        }
         return $arreglo;
     }
     public function agregarCategoria() {
         $category = json_decode(Form::getValue("category", false, false));
         $arreglo = array();
-        $arreglo["verifyExistsIndexUniqueCategory"] = $this -> verifyExistsIndexUniqueCategory($category);
-        if (!$arreglo["verifyExistsIndexUniqueCategory"]["isExists"]) {
-            $insert = $this -> c -> agregar($category);
-            if ($insert) {
-                $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ CATEGORIA AGREGADO !";
-                $arreglo["msj"] = "Se agrego correctamenmte la categoria con id_category: $category->id_category a la cuenta con id_account: $category->id_account del respaldo con id_backup: $category->id_backup";
 
-                $this -> pk_Category["id_backup"] = $category -> id_backup;
-                $this -> pk_Category["id_account"] = $category -> id_account;
-                $this -> pk_Category["id_category"] = $category -> id_category;
-                $queryNewCategory = $this -> buscarCategoriesBackup(false);
-                $arreglo["category"]["error"] = $queryNewCategory["error"];
-                $arreglo["category"]["titulo"] = $queryNewCategory["titulo"];
-                $arreglo["category"]["msj"] = $queryNewCategory["msj"];
-                if (!$arreglo["category"]["error"]) $arreglo["category"]["new"] = $queryNewCategory["categories"][0];
-            } else {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ CATEGORIA NO AGREGADO !";
-                $arreglo["msj"] = "Ocurrio un error al agregar la categoria con id_category: $category->id_category a la cuenta con id_account: $category->id_account del respaldo con id_backup: $category->id_backup";
-            }
+        $arreglo = $this -> verifyExistsIndexUniqueCategory($category);
+        if ($arreglo["error"]) return $arreglo;
+
+        $insert = $this -> c -> agregar($category);
+        if ($insert) {
+
+            $this -> pk_Category["id_backup"] = $category -> id_backup;
+            $this -> pk_Category["id_account"] = $category -> id_account;
+            $this -> pk_Category["id_category"] = $category -> id_category;
+            $this -> pk_Category["name"] = $category -> name;
+            $this -> pk_Category["sign"] = $category -> sign;
+
+            $queryNewCategory = $this -> buscarCategoriesBackup(false);
+            $arreglo["category"]["error"] = $queryNewCategory["error"];
+            $arreglo["category"]["titulo"] = $queryNewCategory["titulo"];
+            $arreglo["category"]["msj"] = $queryNewCategory["msj"];
+            if (!$arreglo["category"]["error"]) $arreglo["category"]["new"] = $queryNewCategory["categories"][0];
+
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ CATEGORIA AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente la categoria con " . $this -> keyValueArray($this -> pk_Category);
+
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede agregar la nueva categoria, puesto que ya existe un registro en la Base de Datos con el mismo nombre de la misma cuenta del backup solicitado. Porfavor cambie el nombre y vuelva a intentarlo.";
+            $arreglo["titulo"] = "¡ CATEGORIA NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al agregar la categoria con " . $this -> keyValueArray($this -> pk_Category);
         }
         return $arreglo;
     }
@@ -215,27 +214,27 @@ class ControlCategory extends Valida
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
 
-        $isExistsIndexUnique = false;
-        if (($category -> id_account != $indexUnique -> id_account) || strtoupper(($category -> name)) != strtoupper($indexUnique -> name)) {
-            $arreglo["verifyExistsIndexUniqueCategory"] = $this -> verifyExistsIndexUniqueCategory($category);
-            $isExistsIndexUnique = $arreglo["verifyExistsIndexUniqueCategory"]["isExists"];
-            // return $isExistsIndexUnique;
+        if (($category -> id_backup != $indexUnique -> id_backup)
+            || ($category -> id_account != $indexUnique -> id_account)
+            || ($category -> id_category != $indexUnique -> id_category)
+            || (strtoupper($category -> name) != strtoupper($indexUnique -> name))
+            || ($category -> sign != $indexUnique -> sign)) {
+            $arreglo = $this -> verifyExistsIndexUniqueCategory($category, true, $indexUnique -> id_category);
+            if ($arreglo["error"]) return $arreglo;
         }
-        if ($isExistsIndexUnique) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede actualizar la categoria, puesto que ya existe un registro en la Base de Datos con el mismo nombre de la misma cuenta del backup solicitado. Porfavor cambie el nombre y vuelva a intentarlo.";
-            return $arreglo;
-        }
+
         $update = $this -> c -> actualizar($category, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ CATEGORIA ACTUALIZADO !";
-            $arreglo["msj"] = "Se actualizo correctamente la categoria con id_category: $indexUnique->id_category de la cuenta con id_account: $indexUnique->id_account del respaldo con id_backup: $indexUnique->id_backup";
+            $arreglo["msj"] = "Se actualizo correctamente la categoria con " . $this -> keyValueArray($indexUnique);
 
             $this -> pk_Category["id_backup"] = $category -> id_backup;
             $this -> pk_Category["id_account"] = $category -> id_account;
             $this -> pk_Category["id_category"] = $category -> id_category;
+            $this -> pk_Category["name"] = $category -> name;
+            $this -> pk_Category["sign"] = $category -> sign;
+
             $queryUpdateCategory = $this -> buscarCategoriesBackup(false);
             $arreglo["category"]["error"] = $queryUpdateCategory["error"];
             $arreglo["category"]["titulo"] = $queryUpdateCategory["titulo"];
@@ -244,23 +243,23 @@ class ControlCategory extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CATEGORIA NO ACTUALIZADO !";
-            $arreglo["msj"] = "Ocurrio un error al actualizar la categoria con id_category: $indexUnique->id_category de la cuenta con id_account: $indexUnique->id_account del respaldo con id_backup: $indexUnique->id_backup";
+            $arreglo["msj"] = "Ocurrio un error al actualizar la categoria con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }
     public function eliminarCategoria() {
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
-        $areglo = array();
+        $arreglo = array();
         $delete = $this -> c -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ CATEGORIA ELIMINADA !";
-            $arreglo["msj"] = "La categoria con id_category: $indexUnique->id_category de la cuenta con id: $indexUnique->id_account del respaldo con id_backup: $indexUnique->id_backup se ha eliminado correctamente";
+            $arreglo["msj"] = "La categoria con " . $this -> keyValueArray($indexUnique) . " se ha eliminado correctamente";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CATEGORIA NO ELIMINADA !";
-            $arreglo["msj"] = "La categoria con id_category: $indexUnique->id_category de la cuenta con id: $indexUnique->id_account del respaldo con id_backup: $indexUnique->idbackup node ha eliminado correctamente";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar la categoría con " . $this -> keyValueArray($indexUnique);
         }
-        return $areglo;
+        return $arreglo;
     }
 }

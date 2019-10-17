@@ -19,8 +19,7 @@ class ControlAccount extends Valida
     private $table = "";
     private $categorieSearch = 1;
     private $symbolName = 1;
-    private $id_backup = 0;
-    private $id_account = 0;
+    private $pk_Account = array();
     private $ctrlCategory;
     private $ctrlCurrency;
 
@@ -28,26 +27,18 @@ class ControlAccount extends Valida
     {
         // $this -> currency = new Currency();
         $this -> a = new Account();
-        $this -> id_backup = $id_backup;
+        $this -> pk_Account["id_backup"] = $id_backup;
         $this -> categorieSearch = $categorieSearch;
         $this -> symbolName = $symbolName;
     }
 
-    public function setId_Backup($id_backup) {
-        $this -> id_backup = $id_backup;
-    }
-
-    public function getId_Backup() {
-        return $this -> id_backup;
-    }
-
-    private function condicionId_Account($isQuery, $alias) {
+    /*private function condicionId_Account($isQuery, $alias) {
         return (!$isQuery) ? "AND " . $alias . "id_account = $this->id_account" : "";
-    }
+    }*/
 
     public function obtAccountsBackup($isQuery = true, $signCategories = "both") {
         if ($isQuery) {
-            $this -> id_backup = Form::getValue("id_backup");
+            $this -> pk_Account["id_backup"] = Form::getValue("id_backup");
             $this -> categorieSearch = Form::getValue("categoriesSearch");
             $signCategories = Form::getValue("signCategories");
             if ($signCategories != "both") {
@@ -56,14 +47,13 @@ class ControlAccount extends Valida
         }
         $arreglo = array();
         $this -> select = "id_account, name, sign";
-        $this -> where = "id_backup = $this->id_backup GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ORDER BY id_account";
+        $this -> where = "id_backup = " . $this -> pk_Account["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ORDER BY id_account";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
             $arreglo["accounts"] = $accountsBackup;
             if ($this -> categorieSearch == 1) {
                 $arrayAccounts = [];
-                $this -> ctrlCategory = new ControlCategory();
-                $this -> ctrlCategory -> setId_Backup($this -> id_backup);
+                $this -> ctrlCategory = new ControlCategory($this -> pk_Account["id_backup"]);
                 foreach ($accountsBackup as $key => $value) {
                     $this -> ctrlCategory -> setId_Account($value -> id_account);
                     $categoriesAccount = $this -> ctrlCategory -> obtCategoriesAccountBackup(false, $signCategories);
@@ -78,11 +68,11 @@ class ControlAccount extends Valida
 
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
+            $arreglo["msj"] = "Se encontraron cuentas con " . $this -> keyValueArray($this -> pk_Account);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNTS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron accounts del Respaldo con id_backup: $this->id_backup.";
+            $arreglo["msj"] = "No se encontraron cuentas con " . $this -> keyValueArray($this -> pk_Account);
         }
         //sleep(5);
         return $arreglo;
@@ -90,20 +80,20 @@ class ControlAccount extends Valida
 
     public function buscarAccountsBackup($isQuery = true) {
         if ($isQuery) {
-            $this -> id_backup = Form::getValue('idBack');
+            $this -> pk_Account["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
             $this -> symbolName = Form::getValue("symbolName");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
         if ($exixstIndexUnique["indice"]) {
-            $this -> where = "ba.id_backup = bc.id_backup AND ba.id_backup = $this->id_backup AND ba.iso_code = bc.iso_code" . $this -> condicionId_Account($isQuery, "ba.") . " GROUP by " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = "ba.id_backup = bc.id_backup AND ba.iso_code = bc.iso_code " . (($isQuery) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") ) . " GROUP by " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
             $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba, backup_currencies bc";
         } else {
-            $this -> select = "ba.*, (SELECT symbolCurrency($this->id_backup, ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
+            $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba";
-            $this -> where = "ba.id_backup = $this->id_backup " . $this -> condicionId_Account($isQuery, "ba.") . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
@@ -114,20 +104,20 @@ class ControlAccount extends Valida
             $arreglo["error"] = false;
             $arreglo["accounts"] = $select;
             $arreglo["titulo"] = ($isQuery) ? "¡ ACCOUNTS ENCONTRADOS !" : "¡ ACCOUNT ENCONTRADO !";
-            $arreglo["msj"] = ($isQuery) ? "Se encontraron accounts del Respaldo con id_backup: $this->id_backup." : "Se recupero la Cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup";
+            $arreglo["msj"] = (($isQuery) ? "Se encontraron cuentas con " : "Se recupero la Cuenta con ") . $this -> keyValueArray($this -> pk_Account);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> categorieSearch = 0;
                 $arreglo["accountsBackup"] = $this -> obtAccountsBackup(false);
                 // $arreglo["currenciesJSON"] = $this -> currency -> Currencies;
                 if ($this -> symbolName == 1) {
-                    $this -> ctrlCurrency = new ControlCurrency($this -> id_backup, 1);
+                    $this -> ctrlCurrency = new ControlCurrency($this -> pk_Account["id_backup"], 1);
                     $arreglo["currencies"] = $this -> ctrlCurrency -> buscarCurrenciesBackup(false);
                 }
             }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ?"¡ ACCOUNTS NO ENCONTRADOS !" : "¡ ACCOUNT NO ENCONTRADO !";
-            $arreglo["msj"] = ($isQuery) ? "No se encontraron accounts del Respaldo con id_backup: $this->id_backup.": "No se recupero la Cuenta con id_account: $this->id_account del Respaldo con id_backup: $this->id_backup";
+            $arreglo["msj"] = (($isQuery) ? "No se encontraron cuentas con ": "No se recupero la Cuenta con ") . $this -> keyValueArray($this -> pk_Account);
         }
         return $arreglo;
     }
@@ -170,19 +160,19 @@ class ControlAccount extends Valida
         return $arreglo;
     }
     public function obtNewId_account() {
-        $this -> id_backup = Form::getValue("idBack");
+        $this -> pk_Account["id_backup"] = Form::getValue("idBack");
         $arreglo = array();
-        $query = $this -> a -> mostrar("id_backup = $this->id_backup", "max(id_account) as max");
+        $query = $this -> a -> mostrar("id_backup = " . $this -> pk_Account["id_backup"], "max(id_account) as max");
         if ($query) {
             $newId_Account = $query[0] -> max + 1;
             $arreglo["newId_account"] = $newId_Account;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ID ACCOUNT CALCULADO !";
-            $arreglo["msj"] = "Se calculo correctamente el id_ account de la nueva cuenta a ingresar";
+            $arreglo["msj"] = "Se calculo correctamente el id_account de la nueva cuenta a ingresar";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ID ACCOUNT NO CALCULADO !";
-            $arreglo["msj"] = "NO se calculo correctamente el id_ account de la nueva cuenta a ingresar";
+            $arreglo["msj"] = "NO se calculo correctamente el id_account de la nueva cuenta a ingresar";
         }
         return $arreglo;
     }
@@ -196,7 +186,7 @@ class ControlAccount extends Valida
             if ($result) {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-                $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " nueva cuenta, puesto que ya existe un registro en la BD con el mismo ID_ACCOUNT del mismo backup. Porfavor verifique el id e intente cambiarlo";
+                $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo ID_ACCOUNT del mismo backup. Porfavor verifique el id e intente cambiarlo";
                 return $arreglo;
             }
         }
@@ -207,7 +197,6 @@ class ControlAccount extends Valida
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie l nombre y vuleva a intentarlo";
-
         }
         return $arreglo;
     }
@@ -215,29 +204,28 @@ class ControlAccount extends Valida
         $account = json_decode(Form::getValue("account", false, false));
         $arreglo = array();
 
-        // --- Verifiy Index --- //
         $arreglo = $this -> verifyExistsNameAccount($account);
         if ($arreglo["error"]) return $arreglo;
-        // --- Verifiy Index --- //
 
         $insert = $this -> a -> agregar($account);
         if ($insert) {
-            $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
-            $arreglo["msj"] = "Se agrego correctamente la cuenta : $account->name del Respaldo con id_backup: $account->id_backup";
-
-            $this -> id_backup = $account -> id_backup;
-            $this -> id_account = $account -> id_account;
+            $this -> pk_Account["id_backup"] = $account -> id_backup;
+            $this -> pk_Account["id_account"] = $account -> id_account;
+            $this -> pk_Account["name"] = $account -> name;
             $queryAccountNew = $this -> buscarAccountsBackup(false);
             $arreglo["account"]["error"] =  $queryAccountNew["error"];
             $arreglo["account"]["titulo"] = $queryAccountNew["titulo"];
             $arreglo["account"]["msj"] = $queryAccountNew["msj"];
             if (!$arreglo["account"]["error"])
                 $arreglo["account"]["new"] = $queryAccountNew["accounts"][0];
+
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente la cuenta con " . $this -> keyValueArray($this -> pk_Account);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNT NO AGREGADO !";
-            $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con id_account: $account->id_account del Respaldo con id_backup: $account->id_backup";
+            $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con " . $this -> keyValueArray($account);
         }
         return $arreglo;
     }
@@ -255,10 +243,12 @@ class ControlAccount extends Valida
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNT ACTUALIZADO !";
-            $arreglo["msj"] = "La Cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup se actualizo correctamente";
+            $arreglo["msj"] = "La cuenta con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
 
-            $this -> id_backup = $account -> id_backup;
-            $this -> id_account = $account -> id_account;
+            $this -> pk_Account["id_backup"] = $account -> id_backup;
+            $this -> pk_Account["id_account"] = $account -> id_account;
+            $this -> pk_Account["name"] = $account -> name;
+
             $queryAccountUpdate = $this -> buscarAccountsBackup(false);
             $arreglo["account"]["error"] =  $queryAccountUpdate["error"];
             $arreglo["account"]["titulo"] = $queryAccountUpdate["titulo"];
@@ -268,7 +258,7 @@ class ControlAccount extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNT NO ACTUALIZADO !";
-            $arreglo["msj"] = "La Cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup no se actualizo correctamente";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar la cuenta con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }
@@ -279,11 +269,11 @@ class ControlAccount extends Valida
         if ($delete) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ ACCOUNT ELIMINADA !";
-            $arreglo["msj"] = "La cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup ha sido eliminado correctamente";
+            $arreglo["msj"] = "La cuenta con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ACCOUNT NO ELIMINADA !";
-            $arreglo["msj"] = "La cuenta con id_account: $indexUnique->id_account del Respaldo con id_backup: $indexUnique->id_backup no ha sido eliminado correctamente";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar la cuenta con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }

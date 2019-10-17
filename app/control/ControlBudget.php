@@ -25,10 +25,6 @@ class ControlBudget extends Valida
         $this -> b = new Budget();
     }
 
-    private function condition_pk_Budget($isQuery, $alias){
-        return (!$isQuery) ? " AND $alias.id_account = " . $this -> pk_Budget["id_account"] . " AND $alias.id_category = " . $this -> pk_Budget["id_category"] : "";
-    }
-
     public function buscarBudgetsBackup($isQuery = true) {
         if ($isQuery) {
             $this -> pk_Budget["id_backup"] = Form::getValue('idBack');
@@ -41,7 +37,7 @@ class ControlBudget extends Valida
         } else {
             $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
             $this -> table = "backup_budgets bd";
-            $this -> where = "bd.id_backup = " . $this -> pk_Budget["id_backup"] . $this -> condition_pk_Budget($isQuery, "bd") . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -115,7 +111,7 @@ class ControlBudget extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el" : "registrar el nuevo") . " presupuesto, puesto que ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifica y vuleva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el" : "registrar el nuevo") . " presupuesto, porque ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifica y vuleva a intentarlo";
 
         }
         return $arreglo;
@@ -131,11 +127,14 @@ class ControlBudget extends Valida
         if ($insert) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ BUDGET AGREGADO !";
-            $arreglo["msj"] = "Se agrego correctamente el nuevo presupuesto con id_account: $budget->id_account e id_category: $budget->id_category del Respaldo con id_backup: $budget->id_backup";
+            $arreglo["msj"] = "Se agrego correctamente el nuevo presupuesto.";
 
             $this -> pk_Budget["id_backup"] = $budget -> id_backup;
             $this -> pk_Budget["id_account"] = $budget -> id_account;
             $this -> pk_Budget["id_category"] = $budget -> id_category;
+            $this -> pk_Budget["period"] = $budget -> period;
+            $this -> pk_Budget["amount"] = $budget -> amount;
+            $this -> pk_Budget["budget"] = $budget -> budget;
             $queryBudgetNew = $this -> buscarBudgetsBackup(false);
             $arreglo["budget"]["error"]  = $queryBudgetNew["error"];
             $arreglo["budget"]["titulo"] = $queryBudgetNew["titulo"];
@@ -145,7 +144,7 @@ class ControlBudget extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BUDGET NO AGREGADO !";
-            $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo presupuesto con id_account: $budget->id_account e id_category: $budget->id_category del Respaldo con id_backup: $budget->id_backup";
+            $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo presupuesto.";
         }
         return $arreglo;
     }
@@ -168,11 +167,15 @@ class ControlBudget extends Valida
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ BUDGET ACTUALIZADA !";
-            $arreglo["msj"] = "El presupusto con id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup se ha actuaizado correctamente";
+            $arreglo["msj"] = "El presupuesto con " . $this -> keyValueArray($indexUnique) . " se ha actuaizado correctamente";
 
             $this -> pk_Budget["id_backup"] = $budget -> id_backup;
             $this -> pk_Budget["id_account"] = $budget -> id_account;
             $this -> pk_Budget["id_category"] = $budget -> id_category;
+            $this -> pk_Budget["period"] = $budget -> period;
+            $this -> pk_Budget["amount"] = $budget -> amount;
+            $this -> pk_Budget["budget"] = $budget -> budget;
+
             $queryBudgetUpdate = $this -> buscarBudgetsBackup(false);
             $arreglo["budget"]["error"]  = $queryBudgetUpdate["error"];
             $arreglo["budget"]["titulo"] = $queryBudgetUpdate["titulo"];
@@ -182,7 +185,7 @@ class ControlBudget extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BUDGET NO ACTUALIZADA !";
-            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el presupusto con id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el presupusto con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }
@@ -193,11 +196,11 @@ class ControlBudget extends Valida
         if ($delete) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ BUDGET ELIMINADA !";
-            $arreglo["msj"] = "El presupuesto con id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup ha sido eliminado correctamente";
+            $arreglo["msj"] = "El presupuesto " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BUDGET NO ELIMINADA !";
-            $arreglo["msj"] = "El presupuesto con id_account: $indexUnique->id_account e id_category: $indexUnique->id_category del Respaldo con id_backup: $indexUnique->id_backup no ha sido eliminado correctamente";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar el presupuesto con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }

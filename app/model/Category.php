@@ -56,9 +56,9 @@ class Category extends DB
             "icon_name" => "'$dataCategory->icon_name'",
             "number" => $dataCategory -> number,
         ];
-        return $this -> update($this -> nameTable, $category, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+        return $this -> update($this -> nameTable, $category, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_category = $indexUnique->id_category");
     }
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, "id_backup = $indexUnique->id_backup and id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_category = $indexUnique->id_category");
     }
 }

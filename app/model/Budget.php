@@ -69,10 +69,10 @@ class Budget extends DB
             'final_date' => "'$dataBudget->final_date'",
             'number' => $dataBudget -> number,
         ];
-        return $this -> update($this -> nameTable, $budget,"id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+        return $this -> update($this -> nameTable, $budget,Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
 
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, "id_backup = $indexUnique->id_backup AND id_account = $indexUnique->id_account AND id_category = $indexUnique->id_category");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
 }
