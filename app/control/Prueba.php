@@ -12,8 +12,8 @@ class Prueba
      * @return array
      */
     public function encriptacion() {
-        $password = '1234';
-        $hash = password_hash($password, PASSWORD_DEFAULT, ['cost' => 15]);
+        $password = '12345';
+        $hash = password_hash($password, PASSWORD_DEFAULT);
         return ['pasword' => $hash ];
     }
 
