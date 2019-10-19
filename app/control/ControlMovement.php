@@ -50,6 +50,7 @@ class ControlMovement extends Valida
             "bm.*, bc.symbol, bac.name as account, bcat.name as category",
             "backup_movements bm, backup_currencies bc, backup_accounts bac, backup_categories bcat");*/
 
+
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> m -> mostrar($this -> where, $this -> select, $this -> table);
 
