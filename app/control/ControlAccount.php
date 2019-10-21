@@ -46,7 +46,7 @@ class ControlAccount extends Valida
             }
         }
         $arreglo = array();
-        $this -> select = "id_account, name, sign";
+        $this -> select = "id_account, name, sign, iso_code";
         $this -> where = "id_backup = " . $this -> pk_Account["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ORDER BY id_account";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
@@ -60,6 +60,7 @@ class ControlAccount extends Valida
 
                     $arrayAccounts[$key]["id_account"] = $value -> id_account;
                     $arrayAccounts[$key]["name"] = $value -> name;
+                    $arrayAccounts[$key]["iso_code"] = $value -> iso_code;
                     $arrayAccounts[$key]["categoriesAccount"] = (!$categoriesAccount["error"]) ? $categoriesAccount["categories"]: [];
 
                 }

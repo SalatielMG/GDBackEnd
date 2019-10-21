@@ -58,7 +58,7 @@ class ControlMovement extends Valida
             $arreglo["error"] = false;
             $arreglo["movements"] = $select;
             $arreglo["titulo"] = ($isQuery) ? "¡ MOVIMIENTOS ENCONTRADOS !": "¡ MOVIMIENTO ENCONTRADO !";
-            $arreglo["msj"] = (($isQuery) ? "Se encontraron movimientos con " : "Se encontro movimiento") . $this -> keyValueArray($this -> pk_Movement);
+            $arreglo["msj"] = (($isQuery) ? "Se encontraron movimientos con " : "Se encontro movimiento con ") . $this -> keyValueArray($this -> pk_Movement);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Movement["id_backup"]);
                 $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
@@ -66,7 +66,7 @@ class ControlMovement extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ? "¡ MOVIMIENTOS NO ENCONTRADOS !": "¡ MOVIMIENTO NO ENCONTRADO !";
-            $arreglo["msj"] = (($isQuery) ? "NO se encontraron movimientos con " : "NO se encontro movimiento") . $this -> keyValueArray($this -> pk_Movement);
+            $arreglo["msj"] = (($isQuery) ? "NO se encontraron movimientos con " : "NO se encontro movimiento con ") . $this -> keyValueArray($this -> pk_Movement);
         }
         return $arreglo;
     }
@@ -106,10 +106,114 @@ class ControlMovement extends Valida
                 return $arreglo;
             }
         }
-        $sql = $this -> sentenciaInconsistenicaSQL($this -> m -> nameTabl, $this -> m -> columnsTableIndexUnique,"id_backup");
+        $sql = $this -> sentenciaInconsistenicaSQL($this -> m -> nameTable, $this -> m -> columnsTableIndexUnique,"id_backup");
         $operacion = $this -> m -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
+        return $arreglo;
+    }
+    public function verifyExistsIndexUnique ($newMovement, $isUpdate = false) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($newMovement, $this -> m -> columnsTableIndexUnique);
+        $result = $this -> m -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el" : "registrar el nuevo") . " Movimiento, porque ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifica y vuleva a intentarlo";
+
+        }
+        return $arreglo;
+    }
+    public function agregarMovement () {
+        $movement = json_decode(Form::getValue("movement", false, false));
+        $arreglo = array();
+        $arreglo = $this -> verifyExistsIndexUnique($movement);
+        if ($arreglo["error"]) return $arreglo;
+
+        $insert = $this -> m -> agregar($movement);
+        /*$arreglo["error"]= true;
+        $arreglo["insert"]= $insert;
+        return $arreglo;*/
+
+        if ($insert) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ MOVIMIENTO AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente el nuevo movimiento.";
+
+            $this -> pk_Movement["id_backup"] = $movement -> id_backup;
+            $this -> pk_Movement["id_account"] = $movement -> id_account;
+            $this -> pk_Movement["id_category"] = $movement -> id_category;
+            $this -> pk_Movement["amount"] = $movement -> amount;
+            $this -> pk_Movement["detail"] = $movement -> detail;
+            $this -> pk_Movement["date_idx"] = $movement -> date_idx;
+            $queryMovementNew = $this -> buscarMovementsBackup(false);
+            $arreglo["movement"]["error"]  = $queryMovementNew["error"];
+            $arreglo["movement"]["titulo"] = $queryMovementNew["titulo"];
+            $arreglo["movement"]["msj"]    = $queryMovementNew["msj"];
+            if (!$arreglo["movement"]["error"]) $arreglo["movement"]["new"] = $queryMovementNew["movements"][0];
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ MOVIMIENTO NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo movimiento.";
+        }
+        return $arreglo;
+    }
+    public function actualizarMovement () {
+        $movement = json_decode(Form::getValue("movement", false, false));
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+
+        if (($movement -> id_backup != $indexUnique -> id_backup)
+            || ($movement -> id_account != $indexUnique -> id_account)
+            || ($movement -> id_category != $indexUnique -> id_category)
+            || ($movement -> amount != $indexUnique -> amount)
+            || ($movement -> detail != $indexUnique -> detail)
+            || ($movement -> date_idx != $indexUnique -> date_idx)) {
+            $arreglo = $this -> verifyExistsIndexUnique($movement, true);
+            if ($arreglo["error"]) return $arreglo;
+        }
+
+        $update = $this -> m -> actualizar($movement, $indexUnique);
+        /*$arreglo["error"] = true;
+        $arreglo["update"] = $update;
+        return $arreglo;*/
+
+        if ($update) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ MOVIMIENTO ACTUALIZADO !";
+            $arreglo["msj"] = "El movimiento con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
+            $this -> pk_Movement["id_backup"] = $movement -> id_backup;
+            $this -> pk_Movement["id_account"] = $movement -> id_account;
+            $this -> pk_Movement["id_category"] = $movement -> id_category;
+            $this -> pk_Movement["amount"] = $movement -> amount;
+            $this -> pk_Movement["detail"] = $movement -> detail;
+            $this -> pk_Movement["date_idx"] = $movement -> date_idx;
+            $queryMovementUpdate = $this -> buscarMovementsBackup(false);
+            $arreglo["movement"]["error"] = $queryMovementUpdate["error"];
+            $arreglo["movement"]["titulo"] = $queryMovementUpdate["titulo"];
+            $arreglo["movement"]["msj"] = $queryMovementUpdate["msj"];
+            if (!$arreglo["movement"]["error"]) $arreglo["movement"]["update"] = $queryMovementUpdate["movements"][0];
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ MOVIMIENTO NO ACTUALIZADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el movimiento con " . $this -> keyValueArray($indexUnique);
+        }
+        return $arreglo;
+    }
+    public function eliminarMovement () {
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $delete = $this -> m -> eliminar($indexUnique);
+        if ($delete) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ MOVIMIENTO ELIMINADA !";
+            $arreglo["msj"] = "El movimiento con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ MOVIMIENTO NO ELIMINADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar el movimiento con " . $this -> keyValueArray($indexUnique);
+        }
         return $arreglo;
     }
 }

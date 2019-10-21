@@ -26,7 +26,8 @@ class CardView extends DB
         foreach ($this -> columnsTable as $key => $value) {
             if (($value["name"] == "id_backup")
             || ($value["name"] == "id_card")
-            || ($value["name"] == "name")) {
+            //|| ($value["name"] == "name")
+            ) {
                 array_push($this -> columnsTableIndexUnique, $value);
             }
         }
@@ -34,6 +35,20 @@ class CardView extends DB
 
     public function mostrar($where = "1", $select = "*", $tabla = "backup_cardviews"){
         return $this -> getDatos($tabla, $select, $where);
+    }
+
+    public function agregar ($dataCardview) {
+        $cardview = Valida::arrayDataOperation($this -> columnsTable, $dataCardview);
+        return $this -> insert($this -> nameTable, $cardview);
+    }
+
+    public function actualizar ($dataCardview, $indexUnique) {
+        $cardview = Valida::arrayDataOperation($this -> columnsTable, $dataCardview, ["id_backup"]);
+        return $this -> update($this -> nameTable, $cardview, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
+
+    public function eliminar ($indexUnique) {
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
     
 }

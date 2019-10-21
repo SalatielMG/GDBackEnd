@@ -50,4 +50,17 @@ class Movement extends DB
     public function mostrar($where = "1", $select = "*", $tabla = "backup_movements"){
         return $this -> getDatos($tabla, $select, $where);
     }
+    public function agregar ($dataMovement) {
+        $movement = Valida::arrayDataOperation($this -> columnsTable, $dataMovement);
+        //return $movement;
+        return $this -> insert($this -> nameTable, $movement);
+    }
+    public function actualizar ($dataMovement, $indexUnique) {
+        $movement = Valida::arrayDataOperation($this -> columnsTable, $dataMovement, ["id_backup"]);
+        //return $movement;
+        return $this -> update($this -> nameTable, $movement, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
+    public function eliminar ($indexUnique) {
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
 }

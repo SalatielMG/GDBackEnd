@@ -167,7 +167,7 @@ class ControlBudget extends Valida
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ BUDGET ACTUALIZADA !";
-            $arreglo["msj"] = "El presupuesto con " . $this -> keyValueArray($indexUnique) . " se ha actuaizado correctamente";
+            $arreglo["msj"] = "El presupuesto con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
 
             $this -> pk_Budget["id_backup"] = $budget -> id_backup;
             $this -> pk_Budget["id_account"] = $budget -> id_account;

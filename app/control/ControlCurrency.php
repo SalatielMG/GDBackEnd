@@ -60,7 +60,7 @@ class ControlCurrency extends Valida
         $arreglo = array();
         if ($select) {
             $arreglo["error"] = false;
-            $arreglo["currenciesSelected"] = $select;
+            $arreglo[(($this -> isCurrenciesAccount == 1) ? "currenciesSelected" : "currencies")] = $select;
             $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
 
@@ -75,6 +75,13 @@ class ControlCurrency extends Valida
                 $currencies = array_merge($currencies, $select);
                 sort($currencies);
                 $arreglo["currencies"] = $currencies;
+            } else {
+                $currencies= $this -> c -> mostrar("1", "*", "table_currencies");
+                if ($currencies) {
+                    //$arreglo[""]
+                } else {
+
+                }
             }
         } else {
             $arreglo["error"] = true;

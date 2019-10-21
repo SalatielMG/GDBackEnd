@@ -17,7 +17,33 @@ class Valida {
         $string = substr_replace($string, "", strlen($string) - 2);
         return $string;
     }
-
+    public static function arrayDataOperation ($columnsTable, $data, $except = array()) {
+        $arrayData = array();
+        $data = (array) ($data);
+        foreach ($columnsTable as $key => $value) {
+            $isExcept = false;
+            if (count($except) > 0) {
+                foreach ($except as $k => $v) {
+                    if ($value["name"] == $v) {
+                        $isExcept = true;
+                        break;
+                    }
+                }
+            }
+            if (!$isExcept) {
+                if ($value["type"] == Form::typeTinyint
+                    || $value["type"] == Form::typeInt
+                    || $value["type"] == Form::typeTinyint
+                    || $value["type"] == Form::typeSmallint
+                    || $value["type"] == Form::typeDecimal) {
+                    $arrayData[$value["name"]] = $data[$value["name"]];
+                } else {
+                    $arrayData[$value["name"]] = (($value["name"] == "sign") ? "'" . DB::signValue($data[$value["name"]]) . "'": "'" . $data[$value["name"]] . "'");
+                }
+            }
+        }
+        return $arrayData;
+    }
     public static function conditionVerifyExistsUniqueIndex($dataObjec, $columnsTableIndexUnique, $isUPPERCASE = true, $alias = "") {
         $sql = "";
         $dataObject = (array) ($dataObjec);
