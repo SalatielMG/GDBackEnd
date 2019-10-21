@@ -44,45 +44,79 @@ class ControlCurrency extends Valida
         }
         return $arreglo;
     }
-    public function buscarCurrenciesBackup($isQuery = true) {
+    private function obtCurrenciesInTableCurrecies($notIn_ISo_Code) {
+        $arreglo = array();
+        $select = $this -> c -> mostrar("iso_code NOT IN $notIn_ISo_Code", "iso_code, symbol, icon as icon_name, selected", "table_currencies");
+        if ($select) {
+            $arreglo["currencies"] = $select;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS!";
+            $arreglo["msj"] = "Se encontraron currencies en la tabla Table_Currencies";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS!";
+            $arreglo["msj"] = "No se encontraron currencies en la tabla Table_Currencies";
+        }
+        return $arreglo;
+    }
+    public function obtCurrenciesGralBackup($isQuery = true) {
         if ($isQuery) {
             $this -> pk_Currency["id_backup"] = Form::getValue("id_backup");
-            $this -> isCurrenciesAccount = Form::getValue("isCurrenciesAccount");
-            if ($this -> isCurrenciesAccount == 0) {
-                $this -> pagina = Form::getValue("pagina");
-                $this -> pagina = $this -> pagina * $this -> limit;
-            }
         }
-        $this -> select = ($this -> isCurrenciesAccount == 1) ? "iso_code, symbol" : "*, count(id_backup) as repeated";
-        $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 " . (($isQuery && $this -> isCurrenciesAccount == 0) ? "limit $this->pagina,$this->limit": "");
-
-        $select = $this -> c -> mostrar($this -> where, $this -> select);
         $arreglo = array();
+        $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ";
+        $select = $this -> c -> mostrar($this -> where, "iso_code, symbol, icon_name, selected");
+        $this -> where = "('')";
+        if (count($select) > 0) {
+            $this -> where = "(";
+            foreach ($select as $key => $value) {
+                $this -> where .= "'$value->iso_code',";
+            }
+            $this -> where = substr_replace($this -> where, ")", strlen($this -> where) - 1);
+        }
+        $currencies = $this -> obtCurrenciesInTableCurrecies($this -> where);
+        if (!$currencies["error"]) {
+            $currencies = array_merge($currencies["currencies"], $select);
+            sort($currencies);
+        } else {
+            $currencies = $select;
+        }
+        $arreglo["currencies"] = $currencies;
         if ($select) {
             $arreglo["error"] = false;
-            $arreglo[(($this -> isCurrenciesAccount == 1) ? "currenciesSelected" : "currencies")] = $select;
+            $arreglo["currenciesSelected"] = $select;
+            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron currencies del respaldo con " . $this -> keyValueArray($this -> pk_Currency);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
+            $arreglo["msj"] = "No se encontraron currencies del respaldo con " . $this -> keyValueArray($this -> pk_Currency);
+        }
+        return $arreglo;
+    }
+    public function buscarCurrenciesBackup($isQuery = true) {
+        $arreglo = array();
+        if ($isQuery) {
+            $this -> pk_Currency["id_backup"] = Form::getValue("id_backup");
+            $this -> pagina = Form::getValue("pagina");
+            $this -> pagina = $this -> pagina * $this -> limit;
+        }
+        $exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+
+        } else {
+            $this -> select = "*, count(id_backup) as repeated";
+            $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Currency["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Currency, $this -> c -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+        }
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $select = $this -> c -> mostrar($this -> where, $this -> select);
+        if ($select) {
+            $arreglo["error"] = false;
+            $arreglo["currencies"] = $select;
             $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
-
-            if ($this -> isCurrenciesAccount == 1) {
-                $where = "(";
-                foreach ($select as $key => $value) {
-                    $where .= "'$value->iso_code',";
-                }
-                $where = substr_replace($where, ")", strlen($where) - 1);
-                $this -> where = "iso_code NOT IN $where";
-                $currencies = $this -> c -> mostrar($this -> where, $this -> select, "table_currencies");
-                $currencies = array_merge($currencies, $select);
-                sort($currencies);
-                $arreglo["currencies"] = $currencies;
-            } else {
-                $currencies= $this -> c -> mostrar("1", "*", "table_currencies");
-                if ($currencies) {
-                    //$arreglo[""]
-                } else {
-
-                }
-            }
+            if ($isQuery && $this -> pagina == 0)
+                $arreglo["curreciesGralBackup"] = $this -> obtCurrenciesGralBackup(false);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
@@ -131,6 +165,89 @@ class ControlCurrency extends Valida
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
+        return $arreglo;
+    }
+    public function verifyExistsIndexUnique ($newCurrency, $isUpdate = false) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($newCurrency, $this -> c -> columnsTableIndexUnique);
+        $result = $this -> c -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Currency, porque ya existe un registro en la BD con el mismo iso_code del mismo backup. Porfavor verifique y vuelva a intentarlo";
+        }
+        return $arreglo;
+    }
+    public function agregarCurrency () {
+        $currency = json_decode(Form::getValue("currency", false, false));
+        $arreglo = array();
+        $arreglo = $this -> verifyExistsIndexUnique($currency);
+        if ($arreglo["error"]) return $arreglo;
+        $insert = $this -> c -> agregar($currency);
+        if ($insert) {
+            $this -> pk_Currency["id_backup"] = $currency -> id_backup;
+            $this -> pk_Currency["iso_code"] = $currency -> iso_code;
+            $queryCurrencyNew = $this -> buscarCurrenciesBackup(false);
+            $arreglo["currency"]["error"] = $queryCurrencyNew["error"];
+            $arreglo["currency"]["titulo"] = $queryCurrencyNew["titulo"];
+            $arreglo["currency"]["msj"] = $queryCurrencyNew["msj"];
+            if (!$arreglo["currency"]["error"]) $arreglo["currency"]["new"] = $queryCurrencyNew["currencies"][0];
+            $arreglo["currenciesBackup"] = $this -> obtCurrenciesGralBackup(false);
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ CURRENCY AGREGADA !";
+            $arreglo["msj"] = "Se agrego correctamente la currency con " . $this -> keyValueArray($this -> pk_Currency);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ CURRENCY NO AGREGADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar ingresar la currency con " . $this -> keyValueArray($this -> pk_Currency);
+        }
+        return $arreglo;
+    }
+    public function actualizarCurrency () {
+        $currency = json_decode(Form::getValue("currency", false, false));
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        if (($currency -> id_backup != $indexUnique -> id_backup)
+            || ($currency -> iso_code != $indexUnique -> iso_code)) {
+            $arreglo = $this -> verifyExistsIndexUnique($currency, true);
+            if ($arreglo["error"]) return $arreglo;
+        }
+        $update = $this -> c -> actualizar($currency, $indexUnique);
+        if ($update) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ CURRENCY ACTUALIZADA !";
+            $arreglo["msj"] = "La currency con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
+            $this -> pk_Currency["id_backup"] = $currency -> id_backup;
+            $this -> pk_Currency["iso_code"] = $currency -> iso_code;
+            $queryCurrencyUpdate = $this -> buscarCurrenciesBackup(false);
+            $arreglo["currency"]["error"] = $queryCurrencyUpdate["error"];
+            $arreglo["currency"]["titulo"] = $queryCurrencyUpdate["titulo"];
+            $arreglo["currency"]["msj"] = $queryCurrencyUpdate["msj"];
+            if (!$arreglo["currency"]["error"]) $arreglo["currency"]["update"] = $queryCurrencyUpdate["currencies"][0];
+            $arreglo["currenciesBackup"] = $this -> obtCurrenciesGralBackup(false);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ CURRENCY NO ACTUALIZADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar la currency con " . $this -> keyValueArray($indexUnique);
+        }
+        return $arreglo;
+    }
+    public function eliminarCurrency () {
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $delete = $this -> c -> eliminar($indexUnique);
+        if ($delete) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ CURRENCY ELIMINADA !";
+            $arreglo["msj"] = "La currency con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
+            $this -> pk_Currency["id_backup"] = $indexUnique -> id_backup;
+            $arreglo["currenciesBackup"] = $this -> obtCurrenciesGralBackup(false);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ CURRENCY NO ELIMINADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar la currency con " . $this -> keyValueArray($indexUnique);
+        }
         return $arreglo;
     }
 }

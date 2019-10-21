@@ -45,10 +45,10 @@ BEGIN
     END IF;
   END IF;
 
-  SET symbol = (SELECT tc.symbol FROM table_currencies tc WHERE tc.iso_code = isoCode);
+  SET symbol = (SELECT bc.symbol FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
 
   IF (symbol IS NULL) THEN
-    SET symbol = (SELECT bc.symbol FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
+    SET symbol = (SELECT tc.symbol FROM table_currencies tc WHERE tc.iso_code = isoCode);
     IF (symbol IS NULL) THEN
       SET symbol = '';
     END IF;

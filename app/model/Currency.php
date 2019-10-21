@@ -24,7 +24,8 @@ class Currency extends DB
         foreach ($this -> columnsTable as $key => $value) {
             if (($value["name"] == "id_backup")
             || ($value["name"] == "iso_code")
-            || ($value["name"] == "symbol")) {
+            //|| ($value["name"] == "symbol")
+            ) {
                 array_push($this -> columnsTableIndexUnique, $value);
             }
         }
@@ -35,7 +36,18 @@ class Currency extends DB
     }
     public function agregarCurrencies() {
         return $this -> insertMultipleData("table_currencies", $this -> Currencies) ;
-    } 
+    }
+    public function agregar ($dataCurrency) {
+        $currency = Valida::arrayDataOperation($this -> columnsTable, $dataCurrency);
+        return $this -> insert($this -> nameTable, $currency);
+    }
+    public function actualizar ($dataCurrency, $indexUnique) {
+        $currency = Valida::arrayDataOperation($this -> columnsTable, $dataCurrency, ["id_backup"]);
+        return $this -> update($this -> nameTable, $currency, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
+    public function eliminar ($indexUnique) {
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
     public $Currencies = [
         ["_id" => 1,	"iso_code" => "'AED'", "symbol" => "'د.إ '", "icon" => "'flag_aed'", "selected" => 0],
         ["_id" => 2,	"iso_code" => "'AKZ'", "symbol" => "'Kz'", "icon" => "'flag_akz'", "selected" => 0],

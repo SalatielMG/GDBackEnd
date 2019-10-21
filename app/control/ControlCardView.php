@@ -122,7 +122,7 @@ class ControlCardView extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " CardView, porque ya existe un registro en la BD con el mismo id_card del mismo backup. Porfavor verifique y vuleva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " CardView, porque ya existe un registro en la BD con el mismo id_card del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }

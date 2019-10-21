@@ -112,7 +112,7 @@ class ControlAccount extends Valida
                 // $arreglo["currenciesJSON"] = $this -> currency -> Currencies;
                 if ($this -> symbolName == 1) {
                     $this -> ctrlCurrency = new ControlCurrency($this -> pk_Account["id_backup"], 1);
-                    $arreglo["currencies"] = $this -> ctrlCurrency -> buscarCurrenciesBackup(false);
+                    $arreglo["currencies"] = $this -> ctrlCurrency -> obtCurrenciesGralBackup(false);
                 }
             }
         } else {
