@@ -158,7 +158,7 @@ class ControlBackup extends Valida
         return $arreglo;
     }
     public function eliminarBackup() {
-        $id = Form::getValue('id');
+        $id = Form::getValue('id_backup');
 
         $arreglo = array();
 
@@ -253,6 +253,7 @@ class ControlBackup extends Valida
         $arreglo = array();
 
         $warning = 0;
+        $errorUserCleanBackup = array();
         $resultCleanBackupsUser = array();
         foreach ($users as $key => $value) {
             $this -> idUser = $value -> id;
@@ -263,6 +264,7 @@ class ControlBackup extends Valida
             array_push($resultCleanBackupsUser, $limpiarBackupsUser);
             if ($limpiarBackupsUser["error"] == "warning") {
                 $warning++;
+                array_push($errorUserCleanBackup, $value);
             }
         }
         $arreglo["warning"] = $warning;
@@ -272,6 +274,7 @@ class ControlBackup extends Valida
             $arreglo["titulo"] = "¡ BACKUPS AJUSTADOS !";
             $arreglo["msj"] = "Se ajustaron correctamente todos los backups de los usuarios que tenian mas de $this->rango Respaldos.";
         } else {
+            $arreglo["usuariosError"] = $errorUserCleanBackup;
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($warning == 1) ? "¡ ERROR DE AJUSTE DE 1 USUARIO !" : "¡ ERROR DE AJUTE DE $warning USUARIOS !";
             $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $warning usuario" . (($warning == 1) ? "": "s");

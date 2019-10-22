@@ -39,6 +39,7 @@ class ControlBudget extends Valida
             $this -> table = "backup_budgets bd";
             $this -> where = (($isQuery) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -46,7 +47,7 @@ class ControlBudget extends Valida
             $arreglo["error"] = false;
             $arreglo["budgets"] = $select;
             $arreglo["titulo"] = "¡ BUDGETS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron budgets del Respaldo con id_backup: " . $this -> pk_Budget["id_backup"];
+            $arreglo["msj"] = "Se encontraron budgets del Respaldo con " . $this -> keyValueArray($this -> pk_Budget);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Budget["id_backup"]);
                 $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false, "'-'");
@@ -54,7 +55,7 @@ class ControlBudget extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ BUDGETS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron budgets del Respaldo con id_backup: " . $this -> pk_Budget["id_backup"];
+            $arreglo["msj"] = "No se encontraron budgets del Respaldo con id_backup: " . $this -> keyValueArray($this -> pk_Budget);
         }
         return $arreglo;
     }

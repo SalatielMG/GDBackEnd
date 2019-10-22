@@ -39,7 +39,7 @@ class ControlAutomatic extends Valida
         } else {
             $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_automatics ba";
-            $this -> where = (($isQuery) ? "ba.id_backup = " . $this -> pk_Automatic["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Automatic, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND bs.id_operation = " . $this -> pk_Automatic["id_operation"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery) ? "ba.id_backup = " . $this -> pk_Automatic["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Automatic, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_operation = " . $this -> pk_Automatic["id_operation"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);

@@ -52,8 +52,8 @@ class Budget extends DB
             'budget' => $dataBudget -> budget,
             'number' => $dataBudget -> number,
         ];
-        if ($dataBudget -> initial_date != "0000-00-00") $backup["initial_date"] = "'$dataBudget->initial_date'";
-        if ($dataBudget -> final_date != "0000-00-00") $backup["final_date"] = "'$dataBudget->final_date'";
+        if ($dataBudget -> initial_date != "0000-00-00") $budget["initial_date"] = "'$dataBudget->initial_date'";
+        if ($dataBudget -> final_date != "0000-00-00") $budget["final_date"] = "'$dataBudget->final_date'";
 
         return $this -> insert($this -> nameTable, $budget);
     }
