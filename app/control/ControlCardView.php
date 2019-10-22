@@ -149,7 +149,6 @@ class ControlCardView extends Valida
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CARDVIEW NO AGREGADO !";
             $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo cardview con " . $this -> keyValueArray($this -> pk_CardView);
-
         }
         return $arreglo;
     }

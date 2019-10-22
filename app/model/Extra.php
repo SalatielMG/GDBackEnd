@@ -8,6 +8,7 @@
 
 class Extra extends DB
 {
+
     public $nameTable = "backup_extras";
     public $columnsTable = [
         ['name' => 'id_backup', 'type' => Form::typeInt],
@@ -31,4 +32,19 @@ class Extra extends DB
     public function mostrar($where = "1", $select = "*", $tabla = "backup_extras"){
         return $this -> getDatos($tabla, $select, $where);
     }
+
+    public function agregar ($dataExtra) {
+        $extra = Valida::arrayDataOperation($this -> columnsTable, $dataExtra);
+        return $this -> insert($this -> nameTable, $extra);
+    }
+
+    public function actualizar ($dataExtra, $indexUnique) {
+        $extra = Valida::arrayDataOperation($this -> columnsTable, $dataExtra, ["id_backup"]);
+        return $this -> update($this -> nameTable, $extra, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
+
+    public function eliminar ($indexUnique) {
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
+    }
+
 }

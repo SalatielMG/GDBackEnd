@@ -11,23 +11,42 @@ class ControlPreference extends Valida
 {
     private $p;
     private $pagina = 0;
+    private $pk_Preference = array();
+    private $where = "";
+    private $select = "";
+    private $table = "";
+    
     public function __construct()
     {
         $this -> p = new Preference();
     }
-    public function buscarPreferencesBackup() {
-        $idBackup = Form::getValue('idBack');
-        $select = $this -> p -> mostrar("id_backup = $idBackup");
+    public function buscarPreferencesBackup($isQuery = true) {
         $arreglo = array();
+        if ($isQuery) {
+            $this -> pk_Preference["id_backup"] = Form::getValue('id_backup');
+            $this -> pagina = Form::getValue("pagina");
+            $this -> pagina = $this -> pagina * $this -> limit;
+        }
+        $exixstIndexUnique = $this -> p -> verifyIfExistsIndexUnique($this -> p -> nameTable);
+
+        if ($exixstIndexUnique["indice"]) {
+
+        } else {
+            $this -> select = "*, COUNT(key_name) repeated";
+            $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Preference["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Preference, $this -> p -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> p -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
+        }
+
+        $select = $this -> p -> mostrar($this -> where , $this -> select);
+
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["preferences"] = $select;
-            $arreglo["titulo"] = "¡ PREFERNCES ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron preferences del respaldo solicitado.";
+            $arreglo["titulo"] = ($isQuery) ? "¡ PREFERENCES ENCONTRADOS !" : "¡ PREFERENCE ENCONTRADO !";
+            $arreglo["msj"] = (($isQuery) ? "Se encontraron preferencias con " : "Se encontro preferencia con ") . $this -> keyValueArray($this -> pk_Preference);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PREFERNCES NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron preferences del respaldo solicitado.";
+            $arreglo["titulo"] = ($isQuery) ? "¡ PREFERENCES NO ENCONTRADOS !" : "¡ PREFERENCE NO ENCONTRADO !";
+            $arreglo["msj"] = (($isQuery) ? "No se encontraron preferencias con " : "No se preferencia extra con ") . $this -> keyValueArray($this -> pk_Preference);
         }
         return $arreglo;
     }
@@ -73,4 +92,88 @@ class ControlPreference extends Valida
         $arreglo["Result"] = $operacion;
         return $arreglo;
     }
+    public function verifyExistsIndexUnique ($newPreference, $isUpdate = false) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($newPreference, $this -> p -> columnsTableIndexUnique);
+        $result = $this -> p -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Preferencia, porque ya existe un registro en la BD con el mismo key_name del mismo backup. Porfavor verifique y vuelva a intentarlo";
+        }
+        return $arreglo;
+    }
+    public function agregarPreference () {
+        $preference = json_decode(Form::getValue("preference", false, false));
+        $arreglo = array();
+        $arreglo = $this -> verifyExistsIndexUnique($preference);
+        if ($arreglo["error"]) return $arreglo;
+        $insert = $this -> p -> agregar($preference);
+
+        if ($insert) {
+            $this -> pk_Preference["id_backup"] = $preference -> id_backup;
+            $this -> pk_Preference["key_name"] = $preference -> key_name;
+            $queryPreferenceNew = $this -> buscarPreferencesBackup(false);
+            $arreglo["preference"]["error"] = $queryPreferenceNew["error"];
+            $arreglo["preference"]["titulo"] = $queryPreferenceNew["titulo"];
+            $arreglo["preference"]["msj"] = $queryPreferenceNew["msj"];
+            if (!$arreglo["preference"]["error"]) $arreglo["preference"]["new"] = $queryPreferenceNew["preferences"][0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ PREFERENCIA AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente la nueva Preferencia con " . $this -> keyValueArray($this -> pk_Preference);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ PREFERENCIA NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al ingresar la nueva Preferencia con " . $this -> keyValueArray($this -> pk_Preference);
+        }
+        return $arreglo;
+    }
+    public function actualizarPreference () {
+        $preference = json_decode(Form::getValue("preference", false, false));
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+
+        if (($preference -> id_backup != $indexUnique -> id_backup)
+            || ($preference -> key_name != $indexUnique -> key_name))
+        {
+            $arreglo = $this -> verifyExistsIndexUnique($preference, true);
+            if ($arreglo["error"]) return $arreglo;
+        }
+        $update = $this -> p -> actualizar($preference, $indexUnique);
+        
+        if ($update) {
+            $this -> pk_Preference["id_backup"] = $preference -> id_backup;
+            $this -> pk_Preference["key_name"] = $preference -> key_name;
+            $queryPreferenceUpdate = $this -> buscarPreferencesBackup(false);
+            $arreglo["preference"]["error"] = $queryPreferenceUpdate["error"];
+            $arreglo["preference"]["titulo"] = $queryPreferenceUpdate["titulo"];
+            $arreglo["preference"]["msj"] = $queryPreferenceUpdate["msj"];
+            if (!$arreglo["preference"]["error"]) $arreglo["preference"]["update"] = $queryPreferenceUpdate["preferences"][0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ PREFERENCIA AGREGADO !";
+            $arreglo["msj"] = "Se actualizo correctamente la Preferencia con " . $this -> keyValueArray($indexUnique);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ PREFERENCIA NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar la Preferencia con " . $this -> keyValueArray($indexUnique);
+        }
+        return $arreglo;
+    }
+    public function eliminarPreference () {
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $delete = $this -> p -> eliminar($indexUnique);
+        if ($delete) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ PREFERENCIA ELIMINADA !";
+            $arreglo["msj"] = "La preferencia con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ PREFERENCIA NO ELIMINADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar la preferencia con " . $this -> keyValueArray($indexUnique);
+        }
+        return $arreglo;
+    }
+
 }

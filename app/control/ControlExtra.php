@@ -11,23 +11,40 @@ class ControlExtra extends Valida
 {
     private $e;
     private $pagina = 0;
+    private $pk_Extra = array();
+    private $where = "";
+    private $select = "";
+    private $table = "";
+
     public function __construct()
     {
         $this -> e = new Extra();
     }
-    public function buscarExtrasBackup() {
-        $idBackup = Form::getValue('idBack');
-        $select = $this -> e -> mostrar("id_backup = $idBackup");
+    public function buscarExtrasBackup($isQuery = true) {
         $arreglo = array();
+        if ($isQuery) {
+            $this -> pk_Extra["id_backup"] = Form::getValue('id_backup');
+            $this -> pagina = Form::getValue("pagina");
+            $this -> pagina = $this -> pagina * $this -> limit;
+        }
+        $exixstIndexUnique = $this -> e -> verifyIfExistsIndexUnique($this -> e -> nameTable);
+
+        if ($exixstIndexUnique["indice"]) {
+
+        } else {
+            $this -> select = "*, COUNT(id_extra) repeated";
+            $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Extra["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Extra, $this -> e -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> e -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
+        }
+        $select = $this -> e -> mostrar($this -> where, $this -> select);
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["extras"] = $select;
-            $arreglo["titulo"] = "¡ EXTRAS ENCONTRADOS !";
-            $arreglo["msj"] = "Se encontraron extras del respaldo solicitado.";
+            $arreglo["titulo"] = ($isQuery) ? "¡ EXTRAS ENCONTRADOS !" : "¡ EXTRA ENCONTRADO !";
+            $arreglo["msj"] = (($isQuery) ? "Se encontraron extras con " : "Se encontro extra con ") . $this -> keyValueArray($this -> pk_Extra);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ EXTRAS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No se encontraron extras del respaldo solicitado.";
+            $arreglo["titulo"] = ($isQuery) ? "¡ EXTRAS NO ENCONTRADOS !" : "¡ EXTRA NO ENCONTRADO !";
+            $arreglo["msj"] = (($isQuery) ? "No se encontraron extras con " : "No se encontro extra con ") . $this -> keyValueArray($this -> pk_Extra);
         }
         return $arreglo;
     }
@@ -71,6 +88,87 @@ class ControlExtra extends Valida
         $operacion = $this -> e -> ejecutarMultSentMySQLi($sql);
         $arreglo["SenteciasSQL"] = $sql;
         $arreglo["Result"] = $operacion;
+        return $arreglo;
+    }
+    public function verifyExistsIndexUnique ($newExtra, $isUpdate = false) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $arreglo["sqlVerfiyIndexUnique"] = $this -> conditionVerifyExistsUniqueIndex($newExtra, $this -> e -> columnsTableIndexUnique);
+        $result = $this -> e -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
+        if ($result) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Extra, porque ya existe un registro en la BD con el mismo id_extra del mismo backup. Porfavor verifique y vuelva a intentarlo";
+        }
+        return $arreglo;
+    }
+    public function agregarExtra() {
+        $extra = json_decode(Form::getValue("extra", false, false));
+        $arreglo = array();
+        $arreglo = $this -> verifyExistsIndexUnique($extra);
+        if ($arreglo["error"]) return $arreglo;
+        $insert = $this -> e -> agregar($extra);
+        if ($insert) {
+            $this -> pk_Extra["id_backup"] = $extra -> id_backup;
+            $this -> pk_Extra["id_extra"] = $extra -> id_extra;
+            $queryExtraNew = $this -> buscarExtrasBackup(false);
+            $arreglo["extra"]["error"] = $queryExtraNew["error"];
+            $arreglo["extra"]["titulo"] = $queryExtraNew["titulo"];
+            $arreglo["extra"]["msj"] = $queryExtraNew["msj"];
+            if (!$arreglo["extra"]["error"]) $arreglo["extra"]["new"] = $queryExtraNew["extras"][0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ EXTRA AGREGADO !";
+            $arreglo["msj"] = "Se agrego correctamente el nuevo Extra con " . $this -> keyValueArray($this -> pk_Extra);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ EXTRA NO AGREGADO !";
+            $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo Extra con " . $this -> keyValueArray($this -> pk_Extra);
+        }
+        return $arreglo;
+    }
+    public function actualizarExtra() {
+        $extra = json_decode(Form::getValue("extra", false, false));
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+
+        if (($extra -> id_backup != $indexUnique -> id_backup)
+            || ($extra -> id_extra != $indexUnique -> id_extra))
+        {
+            $arreglo = $this -> verifyExistsIndexUnique($extra, true);
+            if ($arreglo["error"]) return $arreglo;
+        }
+        $update = $this -> e -> actualizar($extra, $indexUnique);
+        if ($update) {
+            $this -> pk_Extra["id_backup"] = $extra -> id_backup;
+            $this -> pk_Extra["id_extra"] = $extra -> id_extra;
+            $queryExtraUpdate = $this -> buscarExtrasBackup(false);
+            $arreglo["extra"]["error"] = $queryExtraUpdate["error"];
+            $arreglo["extra"]["titulo"] = $queryExtraUpdate["titulo"];
+            $arreglo["extra"]["msj"] = $queryExtraUpdate["msj"];
+            if (!$arreglo["extra"]["error"]) $arreglo["extra"]["update"] = $queryExtraUpdate["extras"][0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ EXTRA ACTUALIZADO !";
+            $arreglo["msj"] = "Se acualizo correctamente el Extra con " . $this -> keyValueArray($indexUnique);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ EXTRA NO ACTUALIZADO !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el Extra con " . $this -> keyValueArray($indexUnique);
+        }
+        return $arreglo;
+    }
+    public function eliminarExtra() {
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $delete = $this -> e -> eliminar($indexUnique);
+        if ($delete) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ EXTRA ELIMINADA !";
+            $arreglo["msj"] = "El Extra con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ EXTRA NO ELIMINADA !";
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar el Extra con " . $this -> keyValueArray($indexUnique);
+        }
         return $arreglo;
     }
 }
