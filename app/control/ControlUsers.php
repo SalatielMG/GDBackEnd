@@ -6,21 +6,28 @@
  * Time: 12:37 PM
  */
 require_once(APP_PATH.'model/Users.php');
+require_once(APP_PATH.'model/Movement.php');
+require_once(APP_PATH.'model/Account.php');
 
 class ControlUsers extends Valida
 {
     private $u;
+    private $m;
+    private $a;
+
     public function __construct()
     {
+        $this -> m = new Movement();
         $this -> u = new Users();
+        $this -> a = new Account();
     }
 
     /**********************************************************************************************/
     public function ValoresGraficaBackupsCategoriasGastos() {
         $idUser = Form::getValue('idUser');
         $tipo = Form::getValue('tipo');
-            $mov = ($tipo == 'neg') ? "gastos": "entradas";
-            $tipo = ($tipo == 'neg') ? "-": "+";
+        $mov = ($tipo == 'neg') ? "gastos": "entradas";
+        $tipo = ($tipo == 'neg') ? "-": "+";
         $idBackup = Form::getValue("idBackup");
         $idAccount = Form::getValue("idCuenta");
         $año = Form::getValue("año");
@@ -72,10 +79,14 @@ class ControlUsers extends Valida
         $arreglo["meses"] = $this -> asignarMeses($meses);
         $arreglo["ultimoMes"] = $mes;
 
-        $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup "  . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " " . $this -> condicionarConsulta($año, 'bm.year') . " " . $this -> condicionarConsulta($mes, 'bm.month') . " AND b.id_user = $idUser AND bm.sign = '$tipo' group BY bm.id_category ORDER BY total DESC";
-        // return $where;
-        $select = $this -> u -> mostrar($where, "bm.id_category, sum(bm.amount) AS total", "backup_movements bm, backups b");
-        $arreglo["where"] = $where;
+        $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup "  . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " " . $this -> condicionarConsulta($año, 'bm.year') . " " . $this -> condicionarConsulta($mes, 'bm.month') . " AND b.id_user = $idUser AND bm.sign = '$tipo' GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
+
+        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, sum(cat.amount) AS total";
+        $table = "(SELECT bm.id_category, bm.amount FROM backup_movements bm, backups b WHERE $where) as cat";
+        $where = "1 GROUP BY cat.id_category ORDER BY total DESC";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
+        $select = $this -> u -> mostrar($where, $select, $table);
+        $arreglo["select"] = $select;
         if ($select) {
             $arreglo["error"] = false;
             $categoria = $this -> extraerDatos($select);
@@ -155,7 +166,7 @@ class ControlUsers extends Valida
          * */
         $data = array();
         foreach ($arreglo as $key => $value) {
-            $data[$value -> id_category] = $value -> total;
+            $data[$value -> nameCategory] = $value -> total;
         }
         /*if (count($arreglo) > 30) {
             $sumaOtro = 0;
@@ -223,8 +234,27 @@ class ControlUsers extends Valida
             $arreglo["ultimoAño"] = $años[0] -> year;
         }*/
 
-        $gastos = $this -> u -> mostrar("b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY bm.month ORDER BY bm.month ", "bm.month, SUM(bm.amount) Total", "backup_movements bm, backups b");
+        $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
+        $select = "tempTable.month, SUM(tempTable.amount) Total";
+        $table = "(SELECT bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
+        $gastos = $this -> u -> mostrar($where, $select, $table);
+        $arrreglo["consultaSQLGastos"] = $this -> consultaSQL($select, $table, $where);
+
+        $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '+' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
+        $select = "tempTable.month, SUM(tempTable.amount) Total";
+        $table = "(SELECT bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
+        $ingresos = $this -> u -> mostrar($where, $select, $table);
+        $arrreglo["consultaSQLIngresos"] = $this -> consultaSQL($select, $table, $where);
+
+
+        /*$gastos = $this -> u -> mostrar("b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY bm.month ORDER BY bm.month ", "bm.month, SUM(bm.amount) Total", "backup_movements bm, backups b");
         $ingresos = $this -> u -> mostrar("b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . "  AND bm.sign = '+' and b.id_user = $idUser GROUP BY bm.month ORDER BY bm.month ", "bm.month, SUM(bm.amount) Total", "backup_movements bm, backups b");
+        */
+
+
+
         if ($gastos || $ingresos) {
             $dataGastos = $this -> asignarMontoMeses($gastos);
             $dataIngresos = $this -> asignarMontoMeses($ingresos);
