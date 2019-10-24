@@ -296,7 +296,7 @@ class ControlUsers extends Valida
         return $data;
     }
     private function extraerBackupsMovements($idUser) {
-        return $this -> u -> mostrar("b.id_user = $idUser order by b.id_backup desc", "b.id_backup", "backups b");
+        return $this -> u -> mostrar("b.id_user = $idUser order by b.id_backup asc", "b.id_backup", "backups b");
     }
     private function extraerAñosMovements($idUSer, $id_backup, $idAccount = "0") {
         return $select = $this -> u -> mostrar("b.id_backup = bm.id_backup and bm.id_backup = $id_backup " . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " and b.id_user = $idUSer GROUP BY bm.year ORDER BY bm.year desc", "bm.year", "backup_movements bm, backups b");
