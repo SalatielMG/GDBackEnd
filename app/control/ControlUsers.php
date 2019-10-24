@@ -264,7 +264,7 @@ class ControlUsers extends Valida
 
             $arreglo["TotalGastos"] = $this -> sumaTotales($arreglo["Gastos"]);
             $arreglo["TotalIngresos"] = $this -> sumaTotales($arreglo["Ingresos"]);
-            $arreglo["TotalAñoLabel"] = array(0 => $año);
+            $arreglo["TotalAnhoLabel"] = array(0 => (($año == 0) ? 'Todos' : $año));
 
 
             $arreglo["error"] = false;
