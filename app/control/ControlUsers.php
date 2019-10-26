@@ -92,8 +92,8 @@ class ControlUsers extends Valida
             $categoria = $this -> extraerDatos($select);
             // $arreglo["arreglo"] = $select;
             $arreglo["categoria"] = $categoria;
-            $arreglo["labels"] = array_keys($categoria);
-            $arreglo["values"] = array_values($categoria);
+            $arreglo["labels"] = $categoria["namesCategories"];
+            $arreglo["values"] = $categoria["total"];
             $arreglo["titulo"] = "¡ MOVIMIENTOS ECONTRADOS !";
             $arreglo["msj"] = "Se encontraron movimientos de tipo $mov del usuario solicitaddo";
         } else {
@@ -161,28 +161,12 @@ class ControlUsers extends Valida
         return $arreglo;
     }
     private function extraerDatos($arreglo) {
-        /*
-         * Los primeros 15.
-         * */
         $data = array();
         foreach ($arreglo as $key => $value) {
-            $data[$value -> nameCategory] = $value -> total;
+            $data["namesCategories"][$key] = $value -> nameCategory;
+            $data["total"][$key] = $value -> total;
         }
-        /*if (count($arreglo) > 30) {
-            $sumaOtro = 0;
-            foreach ($arreglo as $key => $value) {
-                if ($key > 29) {
-                    $sumaOtro = $sumaOtro + $value -> total;
-                } else {
-                    $data[$value -> id_category] = $value -> total;
-                }
-            }
-            $data["Otros"] = $sumaOtro;
-        } else {
-            foreach ($arreglo as $key => $value) {
-                $data[$value -> id_category] = $value -> total;
-            }
-        }*/
+
         return $data;
 
     }

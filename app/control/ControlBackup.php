@@ -141,7 +141,7 @@ class ControlBackup extends Valida
         $this -> pagina = $this -> pagina * $this -> limit;
         $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina, $this->limit";
         $select = "tabla.*";
-        $table = "((SELECT b.id_user, u.email, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'".$this -> email."'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) > $this->rango) AS tabla)";
+        $table = "((SELECT u.*, COUNT(b.id_user) as cantRep FROM backups b, users u WHERE b.id_user = u.id_user ". $this -> condicionarConsulta("'".$this -> email."'", "u.email", "'Generales'")." GROUP BY b.id_user HAVING COUNT(*) > $this->rango) AS tabla)";
         $arreglo["consulta"] = $this -> consultaSQL($select, $table, $where);
         //return $arreglo;
         $consulta = $this -> b -> mostrar($where, $select, $table);
