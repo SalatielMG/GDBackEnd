@@ -98,6 +98,50 @@ class ControlBackup extends Valida
         }
         return $arreglo;
     }
+    public function buscarUsersExportacionBackups() {
+        $this -> email = Form::getValue("email");
+        $this -> pagina = Form::getValue('pagina');
+        $arreglo = array();
+
+        $form = new Form();
+        if ($this -> email != "Generales") {
+            $form -> validarDatos($this -> email, "Correo electronico", "email");
+            if (count($form -> errores) > 0) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["msj"] = $form -> errores;
+                return $arreglo;
+            }
+        }
+        $arreglo = $this -> buscarUsersEB();
+        return $arreglo;
+    }
+    private function buscarUsersEB() {
+        $arreglo = array();
+        if ($this -> email != "Generales") {
+            $arreglo = $this -> verifyExistsUser();
+            if ($arreglo["error"]) return $arreglo;
+        }
+        $this -> pagina = $this -> pagina * $this -> limit;
+        $this -> select = "u.*, COUNT(b.id_user) as cantRep";
+        $this -> table = "backups b, users u";
+        $this -> where = "b.id_user = u.id_user ". $this -> condicionarConsulta("'".$this -> email."'", "u.email", "'Generales'")." GROUP BY b.id_user ORDER BY u.email limit $this->pagina,$this->limit";
+
+        $arreglo["consulta"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        //return $arreglo;
+        $consulta = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
+        if ($consulta) {
+            $arreglo["error"] = false;
+            $arreglo["users"] = $consulta;
+            $arreglo["titulo"] = ($this -> email == "Generales") ? "¡ USUARIOS ENCONTRADOS !" : "¡ USUARIO ENCONTRADO !";
+            $arreglo["msj"] = "Se encontraron Usuario". (($this -> email == "Generales") ? "s: " : ": ") . $this->email;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = ($this->email == "Generales") ? "¡ USUARIOS NO ENCONTRADOS !" : "¡ USUARIO NO ENCONTRADO !";
+            $arreglo["msj"] = "No se encontraron Usuario". (($this -> email == "Generales") ? "s: " : ": ") . $this->email;
+        }
+        return $arreglo;
+    }
     public function buscarBackupsUserCantidad() {
         $this -> email = Form::getValue('email');
         $this -> rango = Form::getValue('cantidad');
@@ -119,22 +163,27 @@ class ControlBackup extends Valida
         $arreglo = $this -> buscarBackupsUC();
         return $arreglo;
     }
+    private function verifyExistsUser() {
+        $arreglo = array();
+        $where = "email = " . "'".$this -> email."'";
+        $select = "id_user, email";
+        $table = "users";
+        $consultaUser = $this -> b -> mostrar($where, $select, $table);
+        if (!$consultaUser) {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+            $arreglo["msj"] = " El usuario con email: $this->email no se encuentra registrado en la base de datos ";
+            return $arreglo;
+        } else {
+            $arreglo["error"] = false;
+        }
+        return $arreglo;
+    }
     public function buscarBackupsUC() {
         $arreglo = array();
-        $idUser = 0;
         if ($this -> email != "Generales") {
-            $where = "email = " . "'".$this -> email."'";
-            $select = "id_user, email";
-            $table = "users";
-            $consultaUser = $this -> b -> mostrar($where, $select, $table);
-            if (!$consultaUser) {
-                $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
-                $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
-                return $arreglo;
-            } else {
-                $idUser = $consultaUser[0] -> id_user;
-            }
+            $arreglo = $this -> verifyExistsUser();
+            if ($arreglo["error"]) return $arreglo;
         }
         //$filtrosSearch = "(SELECT JSON_PRETTY({\"id_backup\":{\"value\" : \"\", \"valueAnt\" : \"\", \"isFilter\" : false}, \"automatic\":{\"value\" : \"-1\", \"valueAnt\" : \"\", \"isFilter\" : false}, \"date_creation\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false},\"date_download\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false},\"created_in\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false}})) as filtrosSearch";
         //$filtrosSearch = "{\"id_backup\":{value : '', valueAnt : '', isFilter : false}, automatic:{value : '-1', valueAnt : '', isFilter : false}, date_creation:{value : '',valueAnt : '',isFilter : false},date_creation:{value : '',valueAnt : '',isFilter : false},date_download:{value : '',valueAnt : '',isFilter : false},created_in:{value : '',valueAnt : '',isFilter : false}} as filtrosSearch";
