@@ -13,6 +13,9 @@ class Form{
     const typeDatetime = 'datetime';
     const typeDate = 'date';
     const typeTime = 'time';
+    const typeSQLITE_INTEGER = 'integer';
+    const typeSQLITE_TEXT = 'text';
+    const typeSQLITE_REAL = 'real';
 
 	public function __construct(){
 		$this->errores = array();

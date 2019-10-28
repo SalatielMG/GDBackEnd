@@ -31,6 +31,29 @@ class Movement extends DB
          ['name' => 'picture', 'type' => Form::typeVarchar],
          ['name' => 'iso_code', 'type' => Form::typeChar],
     ];
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "account", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "category", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "amount", "type" => Form::typeSQLITE_REAL],
+        ["name" => "sign", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "detail", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "date", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "time", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "confirmed", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "transfer", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "date_idx", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "day", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "week", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "fortnight", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "month", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "year", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "code", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "picture", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "iso_code", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
+    ];
+
 
     public function __construct()
     {

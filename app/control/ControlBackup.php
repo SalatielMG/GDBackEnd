@@ -381,4 +381,28 @@ class ControlBackup extends Valida
         }
         return $arreglo;
     }
+    public function exportarBackup() {
+        $id_backup = Form::getValue("id_backup");
+        $typeExport = Form::getValue("typeExport");
+        return ($typeExport == "sqlite") ? $this -> sqliteExport($id_backup) : $this -> xlsExport($id_backup);
+    }
+    private function sqliteExport($id_backup) {
+        require_once (APP_PATH . "model/DBSQLITE.php");
+        require_once (APP_PATH . "control/ControlMovement.php");
+        $arreglo = array();
+        $dbSqlite = new DBSQLITE();
+        $dbSqlite -> generateSchema();
+
+        $ctrlMovement = new ControlMovement();
+        $ctrlMovement -> setPk_Movement($id_backup);
+        $movements = $ctrlMovement -> buscarMovementsBackup(false, true);
+        $arreglo["Movs"] = $movements;
+        $arreglo["consultaSQL"] = $dbSqlite -> insertMultipleData("table_movements", $movements["movements"], $ctrlMovement -> getMovementModel() -> columnsTableSQLITE);
+        $arreglo["id_backup"] = $id_backup;
+        return $arreglo;
+    }
+    private function xlsExport($id_backup) {
+        $arreglo["id_backup"] = $id_backup;
+        return $arreglo;
+    }
 }
