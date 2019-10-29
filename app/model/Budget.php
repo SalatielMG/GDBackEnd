@@ -22,6 +22,21 @@ class Budget extends DB
     ];
     public $columnsTableIndexUnique = [];
 
+    public $nameTableSQLITE = "table_budgets";
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "account", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "category", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "period", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "amount", "type" => Form::typeSQLITE_REAL],
+        ["name" => "budget", "type" => Form::typeSQLITE_REAL],
+        ["name" => "initial_date", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "final_date", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "show", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "number", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
+    ];
+
     public function __construct()
     {
         parent::__construct();

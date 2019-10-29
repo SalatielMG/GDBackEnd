@@ -20,12 +20,17 @@ class ControlBudget extends Valida
     private $select = "";
     private $table = "";
 
-    public function __construct()
+    public function __construct($id_backup = 0)
     {
         $this -> b = new Budget();
+        $this -> pk_Budget["id_backup"] = $id_backup;
     }
 
-    public function buscarBudgetsBackup($isQuery = true) {
+    public function getBudgetModel() {
+        return $this -> b;
+    }
+
+    public function buscarBudgetsBackup($isQuery = true, $isExport = false) {
         if ($isQuery) {
             $this -> pk_Budget["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
@@ -35,9 +40,12 @@ class ControlBudget extends Valida
         if ($exixstIndexUnique["indice"]) {
 
         } else {
-            $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
+            if ($isExport)
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, DATE_FORMAT(bd.initial_date, '%d/%m/%Y') as initial_date,  DATE_FORMAT(bd.final_date, '%d/%m/%Y') as final_date, 0 as show_item, bd.number, 0 as selected";
+            else
+                $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
             $this -> table = "backup_budgets bd";
-            $this -> where = (($isQuery) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery || $isExport) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);

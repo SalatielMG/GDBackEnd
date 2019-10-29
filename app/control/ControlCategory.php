@@ -28,6 +28,10 @@ class ControlCategory extends Valida
         $this -> pk_Category["id_account"] = $id_account;
     }
 
+    public function getCategoryModel() {
+        return $this -> c;
+    }
+
 
     public function obtCategoriesAccountBackup($isQuery = true, $signCategories = "both") {
         if ($isQuery) {
@@ -55,19 +59,22 @@ class ControlCategory extends Valida
         return $arreglo;
     }
 
-    public function buscarCategoriesBackup($isQuery = true) {
+    public function buscarCategoriesBackup($isQuery = true, $isExport = false) {
         if ($isQuery) {
             $this -> pk_Category["id_backup"] = Form::getValue("id_backup");
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
         $exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
-        if ($exixstIndexUnique["indice"]) { // Table si inconsistencia de datos.
+        if ($exixstIndexUnique["indice"]) { // Table sin inconsistencia de datos.
 
         } else { // Table con inconsistencia de datos.
-            $this -> select = "bc.*, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
+            if ($isExport)
+                $this -> select = "bc.id_category as _id, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign, bc.icon_name as icon, number, 0 as selected";
+            else
+                $this -> select = "bc.*, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
             $this -> table = $this -> c -> nameTable . " bc";
-            $this -> where = (($isQuery) ? "bc.id_backup = " . $this -> pk_Category["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Category, $this -> c -> columnsTableIndexUnique, false, "bc.") . " AND bc.id_category = " . $this -> pk_Category["id_category"]) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 ORDER BY bc.id_category " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
+            $this -> where = (($isQuery || $isExport) ? "bc.id_backup = " . $this -> pk_Category["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Category, $this -> c -> columnsTableIndexUnique, false, "bc.") . " AND bc.id_category = " . $this -> pk_Category["id_category"]) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 ORDER BY bc.id_category " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
         }
         $select = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
         //$select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = " . $this -> pk_Category["id_backup"], "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");

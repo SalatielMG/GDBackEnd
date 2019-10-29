@@ -32,9 +32,9 @@ class ControlAccount extends Valida
         $this -> symbolName = $symbolName;
     }
 
-    /*private function condicionId_Account($isQuery, $alias) {
-        return (!$isQuery) ? "AND " . $alias . "id_account = $this->id_account" : "";
-    }*/
+    public function getAccountModel() {
+        return $this -> a;
+    }
 
     public function obtAccountsBackup($isQuery = true, $signCategories = "both") {
         if ($isQuery) {
@@ -79,7 +79,7 @@ class ControlAccount extends Valida
         return $arreglo;
     }
 
-    public function buscarAccountsBackup($isQuery = true) {
+    public function buscarAccountsBackup($isQuery = true, $isExport = false) {
         if ($isQuery) {
             $this -> pk_Account["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
@@ -92,9 +92,12 @@ class ControlAccount extends Valida
             $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba, backup_currencies bc";
         } else {
-            $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
+            if ($isExport)
+                $this -> select = "ba.id_account as _id, ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.icon_name as icon, ba.income, ba.expense, ba.final_balance as balance, ba.month, ba.year, ba.negative_max, ba.positive_max, ba.iso_code, ba.rate, ba.include_total, ba.value_type, ba.selected";
+            else
+                $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba";
-            $this -> where = (($isQuery) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);

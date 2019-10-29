@@ -16,11 +16,15 @@ class ControlPreference extends Valida
     private $select = "";
     private $table = "";
     
-    public function __construct()
+    public function __construct($id_backup)
     {
         $this -> p = new Preference();
+        $this -> pk_Preference["id_backup"] = $id_backup;
     }
-    public function buscarPreferencesBackup($isQuery = true) {
+    public function getPreferenceModel() {
+        return $this -> p;
+    }
+    public function buscarPreferencesBackup($isQuery = true, $isExport = false) {
         $arreglo = array();
         if ($isQuery) {
             $this -> pk_Preference["id_backup"] = Form::getValue('id_backup');
@@ -32,8 +36,12 @@ class ControlPreference extends Valida
         if ($exixstIndexUnique["indice"]) {
 
         } else {
-            $this -> select = "*, COUNT(key_name) repeated";
-            $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Preference["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Preference, $this -> p -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> p -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
+            if ($isExport)
+                $this -> select = "key_name, value";
+            else
+                $this -> select = "*, COUNT(key_name) repeated";
+
+            $this -> where = (($isQuery || $isExport) ? "id_backup = " . $this -> pk_Preference["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Preference, $this -> p -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> p -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
         }
 
         $select = $this -> p -> mostrar($this -> where , $this -> select);

@@ -14,7 +14,14 @@ class Preference extends DB
          ['name' => 'key_name', 'type' => Form::typeVarchar],
          ['name' => 'value', 'type' => Form::typeVarchar],
     ];
+
     public $columnsTableIndexUnique = [];
+    public $nameTableSQLITE = "table_preferences";
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "key", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "value", "type" => Form::typeSQLITE_TEXT],
+    ];
 
     public function __construct()
     {

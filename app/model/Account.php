@@ -34,6 +34,27 @@ class Account extends DB
     ];
     public $columnsTableIndexUnique = [];
 
+    public $nameTableSQLITE = "table_accounts";
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "account", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "detail", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "initial_balance", "type" => Form::typeSQLITE_REAL],
+        ["name" => "sign", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "icon", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "income", "type" => Form::typeSQLITE_REAL],
+        ["name" => "expense", "type" => Form::typeSQLITE_REAL],
+        ["name" => "balance", "type" => Form::typeSQLITE_REAL],
+        ["name" => "month", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "year", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "negative_max", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "positive_max", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "iso_code", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "rate", "type" => Form::typeSQLITE_REAL],
+        ["name" => "include_total", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "value_type", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
+    ];
     public function __construct()
     {
         parent::__construct();

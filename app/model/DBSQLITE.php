@@ -14,7 +14,7 @@ class DBSQLITE
     {
         if (empty($this -> db)) {
             try {
-                $this -> db = new PDO('sqlite:ExportBackupSQlite/database.sqlite');
+                $this -> db = new PDO('sqlite:' . APP_PATH . 'exports/database.sqlite');
                 $this -> db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $this -> db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
             } catch (Exception $e) {
@@ -149,7 +149,7 @@ class DBSQLITE
     private function solicitud($sql){
         try{
             $this -> result = $this -> db -> query($sql);
-            $this -> db = null;
+            //$this -> db = null;
             if($this -> result)
                 return true;
             else{
@@ -161,28 +161,60 @@ class DBSQLITE
             exit();
         }
     }
-    public function insertMultipleData($tabla, $arreglo, $columnsTable) {
-        $sql = "INSERT INTO $tabla ";
+    public function insertMultipleData($table, $arreglo, $columnsTable) {
+        $sql = "INSERT INTO $table ";
         foreach ($arreglo as $key => $value) {
             $value = (array) $value;
-            if ($key == 0) $sql .= "(_id, " . implode(", ", array_keys($value) ) . ") VALUES ";
-            $sql .= $this -> validKeyValueDataInSQLITE($value, $columnsTable);
+            if ($key == 0) $sql .= $this -> validateKeyNameDataInSQLITE($columnsTable) . " VALUES ";
+            $sql .= $this -> validateKeyValueDataInSQLITE($value, $columnsTable, $table);
         }
         $sql = substr_replace($sql, ";", strlen($sql) - 1);
         //return $sql;
         return $this -> solicitud($sql);
     }
-
-    private function validKeyValueDataInSQLITE($Value, $columsTable) {
+    private function validateKeyNameDataInSQLITE($columnsTable) {
+        $columns = "(";
+        foreach ($columnsTable as $key => $value){
+            $columns .= $value["name"] . ",";
+        }
+        $columns = substr_replace($columns, ")", strlen($columns) - 1);
+        return $columns;
+    }
+    private function validateKeyValueDataInSQLITE($Value, $columsTable, $table) {
         $sql = "";
         $Value = (array) $Value;
-        $sql .= "(null ,";
+        $sql .= "(";
         foreach ($columsTable as $key => $value) {
             if ($value["type"] == Form::typeSQLITE_INTEGER
             || $value["type"] == Form::typeSQLITE_REAL) {
-                 $sql .= ((empty($Value[$value["name"]])) ? 0 : $Value[$value["name"]]) . ",";
+                switch ($value["name"]) {
+                    case "_id":
+                        $sql .= (($table == "table_categories" || $table == "table_automatics" || $table == "table_accounts") ? $Value[$value["name"]]: "null") . ",";
+                        break;
+                    default:
+                        $sql .= ((empty($Value[$value["name"]])) ? 0 : $Value[$value["name"]]) . ",";
+                        break;
+                }
             } else {
-                $sql .= "'" . $Value[$value["name"]] . "',";
+                $key = "";
+                switch ($value["name"]) {
+                    case "show":
+                        $key = "show_item";
+                        break;
+                    case "each":
+                        $key = "each_number";
+                        break;
+                    case "repeat":
+                        $key = "repeat_number";
+                        break;
+                    case "key":
+                        $key = "key_name";
+                        break;
+                    default:
+                        $key = $value["name"];
+                        break;
+                }
+                $sql .= "'" . $Value[$key] . "',";
             }
         }
         $sql = substr_replace($sql, "", strlen($sql) - 1);

@@ -21,12 +21,17 @@ class ControlAutomatic extends Valida
     private $select = "";
     private $table = "";
 
-    public function __construct()
+    public function __construct($id_backup = 0)
     {
         $this -> a = new Automatic();
+        $this -> pk_Automatic["id_backup"] = $id_backup;
     }
 
-    public function buscarAutomaticsBackup($isQuery = true) {
+    public function getAutomaticModel() {
+        return $this -> a;
+    }
+
+    public function buscarAutomaticsBackup($isQuery = true, $isExport = false) {
         if ($isQuery) {
             $this -> pk_Automatic["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
@@ -37,9 +42,13 @@ class ControlAutomatic extends Valida
         if ($exixstIndexUnique["indice"]) {
 
         } else {
-            $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
+            if ($isExport)
+                $this -> select = "ba.id_operation as _id, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, ba.counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ba.next_date, '%d/%m/%Y') as next_date, ba.operation_code as code, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, ba.detail, ba.enabled, 0 as selected";
+            else
+                $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
+
             $this -> table = "backup_automatics ba";
-            $this -> where = (($isQuery) ? "ba.id_backup = " . $this -> pk_Automatic["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Automatic, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_operation = " . $this -> pk_Automatic["id_operation"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+            $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Automatic["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Automatic, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_operation = " . $this -> pk_Automatic["id_operation"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
         }
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);

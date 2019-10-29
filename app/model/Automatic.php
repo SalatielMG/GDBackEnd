@@ -29,6 +29,26 @@ class Automatic extends DB
     ];
     public $columnsTableIndexUnique = [];
 
+    public $nameTableSQLITE = "table_automatics";
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "account", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "title", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "period", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "each", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "repeat", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "counter", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "initial_date", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "next_date", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "code", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "category", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "amount", "type" => Form::typeSQLITE_REAL],
+        ["name" => "sign", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "detail", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "enabled", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
+    ];
+
     public function __construct()
     {
         parent::__construct();

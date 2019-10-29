@@ -59,11 +59,11 @@ class ControlCurrency extends Valida
         if ($select) {
             $arreglo["currencies"] = $select;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS!";
+            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
             $arreglo["msj"] = "Se encontraron currencies en la tabla Table_Currencies";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS!";
+            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
             $arreglo["msj"] = "No se encontraron currencies en la tabla Table_Currencies";
         }
         return $arreglo;

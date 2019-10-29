@@ -30,8 +30,10 @@ class ControlCardView extends Valida
             $this -> pk_CardView["id_backup"] = Form::getValue("id_backup");
         }
         $arreglo = array();
-        $this -> select = ($isExport) ? "id_card, name, period, sign, show_card as show, number" : "id_card, name";
+        $this -> select = ($isExport) ? "id_card, name, period, sign, show_card as show_item, number" : "id_card, name";
         $this -> where = "id_backup = " . $this -> pk_CardView["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> cv -> columnsTableIndexUnique, ""). " HAVING COUNT( * ) >= 1 ORDER BY id_card";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> cv -> nameTable, $this -> where);
+        //return $arreglo;
         $cardviewBackup = $this -> cv -> mostrar($this -> where, $this -> select);
         if ($cardviewBackup) {
             $arreglo["cardviews"] = $cardviewBackup;

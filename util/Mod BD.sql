@@ -72,7 +72,20 @@ BEGIN
   if (nameAccount IS NULL) then
   	SET nameAccount = (SELECT account FROM backup_extras WHERE id_extra = idAccount and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
   	if(nameAccount IS NULL) then
-  		SET nameAccount = 'Cuenta no encontrada';
+
+  	  CASE idAccount
+        WHEN 10000 THEN
+         SET nameAccount = 'Transferencias';
+        WHEN 10001 THEN
+         SET nameAccount = 'Todas las cuentas';
+        WHEN 10002 THEN
+         SET nameAccount = 'Todas las categorias';
+        ELSE
+          BEGIN
+            SET nameAccount = 'Cuenta no encontrada';
+          END;
+      END CASE;
+
   	END if;
   END if;
 
@@ -93,7 +106,20 @@ BEGIN
   if (nameCategory IS NULL) then
   	SET nameCategory = (SELECT category FROM backup_extras WHERE id_extra = idCategory and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
   	if(nameCategory IS NULL) then
-  		SET nameCategory = 'Categoria no encontrada';
+
+  	  CASE idCategory
+        WHEN 10000 THEN
+         SET nameCategory = 'Transferencias';
+        WHEN 10001 THEN
+         SET nameCategory = 'Todas las cuentas';
+        WHEN 10002 THEN
+         SET nameCategory = 'Todas las categorias';
+        ELSE
+          BEGIN
+            SET nameCategory = 'Categoria no encontrada';
+          END;
+      END CASE;
+
   	END if;
   END if;
 

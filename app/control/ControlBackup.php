@@ -401,11 +401,13 @@ class ControlBackup extends Valida
         $dbSqlite -> generateSchema();
         $error = 0;
 
+        // ------------------------------ Insert Movements ------------------------------ //
         $control = new ControlMovement();
         $control -> setPk_Movement($id_backup);
         $query = $control -> buscarMovementsBackup(false, true);
         if (!$query["error"]) {
             $insert = $dbSqlite -> insertMultipleData("table_movements", $query["movements"], $control -> getMovementModel() -> columnsTableSQLITE);
+            $arreglo["insertMovements"] = $insert;
             if (!$insert) {
                 $error++;
                 $arreglo["errorInsert"][$error]["error"] = true;
@@ -413,23 +415,30 @@ class ControlBackup extends Valida
                 $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"table_movements\" sobre el fichero database.sqlite";
             }
         }
+        // ------------------------------ Insert Movements ------------------------------ //
 
+        // ------------------------------ Insert Currencies ------------------------------ //
         $control = new ControlCurrency();
         $control -> setPk_Currency($id_backup);
         $query = $control -> obtCurrenciesGralBackup(false, true);
         $insert = $dbSqlite -> insertMultipleData("table_currencies", $query["currencies"], $control -> getCurrencyModel() -> columnsTableSQLITE);
+        $arreglo["insertCurrencies"] = $insert;
         if (!$insert) {
             $error++;
             $arreglo["errorInsert"][$error]["error"] = true;
             $arreglo["errorInsert"][$error]["titulo"] = "";
             $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"table_currencies\" sobre el fichero database.sqlite";
         }
+        // ------------------------------ Insert Currencies ------------------------------ //
 
+        // ------------------------------ Insert Cardviews ------------------------------ //
         $control = new ControlCardView();
         $control -> setPk_CardView($id_backup);
         $query = $control -> obtCardViewsGralBackup(false, true);
+        //$arreglo["queryCardView"] = $query;
         if (!$query["error"]) {
             $insert = $dbSqlite -> insertMultipleData("table_cardviews", $query["cardviews"], $control -> getCardViewModel() -> columnsTableSQLITE);
+            $arreglo["insertCardViews"] = $insert;
             if (!$insert) {
                 $error++;
                 $arreglo["errorInsert"][$error]["error"] = true;
@@ -437,10 +446,88 @@ class ControlBackup extends Valida
                 $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"table_cardviews\" sobre el fichero database.sqlite";
             }
         }
+        // ------------------------------ Insert Cardviews ------------------------------ //
 
+        // ------------------------------ Insert Categories ------------------------------ //
+        $control = new ControlCategory($id_backup);
+        $query = $control ->  buscarCategoriesBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData($control -> getCategoryModel() -> nameTableSQLITE, $query["categories"], $control -> getCategoryModel() -> columnsTableSQLITE);
+            $arreglo["insertCategories"] = $insert;
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"" . $control -> getCategoryModel() -> nameTableSQLITE . "\" sobre el fichero database.sqlite";
+            }
+        }
+        // ------------------------------ Insert Categories ------------------------------ //
 
+        // ------------------------------ Insert Budgets ------------------------------ //
+        $control = new ControlBudget($id_backup);
+        $query = $control ->  buscarBudgetsBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData($control -> getBudgetModel() -> nameTableSQLITE, $query["budgets"], $control -> getBudgetModel() -> columnsTableSQLITE);
+            $arreglo["insertBudgets"] = $insert;
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"" . $control -> getBudgetModel() -> nameTableSQLITE . "\" sobre el fichero database.sqlite";
+            }
+        }
+        // ------------------------------ Insert Budgets ------------------------------ //
+
+        // ------------------------------ Insert Automatics ------------------------------ //
+        $control = new ControlAutomatic($id_backup);
+        $query = $control ->  buscarAutomaticsBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData($control -> getAutomaticModel() -> nameTableSQLITE, $query["automatics"], $control -> getAutomaticModel() -> columnsTableSQLITE);
+            $arreglo["insertAutomatics"] = $insert;
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"" . $control -> getAutomaticModel() -> nameTableSQLITE . "\" sobre el fichero database.sqlite";
+            }
+        }
+        // ------------------------------ Insert Automatics ------------------------------ //
+
+        // ------------------------------ Insert Accounts ------------------------------ //
+        $control = new ControlAccount($id_backup);
+        $query = $control ->  buscarAccountsBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData($control -> getAccountModel() -> nameTableSQLITE, $query["accounts"], $control -> getAccountModel() -> columnsTableSQLITE);
+            $arreglo["insertAccounts"] = $insert;
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"" . $control -> getAccountModel() -> nameTableSQLITE . "\" sobre el fichero database.sqlite";
+            }
+        }
+        // ------------------------------ Insert Accounts ------------------------------ //
+
+        // ------------------------------ Insert Preferences ------------------------------ //
+        $control = new ControlPreference($id_backup);
+        $query = $control ->  buscarPreferencesBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData($control -> getPreferenceModel() -> nameTableSQLITE, $query["preferences"], $control -> getPreferenceModel() -> columnsTableSQLITE);
+            $arreglo["insertPreferences"] = $insert;
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"" . $control -> getPreferenceModel() -> nameTableSQLITE . "\" sobre el fichero database.sqlite";
+            }
+        }
+        // ------------------------------ Insert Preferences ------------------------------ //
 
         if ($error == 0) {
+            /*header("Content-Type: application/force-download");
+            header("Content-disposition: attachment; filename=ExportBackupSQlite/database.sqlite");
+            header("Content-type: application/sqlite");
+            readfile("ExportBackupSQlite/database.sqlite");*/
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ EXPORTACIÓN TERMINADA !";
             $arreglo["msj"] = "Se creo correctamente el fichero SQLITE del Respaldo con id_backup: " . $id_backup;

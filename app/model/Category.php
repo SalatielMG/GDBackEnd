@@ -18,7 +18,7 @@ class Category extends DB
          ['name' => 'icon_name', 'type' => Form::typeVarchar],
          ['name' => 'number', 'type' => Form::typeSmallint],
     ];
-
+    public $nameTableSQLITE = "table_categories";
     public $columnsTableSQLITE = [
         ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
         ["name" => "account", "type" => Form::typeSQLITE_TEXT],
