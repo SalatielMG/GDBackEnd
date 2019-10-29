@@ -16,6 +16,13 @@ class Currency extends DB
         ['name' => 'icon_name', 'type' => Form::typeVarchar],
         ['name' => 'selected', 'type' => Form::typeTinyint],
     ];
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "iso_code", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "symbol", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "icon", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
+    ];
     public $columnsTableIndexUnique = [];
 
     public function __construct()

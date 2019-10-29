@@ -165,7 +165,7 @@ class DBSQLITE
         $sql = "INSERT INTO $tabla ";
         foreach ($arreglo as $key => $value) {
             $value = (array) $value;
-            if ($key == 0) $sql .= "(" . implode(", ", array_keys($value) ) . ") VALUES ";
+            if ($key == 0) $sql .= "(_id, " . implode(", ", array_keys($value) ) . ") VALUES ";
             $sql .= $this -> validKeyValueDataInSQLITE($value, $columnsTable);
         }
         $sql = substr_replace($sql, ";", strlen($sql) - 1);
@@ -176,13 +176,10 @@ class DBSQLITE
     private function validKeyValueDataInSQLITE($Value, $columsTable) {
         $sql = "";
         $Value = (array) $Value;
-        $sql .= "(";
+        $sql .= "(null ,";
         foreach ($columsTable as $key => $value) {
             if ($value["type"] == Form::typeSQLITE_INTEGER
             || $value["type"] == Form::typeSQLITE_REAL) {
-                if ($value["name"] == "_id"){
-                   $sql .= "null" . ",";
-                } else
                  $sql .= ((empty($Value[$value["name"]])) ? 0 : $Value[$value["name"]]) . ",";
             } else {
                 $sql .= "'" . $Value[$value["name"]] . "',";

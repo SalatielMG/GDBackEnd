@@ -42,7 +42,7 @@ class ControlMovement extends Valida
 
         } else {
             if ($export)
-                $this -> select = "0 as _id, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, bm.confirmed, bm.transfer, bm.date_idx, bm.day, bm.week, bm.fortnight, bm.month, bm.year, bm.operation_code as code, bm.picture, bm.iso_code, 0 as selected";
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, bm.confirmed, bm.transfer, bm.date_idx, bm.day, bm.week, bm.fortnight, bm.month, bm.year, bm.operation_code as code, bm.picture, bm.iso_code, 0 as selected";
             else
                 $this -> select = "bm.*, (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
             $this -> table = "backup_movements bm";

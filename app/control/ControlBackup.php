@@ -389,16 +389,66 @@ class ControlBackup extends Valida
     private function sqliteExport($id_backup) {
         require_once (APP_PATH . "model/DBSQLITE.php");
         require_once (APP_PATH . "control/ControlMovement.php");
+        require_once (APP_PATH . "control/ControlCurrency.php");
+        require_once (APP_PATH . "control/ControlCardView.php");
+        require_once (APP_PATH . "control/ControlCategory.php");
+        require_once (APP_PATH . "control/ControlBudget.php");
+        require_once (APP_PATH . "control/ControlAutomatic.php");
+        require_once (APP_PATH . "control/ControlAccount.php");
+        require_once (APP_PATH . "control/ControlPreference.php");
         $arreglo = array();
         $dbSqlite = new DBSQLITE();
         $dbSqlite -> generateSchema();
+        $error = 0;
 
-        $ctrlMovement = new ControlMovement();
-        $ctrlMovement -> setPk_Movement($id_backup);
-        $movements = $ctrlMovement -> buscarMovementsBackup(false, true);
-        $arreglo["Movs"] = $movements;
-        $arreglo["consultaSQL"] = $dbSqlite -> insertMultipleData("table_movements", $movements["movements"], $ctrlMovement -> getMovementModel() -> columnsTableSQLITE);
-        $arreglo["id_backup"] = $id_backup;
+        $control = new ControlMovement();
+        $control -> setPk_Movement($id_backup);
+        $query = $control -> buscarMovementsBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData("table_movements", $query["movements"], $control -> getMovementModel() -> columnsTableSQLITE);
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"table_movements\" sobre el fichero database.sqlite";
+            }
+        }
+
+        $control = new ControlCurrency();
+        $control -> setPk_Currency($id_backup);
+        $query = $control -> obtCurrenciesGralBackup(false, true);
+        $insert = $dbSqlite -> insertMultipleData("table_currencies", $query["currencies"], $control -> getCurrencyModel() -> columnsTableSQLITE);
+        if (!$insert) {
+            $error++;
+            $arreglo["errorInsert"][$error]["error"] = true;
+            $arreglo["errorInsert"][$error]["titulo"] = "";
+            $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"table_currencies\" sobre el fichero database.sqlite";
+        }
+
+        $control = new ControlCardView();
+        $control -> setPk_CardView($id_backup);
+        $query = $control -> obtCardViewsGralBackup(false, true);
+        if (!$query["error"]) {
+            $insert = $dbSqlite -> insertMultipleData("table_cardviews", $query["cardviews"], $control -> getCardViewModel() -> columnsTableSQLITE);
+            if (!$insert) {
+                $error++;
+                $arreglo["errorInsert"][$error]["error"] = true;
+                $arreglo["errorInsert"][$error]["titulo"] = "";
+                $arreglo["errorInsert"][$error]["msj"] = "Ocurrio un error al intentar ingresar los registros en la tabla \"table_cardviews\" sobre el fichero database.sqlite";
+            }
+        }
+
+
+
+        if ($error == 0) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ EXPORTACIÓN TERMINADA !";
+            $arreglo["msj"] = "Se creo correctamente el fichero SQLITE del Respaldo con id_backup: " . $id_backup;
+        } else {
+            $arreglo["error"] = "warning";
+            $arreglo["titulo"] = "¡ EXPORTACIÓN NO TERMINADA !";
+            $arreglo["msj"] = "Ocurrieron errores al crear el fichero SQLITE del Respaldo con id_backup: " . $id_backup;
+        }
         return $arreglo;
     }
     private function xlsExport($id_backup) {

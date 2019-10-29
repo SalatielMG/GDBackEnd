@@ -18,6 +18,16 @@ class Category extends DB
          ['name' => 'icon_name', 'type' => Form::typeVarchar],
          ['name' => 'number', 'type' => Form::typeSmallint],
     ];
+
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "account", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "category", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "sign", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "icon", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "number", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
+    ];
     public $columnsTableIndexUnique = [];
 
     public function __construct()

@@ -18,6 +18,15 @@ class CardView extends DB
         ['name' => 'show_card', 'type' => Form::typeTinyint],
         ['name' => 'number', 'type' => Form::typeSmallint],
     ];
+    public $columnsTableSQLITE = [
+        ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "id_card", "type" => Form::typeSQLITE_INTEGER],
+        ["name" => "name", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "period", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "sign", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "show", "type" => Form::typeSQLITE_TEXT],
+        ["name" => "number", "type" => Form::typeSQLITE_INTEGER],
+    ];
     public $columnsTableIndexUnique = [];
 
     public function __construct()

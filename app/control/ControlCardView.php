@@ -19,23 +19,29 @@ class ControlCardView extends Valida
     {
         $this -> cv = new CardView();
     }
-    public function obtCardViewsGralBackup($isQuery = true) {
+    public function setPk_CardView($id_backup) {
+        $this -> pk_CardView["id_backup"] = $id_backup;
+    }
+    public function getCardViewModel() {
+        return $this -> cv;
+    }
+    public function obtCardViewsGralBackup($isQuery = true, $isExport = false) {
         if ($isQuery) {
             $this -> pk_CardView["id_backup"] = Form::getValue("id_backup");
         }
         $arreglo = array();
-        $this -> select = "id_card, name";
+        $this -> select = ($isExport) ? "id_card, name, period, sign, show_card as show, number" : "id_card, name";
         $this -> where = "id_backup = " . $this -> pk_CardView["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> cv -> columnsTableIndexUnique, ""). " HAVING COUNT( * ) >= 1 ORDER BY id_card";
         $cardviewBackup = $this -> cv -> mostrar($this -> where, $this -> select);
         if ($cardviewBackup) {
             $arreglo["cardviews"] = $cardviewBackup;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ CARDVIEWS ENCONTRADOS !";
-            $arreglo["msj"] = "Se ecnontraron cardviews con ". $this -> keyValueArray($this -> pk_CardView);
+            $arreglo["msj"] = "Se encontraron cardviews con ". $this -> keyValueArray($this -> pk_CardView);
         } else {
-            $arreglo["error"] = false;
+            $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ CARDVIEWS NO ENCONTRADOS !";
-            $arreglo["msj"] = "No seencontraron cardviews con " . $this -> keyValueArray($this -> pk_CardView);
+            $arreglo["msj"] = "No se encontraron cardviews con " . $this -> keyValueArray($this -> pk_CardView);
         }
         return $arreglo;
     }

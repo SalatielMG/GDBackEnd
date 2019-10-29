@@ -23,6 +23,12 @@ class ControlCurrency extends Valida
         $this -> pk_Currency["id_backup"] = $id_backup;
         $this -> isCurrenciesAccount = $isCurrencyAccount;
     }
+    public function setPk_Currency($id_backup) {
+        $this -> pk_Currency["id_backup"] = $id_backup;
+    }
+    public function getCurrencyModel() {
+        return $this -> c;
+    }
     public function insertCurrencies() {
         $arreglo = array();
         $result = $this -> c -> mostrar("1", "*", "table_currencies");
@@ -44,9 +50,12 @@ class ControlCurrency extends Valida
         }
         return $arreglo;
     }
-    private function obtCurrenciesInTableCurrecies($notIn_ISo_Code) {
+    private function obtCurrenciesInTableCurrecies($notIn_ISo_Code, $isExport) {
         $arreglo = array();
-        $select = $this -> c -> mostrar("iso_code NOT IN $notIn_ISo_Code", "iso_code, symbol, icon as icon_name, selected", "table_currencies");
+        $this -> select = "iso_code, symbol, icon " . (($isExport) ? "" : "as icon_name") . ", selected";
+        $this -> table = "table_currencies";
+        $this -> where = "iso_code NOT IN $notIn_ISo_Code";
+        $select = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
         if ($select) {
             $arreglo["currencies"] = $select;
             $arreglo["error"] = false;
@@ -59,13 +68,14 @@ class ControlCurrency extends Valida
         }
         return $arreglo;
     }
-    public function obtCurrenciesGralBackup($isQuery = true) {
+    public function obtCurrenciesGralBackup($isQuery = true, $isExport = false) {
         if ($isQuery) {
             $this -> pk_Currency["id_backup"] = Form::getValue("id_backup");
         }
         $arreglo = array();
+        $this -> select = "iso_code, symbol, icon_name " . (($isExport) ? "as icon" : "") . ", selected";
         $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ";
-        $select = $this -> c -> mostrar($this -> where, "iso_code, symbol, icon_name, selected");
+        $select = $this -> c -> mostrar($this -> where, $this -> select);
         $this -> where = "('')";
         if (count($select) > 0) {
             $this -> where = "(";
@@ -74,12 +84,12 @@ class ControlCurrency extends Valida
             }
             $this -> where = substr_replace($this -> where, ")", strlen($this -> where) - 1);
         }
-        $currencies = $this -> obtCurrenciesInTableCurrecies($this -> where);
+        $currencies = $this -> obtCurrenciesInTableCurrecies($this -> where, $isExport);
         if (!$currencies["error"]) {
             $currencies = array_merge($currencies["currencies"], $select);
             sort($currencies);
         } else {
-            $currencies = $select;
+            $currencies = [];
         }
         $arreglo["currencies"] = $currencies;
         if ($select) {
