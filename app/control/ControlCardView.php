@@ -15,11 +15,9 @@ class ControlCardView extends Valida
     private $select = "";
     private $table = "";
 
-    public function __construct()
+    public function __construct($id_backup = 0)
     {
         $this -> cv = new CardView();
-    }
-    public function setPk_CardView($id_backup) {
         $this -> pk_CardView["id_backup"] = $id_backup;
     }
     public function getCardViewModel() {

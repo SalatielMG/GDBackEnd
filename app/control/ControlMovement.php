@@ -19,9 +19,10 @@ class ControlMovement extends Valida
     private $select = "";
     private $table = "";
 
-    public function __construct()
+    public function __construct($id_backup = 0)
     {
         $this -> m = new Movement();
+        $this -> pk_Movement["id_backup"] = $id_backup;
     }
     public function setPk_Movement($id_backup) {
         $this -> pk_Movement["id_backup"] = $id_backup;
@@ -29,7 +30,7 @@ class ControlMovement extends Valida
     public function getMovementModel() {
         return $this -> m;
     }
-    public function buscarMovementsBackup($isQuery = true, $export = false) {
+    public function buscarMovementsBackup($isQuery = true, $export = false, $typeExport = "sqlite") {
         if ($isQuery) {
             $this -> pk_Movement["id_backup"] = Form::getValue('id_backup');
             $this -> pagina = Form::getValue("pagina");
@@ -42,7 +43,11 @@ class ControlMovement extends Valida
 
         } else {
             if ($export)
-                $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, bm.confirmed, bm.transfer, bm.date_idx, bm.day, bm.week, bm.fortnight, bm.month, bm.year, bm.operation_code as code, bm.picture, bm.iso_code, 0 as selected";
+                if ($typeExport == "sqlite")
+                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, bm.confirmed, bm.transfer, bm.date_idx, bm.day, bm.week, bm.fortnight, bm.month, bm.year, bm.operation_code as code, bm.picture, bm.iso_code, 0 as selected";
+                else
+                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time";
+
             else
                 $this -> select = "bm.*, (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
             $this -> table = "backup_movements bm";

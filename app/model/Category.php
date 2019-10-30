@@ -30,6 +30,13 @@ class Category extends DB
     ];
     public $columnsTableIndexUnique = [];
 
+    public $nameSheetXLSX = "categories";
+    public $columnsSheetXLSX = [
+        ["name" => "account", "column" => "A"],
+        ["name" => "category", "column" => "B"],
+        ["name" => "sign", "column" => "C"],
+    ];
+
     public function __construct()
     {
         parent::__construct();

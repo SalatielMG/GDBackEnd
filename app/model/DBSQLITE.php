@@ -14,7 +14,7 @@ class DBSQLITE
     {
         if (empty($this -> db)) {
             try {
-                $this -> db = new PDO('sqlite:' . APP_PATH . 'exports/database.sqlite');
+                $this -> db = new PDO('sqlite:exports/database.sqlite');
                 $this -> db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $this -> db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
             } catch (Exception $e) {

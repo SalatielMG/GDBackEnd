@@ -31,7 +31,7 @@ class ControlAutomatic extends Valida
         return $this -> a;
     }
 
-    public function buscarAutomaticsBackup($isQuery = true, $isExport = false) {
+    public function buscarAutomaticsBackup($isQuery = true, $isExport = false, $typeExport = "sqlite") {
         if ($isQuery) {
             $this -> pk_Automatic["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
@@ -43,7 +43,10 @@ class ControlAutomatic extends Valida
 
         } else {
             if ($isExport)
-                $this -> select = "ba.id_operation as _id, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, ba.counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ba.next_date, '%d/%m/%Y') as next_date, ba.operation_code as code, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, ba.detail, ba.enabled, 0 as selected";
+                if ($typeExport == "sqlite")
+                    $this -> select = "ba.id_operation as _id, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, ba.counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ba.next_date, '%d/%m/%Y') as next_date, ba.operation_code as code, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, ba.detail, ba.enabled, 0 as selected";
+                else
+                    $this -> select = "CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, ba.counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ba.next_date, '%d/%m/%Y') as next_date, ba.enabled, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign";
             else
                 $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) cantidadRepetida";
 

@@ -23,9 +23,6 @@ class ControlCurrency extends Valida
         $this -> pk_Currency["id_backup"] = $id_backup;
         $this -> isCurrenciesAccount = $isCurrencyAccount;
     }
-    public function setPk_Currency($id_backup) {
-        $this -> pk_Currency["id_backup"] = $id_backup;
-    }
     public function getCurrencyModel() {
         return $this -> c;
     }
@@ -50,9 +47,15 @@ class ControlCurrency extends Valida
         }
         return $arreglo;
     }
-    private function obtCurrenciesInTableCurrecies($notIn_ISo_Code, $isExport) {
+    private function obtCurrenciesInTableCurrecies($notIn_ISo_Code, $isExport = false, $typeExport = "sqlite") {
         $arreglo = array();
-        $this -> select = "iso_code, symbol, icon " . (($isExport) ? "" : "as icon_name") . ", selected";
+        if ($isExport)
+            if ($typeExport == "sqlite")
+                $this -> select = "iso_code, symbol, icon, selected";
+            else
+                $this -> select = "iso_code, symbol";
+        else
+            $this -> select = "iso_code, symbol, icon as icon_name, selected";
         $this -> table = "table_currencies";
         $this -> where = "iso_code NOT IN $notIn_ISo_Code";
         $select = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
@@ -68,12 +71,18 @@ class ControlCurrency extends Valida
         }
         return $arreglo;
     }
-    public function obtCurrenciesGralBackup($isQuery = true, $isExport = false) {
+    public function obtCurrenciesGralBackup($isQuery = true, $isExport = false, $typeExport = "sqlite") {
         if ($isQuery) {
             $this -> pk_Currency["id_backup"] = Form::getValue("id_backup");
         }
         $arreglo = array();
-        $this -> select = "iso_code, symbol, icon_name " . (($isExport) ? "as icon" : "") . ", selected";
+        if ($isExport)
+            if ($typeExport == "sqlite")
+                $this -> select = "iso_code, symbol, icon_name as icon, selected";
+            else
+                $this -> select = "iso_code, symbol";
+        else
+            $this -> select = "iso_code, symbol, icon_name, selected";
         $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ";
         $select = $this -> c -> mostrar($this -> where, $this -> select);
         $this -> where = "('')";
@@ -84,7 +93,7 @@ class ControlCurrency extends Valida
             }
             $this -> where = substr_replace($this -> where, ")", strlen($this -> where) - 1);
         }
-        $currencies = $this -> obtCurrenciesInTableCurrecies($this -> where, $isExport);
+        $currencies = $this -> obtCurrenciesInTableCurrecies($this -> where, $isExport, $typeExport);
         if (!$currencies["error"]) {
             $currencies = array_merge($currencies["currencies"], $select);
             sort($currencies);

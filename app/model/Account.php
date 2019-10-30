@@ -55,6 +55,18 @@ class Account extends DB
         ["name" => "value_type", "type" => Form::typeSQLITE_INTEGER],
         ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
     ];
+    public $nameSheetXLSX = "accounts";
+    public $columnsSheetXLSX = [
+        ["name" => "account", "column" => "A"],
+        ["name" => "detail", "column" => "B"],
+        ["name" => "initial_balance", "column" => "C"],
+        ["name" => "sign", "column" => "D"],
+        ["name" => "income", "column" => "E"],
+        ["name" => "expense", "column" => "F"],
+        ["name" => "balance", "column" => "G"],
+        ["name" => "iso_code", "column" => "H"],
+    ];
+
     public function __construct()
     {
         parent::__construct();

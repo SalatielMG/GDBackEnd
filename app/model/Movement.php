@@ -31,6 +31,8 @@ class Movement extends DB
          ['name' => 'picture', 'type' => Form::typeVarchar],
          ['name' => 'iso_code', 'type' => Form::typeChar],
     ];
+
+    public $nameTableSQLITE = "table_movements";
     public $columnsTableSQLITE = [
         ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
         ["name" => "account", "type" => Form::typeSQLITE_TEXT],
@@ -54,6 +56,16 @@ class Movement extends DB
         ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
     ];
 
+    public $nameSheetXLSX = "movements";
+    public $columnsSheetXLSX = [
+        ["name" => "account", "column" => "A"],
+        ["name" => "category", "column" => "B"],
+        ["name" => "amount", "column" => "C"],
+        ["name" => "sign", "column" => "D"],
+        ["name" => "detail", "column" => "E"],
+        ["name" => "date", "column" => "F"],
+        ["name" => "time", "column" => "G"],
+    ];
 
     public function __construct()
     {

@@ -37,6 +37,15 @@ class Budget extends DB
         ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
     ];
 
+    public $nameSheetXLSX = "budgets";
+    public $columnsSheetXLSX = [
+        ["name" => "account", "column" => "A"],
+        ["name" => "category", "column" => "B"],
+        ["name" => "period", "column" => "C"],
+        ["name" => "amount", "column" => "D"],
+        ["name" => "budget", "column" => "E"],
+    ];
+
     public function __construct()
     {
         parent::__construct();

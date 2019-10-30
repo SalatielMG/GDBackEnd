@@ -79,7 +79,7 @@ class ControlAccount extends Valida
         return $arreglo;
     }
 
-    public function buscarAccountsBackup($isQuery = true, $isExport = false) {
+    public function buscarAccountsBackup($isQuery = true, $isExport = false, $typeExport = "sqlite") {
         if ($isQuery) {
             $this -> pk_Account["id_backup"] = Form::getValue('idBack');
             $this -> pagina = Form::getValue("pagina");
@@ -93,7 +93,10 @@ class ControlAccount extends Valida
             $this -> table = "backup_accounts ba, backup_currencies bc";
         } else {
             if ($isExport)
-                $this -> select = "ba.id_account as _id, ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.icon_name as icon, ba.income, ba.expense, ba.final_balance as balance, ba.month, ba.year, ba.negative_max, ba.positive_max, ba.iso_code, ba.rate, ba.include_total, ba.value_type, ba.selected";
+                if ($typeExport == "sqlite")
+                    $this -> select = "ba.id_account as _id, ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.icon_name as icon, ba.income, ba.expense, ba.final_balance as balance, ba.month, ba.year, ba.negative_max, ba.positive_max, ba.iso_code, ba.rate, ba.include_total, ba.value_type, ba.selected";
+                else
+                    $this -> select = "ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.income, ba.expense, ba.final_balance as balance, ba.iso_code";
             else
                 $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba";

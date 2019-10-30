@@ -16,6 +16,8 @@ class Currency extends DB
         ['name' => 'icon_name', 'type' => Form::typeVarchar],
         ['name' => 'selected', 'type' => Form::typeTinyint],
     ];
+
+    public $nameTableSQLITE = "table_currencies";
     public $columnsTableSQLITE = [
         ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
         ["name" => "iso_code", "type" => Form::typeSQLITE_TEXT],
@@ -24,6 +26,12 @@ class Currency extends DB
         ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
     ];
     public $columnsTableIndexUnique = [];
+
+    public $nameSheetXLSX = "currencies";
+    public $columnsSheetXLSX = [
+        ["name" => "iso_code", "column" => "A"],
+        ["name" => "symbol", "column" => "B"],
+    ];
 
     public function __construct()
     {

@@ -49,6 +49,22 @@ class Automatic extends DB
         ["name" => "selected", "type" => Form::typeSQLITE_INTEGER],
     ];
 
+    public $nameSheetXLSX = "automatics";
+    public $columnsSheetXLSX = [
+        ["name" => "title", "column" => "A"],
+        ["name" => "period", "column" => "B"],
+        ["name" => "each", "column" => "C"],
+        ["name" => "repeat", "column" => "D"],
+        ["name" => "counter", "column" => "E"],
+        ["name" => "initial_date", "column" => "F"],
+        ["name" => "next_date", "column" => "G"],
+        ["name" => "enabled", "column" => "H"],
+        ["name" => "account", "column" => "I"],
+        ["name" => "category", "column" => "J"],
+        ["name" => "amount", "column" => "K"],
+        ["name" => "sign", "column" => "L"],
+    ];
+
     public function __construct()
     {
         parent::__construct();

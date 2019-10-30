@@ -18,6 +18,7 @@ class CardView extends DB
         ['name' => 'show_card', 'type' => Form::typeTinyint],
         ['name' => 'number', 'type' => Form::typeSmallint],
     ];
+    public $nameTableSQLITE = "table_cardviews";
     public $columnsTableSQLITE = [
         ["name" => "_id", "type" => Form::typeSQLITE_INTEGER],
         ["name" => "id_card", "type" => Form::typeSQLITE_INTEGER],

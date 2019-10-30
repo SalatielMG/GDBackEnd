@@ -59,7 +59,7 @@ class ControlCategory extends Valida
         return $arreglo;
     }
 
-    public function buscarCategoriesBackup($isQuery = true, $isExport = false) {
+    public function buscarCategoriesBackup($isQuery = true, $isExport = false, $typeExport = "sqlite") {
         if ($isQuery) {
             $this -> pk_Category["id_backup"] = Form::getValue("id_backup");
             $this -> pagina = Form::getValue("pagina");
@@ -70,7 +70,10 @@ class ControlCategory extends Valida
 
         } else { // Table con inconsistencia de datos.
             if ($isExport)
-                $this -> select = "bc.id_category as _id, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign, bc.icon_name as icon, number, 0 as selected";
+                if ($typeExport == "sqlite")
+                    $this -> select = "bc.id_category as _id, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign, bc.icon_name as icon, number, 0 as selected";
+                else
+                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign";
             else
                 $this -> select = "bc.*, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
             $this -> table = $this -> c -> nameTable . " bc";
