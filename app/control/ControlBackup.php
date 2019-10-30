@@ -524,10 +524,6 @@ class ControlBackup extends Valida
         // ------------------------------ Insert Preferences ------------------------------ //
 
         if ($error == 0) {
-            /*header("Content-Type: application/force-download");
-            header("Content-disposition: attachment; filename=ExportBackupSQlite/database.sqlite");
-            header("Content-type: application/sqlite");
-            readfile("ExportBackupSQlite/database.sqlite");*/
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ EXPORTACIÓN TERMINADA !";
             $arreglo["msj"] = "Se creo correctamente el fichero SQLITE del Respaldo con id_backup: " . $id_backup;
@@ -538,8 +534,18 @@ class ControlBackup extends Valida
         }
         return $arreglo;
     }
+
     private function xlsExport($id_backup) {
         $arreglo["id_backup"] = $id_backup;
+        require_once (APP_PATH . "control/ControlCurrency.php");
+        require_once (APP_PATH . "exports/Reporte.php");
+        $control = new ControlCurrency();
+        $control -> setPk_Currency($id_backup);
+        $query = $control -> obtCurrenciesGralBackup(false, true);
+        $arreglo["insertCurrencies"] = $query;
+        /*session_start();
+        $_SESSION["currencies"] = $query["currencies"];*/
+        new Reporte();
         return $arreglo;
     }
 }
