@@ -44,7 +44,7 @@ class ControlBudget extends Valida
                 if ($typeExport == "sqlite")
                     $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, DATE_FORMAT(bd.initial_date, '%d/%m/%Y') as initial_date,  DATE_FORMAT(bd.final_date, '%d/%m/%Y') as final_date, 0 as show_item, bd.number, 0 as selected";
                 else
-                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget";
+                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol";
             else
                 $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
             $this -> table = "backup_budgets bd";

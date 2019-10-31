@@ -15,7 +15,6 @@ require (APP_UTIL . "librerias/PHPOffice/vendor/autoload.php");
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-
 class ExportXLSX
 {
     private $id_backup;
@@ -155,6 +154,17 @@ class ExportXLSX
                             break;
                     }
                     $sheetCurrent -> setCellValue($v["column"] . ($key + 5), $value[$index]);
+                    if ($v["name"] == "initial_balance"
+                    || $v["name"] == "income"
+                    || $v["name"] == "expense"
+                    || $v["name"] == "balance"
+                    || $v["name"] == "amount"
+                    || $v["name"] == "budget"
+                    ) {
+                        $sheetCurrent -> getStyle($v["column"] . ($key + 5)) -> getNumberFormat()
+                            ->setFormatCode($value["symbol"] . ' #,##0.00####');
+                    }
+                    $sheetCurrent -> getRowDimension(($key + 5)) -> setRowHeight(25);
                 }
             }
         } catch (Exception $e) {
