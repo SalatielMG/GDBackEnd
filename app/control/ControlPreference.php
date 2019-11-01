@@ -16,7 +16,7 @@ class ControlPreference extends Valida
     private $select = "";
     private $table = "";
     
-    public function __construct($id_backup)
+    public function __construct($id_backup = 0)
     {
         $this -> p = new Preference();
         $this -> pk_Preference["id_backup"] = $id_backup;
