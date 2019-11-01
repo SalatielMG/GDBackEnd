@@ -12,6 +12,7 @@
     require_once ("Preference.php");
     require_once ("User.php");
     require_once ("Usuario.php");
+    require_once ("Permiso.php");
     /*Rutas de prueba*/
 	Ruta::get("contraseña","Prueba@encriptacion");
 	Ruta::get("backupBD","Prueba@backupBD");

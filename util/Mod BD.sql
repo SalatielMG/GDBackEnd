@@ -1,3 +1,43 @@
+-- -----------------------------------------------------
+-- Table `usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `usuarios` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(50) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `tipo` ENUM('admin', 'auxiliar') NOT NULL,
+  `cargo` VARCHAR(50) NOT NULL,
+  `imagen` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 'admin', 'CEO');
+
+
+-- -----------------------------------------------------
+-- Table `permisos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `permisos` (
+  `permiso` VARCHAR(50) NOT NULL UNIQUE,
+  `descripcion` VARCHAR(255) NULL,
+  PRIMARY KEY (`permiso`))
+ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+-- -----------------------------------------------------
+-- Table `usuarios_permisos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `usuarios_permisos` (
+  `usuario` INT NOT NULL,
+  `permiso` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`usuario`, `permiso`),
+    FOREIGN KEY (`usuario`)
+    REFERENCES `usuarios` (`id`),
+    FOREIGN KEY (`permiso`)
+    REFERENCES `permisos` (`permiso`))
+ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+/*
 --
 -- Table structure for table `usuarios`
 --
@@ -12,12 +52,11 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
    PRIMARY KEY (`id`))
   ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 1, 1, 1, 1);
+insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 1, 1, 1, 1);*/
 
 --
--- Table structure for table `usuarios`
+-- Table structure for table `table_currencies`
 --
-
 CREATE TABLE IF NOT EXISTS `table_currencies` (
    `_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
    `iso_code` char(3) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',

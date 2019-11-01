@@ -6,9 +6,14 @@
  * Time: 11:09
  */
 require_once(APP_PATH.'model/Usuario.php');
+
 class ControlUsuario
 {
     private $u;
+    private $select = "";
+    private $table = "";
+    private $where = "";
+
     public function __construct() {
         $this -> u = new Usuario();
     }
@@ -34,7 +39,7 @@ class ControlUsuario
             if (password_verify($pass, $usuario -> password)) {
                 $arreglo["error"] = false;
                 $arreglo["titulo"] = "¡ LOGIN EXITOSO !";
-                $arreglo["id"] = base64_encode($usuario -> id);
+                $arreglo["idEncode"] = base64_encode($usuario -> id);
                 $arreglo["msj"] = "Bienvenido usuario $email";
             } else {
                 $arreglo["error"] = true;
@@ -49,5 +54,43 @@ class ControlUsuario
         return $arreglo;
     }
 
+    public function obtUsuariosGral() {
+        $id_usuario = Form::getValue("id_usuario", false);
+        $show_permiso = Form::getValue("show_permiso");
+        if ($id_usuario == 0) { // Busca todos los usuarios
+            $this -> $where = "1";
+        } else { // Busca todos los usuarios esxcepto con el id recibido
+            if(!empty($id_usuario)) {
+                $id_usuario = base64_decode($id_usuario);
+                $this -> where = "id != $id_usuario";
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ USUARIO NO RECIBIDO !";
+                $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
+                return $arreglo;
+            }
+        }
+        $arreglo = array();
+        $usuarios = $this -> u -> mostrar();
+        if ($usuarios) {
+            if ($show_permiso == 1) { //Buscar los permisos de cada usuario
+                require_once (APP_PATH . "control/ControlPermiso.php");
+                $ctrlPermiso = new ControlPermiso();
+                foreach ($usuarios as $key => $value) {
+                    $usuarios[$key]["permisos"] = $ctrlPermiso -> obtPermisosUsuario($value -> id);
+                }
+            }
+            $arreglo["usuarios"] = $usuarios;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ USUARIOS ENCONTRADOS !";
+            $arreglo["msj"] = "Se encontraron usuarios regsitrados en la base de datos";
+
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ USUARIOS NO ENCONTRADOS !";
+            $arreglo["msj"] = "NO se encontraron usuarios regsitrados en la base de datos";
+        }
+        return $arreglo;
+    }
 
 }
