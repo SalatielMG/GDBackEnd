@@ -93,4 +93,6 @@ class ControlUsuario
         return $arreglo;
     }
 
+
+
 }

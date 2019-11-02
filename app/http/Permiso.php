@@ -6,3 +6,6 @@
  * Time: 11:50 AM
  */
 Ruta::get("obtPermisosGral", "ControlPermiso@obtPermisosGral");
+Ruta::post("agregarPermiso", "ControlPermiso@agregarPermiso");
+Ruta::post("actualizarPermiso", "ControlPermiso@actualizarPermiso");
+Ruta::delete("eliminarPermiso", "ControlPermiso@eliminarPermiso");
