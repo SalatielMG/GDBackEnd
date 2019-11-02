@@ -58,7 +58,7 @@ class ControlUsuario
         $id_usuario = Form::getValue("id_usuario", false);
         $show_permiso = Form::getValue("show_permiso");
         if ($id_usuario == 0) { // Busca todos los usuarios
-            $this -> $where = "1";
+            $this -> where = "1";
         } else { // Busca todos los usuarios esxcepto con el id recibido
             if(!empty($id_usuario)) {
                 $id_usuario = base64_decode($id_usuario);

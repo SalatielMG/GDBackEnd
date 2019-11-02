@@ -6,3 +6,4 @@
  * Time: 01:32 PM
  */
 Ruta::post("login","ControlUsuario@login");
+Ruta::get("obtUsuariosGral","ControlUsuario@obtUsuariosGral");
