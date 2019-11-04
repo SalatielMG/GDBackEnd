@@ -5,7 +5,7 @@
  * Date: 01/11/2019
  * Time: 11:50 AM
  */
-Ruta::get("obtPermisosGral", "ControlPermiso@obtPermisosGral");
+Ruta::get("obtPermisosGral", "ControlPermiso@getPermisosGral");
 Ruta::post("agregarPermiso", "ControlPermiso@agregarPermiso");
 Ruta::post("actualizarPermiso", "ControlPermiso@actualizarPermiso");
 Ruta::delete("eliminarPermiso", "ControlPermiso@eliminarPermiso");

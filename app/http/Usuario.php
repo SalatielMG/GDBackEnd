@@ -7,3 +7,4 @@
  */
 Ruta::post("login","ControlUsuario@login");
 Ruta::get("obtUsuariosGral","ControlUsuario@obtUsuariosGral");
+Ruta::get("obtUsersGral","ControlUsuario@obtUsersGral");

@@ -8,7 +8,10 @@
 
 class Usuario extends DB
 {
-    public function mostrar($where = "1", $select = "*"){
-        return $this -> getDatos('usuarios', $select, $where);
+    public $nameTable = "usuarios";
+    public $nameTableMM = "usuarios_permisos";
+
+    public function mostrar($where = "1", $select = "*", $table = "usuarios"){
+        return $this -> getDatos($table, $select, $where);
     }
 }

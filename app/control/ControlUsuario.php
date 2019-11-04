@@ -7,7 +7,7 @@
  */
 require_once(APP_PATH.'model/Usuario.php');
 
-class ControlUsuario
+class ControlUsuario extends Valida
 {
     private $u;
     private $select = "";
@@ -54,6 +54,29 @@ class ControlUsuario
         return $arreglo;
     }
 
+    public function obtUsersGral() {
+        $arreglo = array();
+        $users = $this -> u -> mostrar();
+        if ($users) {
+            for ($i = 0; $i < 37 ; $i++)
+            {
+                foreach ($users as $key => $user) {
+                    $users[$i] = $user;
+                }
+            }
+            $arreglo["usuarios"] = $users;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Usuarios encontrados !";
+            $arreglo["msj"] = "Se econtraron usuarios registrados en la base de datos.";
+        } else {
+            $arreglo["usuarios"] = [];
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuarios no encontrados !";
+            $arreglo["msj"] = "No se econtraro usuarios registrad en la base de datos.";
+        }
+        return $arreglo;
+    }
+
     public function obtUsuariosGral() {
         $id_usuario = Form::getValue("id_usuario", false);
         $show_permiso = Form::getValue("show_permiso");
@@ -77,7 +100,7 @@ class ControlUsuario
                 require_once (APP_PATH . "control/ControlPermiso.php");
                 $ctrlPermiso = new ControlPermiso();
                 foreach ($usuarios as $key => $value) {
-                    $usuarios[$key]["permisos"] = $ctrlPermiso -> obtPermisosUsuario($value -> id);
+                    $usuarios[$key]["permisos"] = $ctrlPermiso -> obtPermisosUsuario($value -> id)["permisos"];
                 }
             }
             $arreglo["usuarios"] = $usuarios;
@@ -93,6 +116,25 @@ class ControlUsuario
         return $arreglo;
     }
 
-
+    public function obtUsuarios_Permiso($permiso) {
+        $arreglo = array();
+        $this -> select = "u.*";
+        $this -> table = "usuarios_permisos up, usuarios u";
+        $this -> where = "up.permiso = '$permiso' AND u.id = up.usuario";
+        $usuarios = $this -> u -> mostrar($this -> where , $this -> select, $this -> table);
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        if ($usuarios){
+            $arreglo["usuarios"] = $usuarios;
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ USUARIOS ASIGNADOS !";
+            $arreglo["msj"] = "Se econtraron usuarios asignados.";
+        } else {
+            $arreglo["usuarios"] = [];
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ USUARIOS NO ASIGNADOS !";
+            $arreglo["msj"] = "NO se econtraron usuarios asignados.";
+        }
+        return $arreglo;
+    }
 
 }
