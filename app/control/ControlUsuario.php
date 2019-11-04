@@ -58,7 +58,7 @@ class ControlUsuario extends Valida
         $arreglo = array();
         $users = $this -> u -> mostrar();
         if ($users) {
-            for ($i = 0; $i < 37 ; $i++)
+            for ($i = 0; $i < 35 ; $i++)
             {
                 foreach ($users as $key => $user) {
                     $users[$i] = $user;
@@ -100,7 +100,8 @@ class ControlUsuario extends Valida
                 require_once (APP_PATH . "control/ControlPermiso.php");
                 $ctrlPermiso = new ControlPermiso();
                 foreach ($usuarios as $key => $value) {
-                    $usuarios[$key]["permisos"] = $ctrlPermiso -> obtPermisosUsuario($value -> id)["permisos"];
+                    $value -> permisos = $ctrlPermiso -> obtPermisosUsuario($value -> id)["permisos"];
+                    //$usuarios[$key]["permisos"] = $ctrlPermiso -> obtPermisosUsuario($value -> id)["permisos"];
                 }
             }
             $arreglo["usuarios"] = $usuarios;
@@ -109,6 +110,7 @@ class ControlUsuario extends Valida
             $arreglo["msj"] = "Se encontraron usuarios regsitrados en la base de datos";
 
         } else {
+            $arreglo["usuarios"] = [];
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ USUARIOS NO ENCONTRADOS !";
             $arreglo["msj"] = "NO se encontraron usuarios regsitrados en la base de datos";

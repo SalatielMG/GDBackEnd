@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(50) NOT NULL UNIQUE,
   `password` VARCHAR(255) NOT NULL,
-  `tipo` ENUM('admin', 'auxiliar') NOT NULL,
+  `tipo` ENUM('admin', 'aux') NOT NULL,
   `cargo` VARCHAR(50) NOT NULL,
   `imagen` VARCHAR(255) NULL,
   PRIMARY KEY (`id`))
