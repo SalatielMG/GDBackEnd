@@ -96,6 +96,12 @@ class ControlUsuario extends Valida
         $arreglo = array();
         $usuarios = $this -> u -> mostrar();
         if ($usuarios) {
+            for ($i = 0; $i < 35 ; $i++)
+            {
+                foreach ($usuarios as $key => $user) {
+                    $usuarios[$i] = $user;
+                }
+            }
             if ($show_permiso == 1) { //Buscar los permisos de cada usuario
                 require_once (APP_PATH . "control/ControlPermiso.php");
                 $ctrlPermiso = new ControlPermiso();
