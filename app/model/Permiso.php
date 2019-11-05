@@ -16,17 +16,18 @@ class Permiso extends DB
     }
     public function agregar($permisoNuevo) {
         $permiso = [
+            "id" => "null",
             "permiso" => "'" . $permisoNuevo -> permiso . "'",
             "descripcion" => "'" . $permisoNuevo -> descripcion . "'",
         ];
         return $this -> insert($this -> nameTable, $permiso);
     }
-    public function agregarUsuarios_Permiso($permiso, $userSelected) {
+    public function agregarUsuarios_Permiso($id_permiso, $userSelected) {
         $data = array();
         foreach ($userSelected as $key => $value){
             $data[$key] = [
                 "usuario" => $value,
-                "permiso" => "'$permiso'",
+                "permiso" => $id_permiso,
             ];
         }
         return $this -> insertMultipleData($this -> nameTableMM, $data);
@@ -36,12 +37,12 @@ class Permiso extends DB
             "permiso" => "'" . $permisoNuevo -> permiso . "'",
             "descripcion" => "'" . $permisoNuevo -> descripcion . "'",
         ];
-        return $this -> update($this -> nameTable, $permiso, "permiso = '$permisoSeleccionado->permiso'");
+        return $this -> update($this -> nameTable, $permiso, "id = $permisoSeleccionado->id");
     }
-    public function eliminar($permiso) {
-        return $this -> delete($this -> nameTable, "permiso = '$permiso'");
+    public function eliminar($id_permiso) {
+        return $this -> delete($this -> nameTable, "id = $id_permiso");
     }
-    public function eliminarUsuario_Permiso($permiso) {
-        return $this -> delete($this -> nameTableMM, "permiso = '$permiso'");
+    public function eliminarUsuario_Permiso($id_permiso) {
+        return $this -> delete($this -> nameTableMM, "permiso = $id_permiso");
     }
 }

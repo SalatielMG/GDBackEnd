@@ -22,7 +22,7 @@ class ControlPermiso extends Valida
 
     public function getPermisosGral($isQuery = true) {
         $arreglo = array();
-        $this -> where = ($isQuery) ? "1": "permiso = '" . $this -> pk_Permiso["permiso"] . "'";
+        $this -> where = ($isQuery) ? "1": "id = " . $this -> pk_Permiso["id"];
         $permisos = $this -> p -> mostrar($this -> where);
         $arreglo["consultaSQL"] = $this -> consultaSQL("*", $this -> p -> nameTable, $this -> where);
         if ($permisos) {
@@ -32,7 +32,7 @@ class ControlPermiso extends Valida
             $ctrlUsuario = new ControlUsuario();
             foreach ($permisos as $key => $value) {
                 //$UserPermiso = $ctrlUsuario -> obtUsuarios_Permiso($value -> permiso);
-                $value -> usuarios = $ctrlUsuario -> obtUsuarios_Permiso($value -> permiso)["usuarios"];
+                $value -> usuarios = $ctrlUsuario -> obtUsuarios_Permiso($value -> id)["usuarios"];
                 //$arreglo[$key]["UserPermiso"] = $UserPermiso;
                 //$arreglo[$key]["value"] = $value;
                 //$permisos[$key] = $value;
@@ -41,17 +41,17 @@ class ControlPermiso extends Valida
             $arreglo["permisos"] = $permisos;
             $arreglo["error"] = false;
             $arreglo["titulo"] = ($isQuery) ? "¡ PERMISOS ENCONTRADOS !" : "¡ PERMISO ENCONTRADO !";
-            $arreglo["msj"] = ($isQuery) ? "Se econtraron permisos registrados en la base de datos." : "Se encontro el Permiso: " . $this -> pk_Permiso["permiso"] . " en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "Se econtraron permisos registrados en la base de datos." : "Se encontro el Permiso: " . $this -> pk_Permiso["id"] . " en la base de datos.";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ? "¡ PERMISOS NO ENCONTRADOS !" : "¡ PERMISO NO ENCONTRADO !";
-            $arreglo["msj"] = ($isQuery) ? "No se econtraron permisos registrados en la base de datos." : "No se encontro el Permiso " . $this -> pk_Permiso["permiso"] . " en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "No se econtraron permisos registrados en la base de datos." : "No se encontro el Permiso " . $this -> pk_Permiso["id"] . " en la base de datos.";
         }
         return $arreglo;
     }
     public function obtPermisosUsuario($id_usuario) {
         $arreglo = array();
-        $this -> where = "up.usuario = $id_usuario AND up.permiso = p.permiso";
+        $this -> where = "up.usuario = $id_usuario AND up.permiso = p.id";
         $this -> table = "usuarios_permisos up, permisos p";
         $this -> select = "p.*";
         $permisos = $this -> p -> mostrar($this -> where, $this -> select, $this -> table);
@@ -69,6 +69,18 @@ class ControlPermiso extends Valida
         }
         return $arreglo;
     }
+
+    public function obtMaxIdPermiso(){
+        $arreglo = array();
+        $arreglo["error"] = true;
+        $idMax = $this -> p -> mostrar("1", "max(id) as id");
+        if ($idMax) {
+            $arreglo["error"] = false;
+            $arreglo["id"] = $idMax[0] -> id;
+        }
+        return $arreglo;
+    }
+
     public function verifyExistsPermiso ($permiso, $isUpdate = false) {
         $arreglo = array();
         $arreglo["error"] = false;
@@ -90,25 +102,32 @@ class ControlPermiso extends Valida
         $insert = $this -> p -> agregar($permiso);
         if ($insert) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ PERMISO AGREGADO !";
+            $arreglo["titulo"] = "¡ Permiso agregado !";
             $arreglo["msj"] = "El Permiso: " . $permiso -> permiso . " se ha agregado correctamente";
-            // Eliminar los usuarios relacionados con el privilegio y volverlos a agregar de acuerdo a l lista de $userSelected.
+
+            $newIdPermiso = $this -> obtMaxIdPermiso();
+            if ($newIdPermiso["error"]) {
+                $arreglo["error"] = true;
+                $arreglo["msj"] = "El Permiso: " . $permiso -> permiso . " se ha agregado correctamente, pero no se pudo recuperar los datos. Porfavor recargue la pagina";
+                return $arreglo;
+            }
             if (count($userSelected) > 0) {
-                $insertUsuarios_Permiso = $this -> p -> agregarUsuarios_Permiso($permiso -> permiso, $userSelected);
+                $insertUsuarios_Permiso = $this -> p -> agregarUsuarios_Permiso($newIdPermiso["id"], $userSelected);
+                $arreglo["msj"] = "El Permiso: " . $permiso -> permiso . " se ha agregado y asignado correctamente los usuarios privilegiados.";
                 if (!$insertUsuarios_Permiso) {
-                    $arreglo["error"] = true;
-                    $arreglo["titulo"] = "¡ PERMISO AGREGADO !";
-                    $arreglo["msj"] = "El Permiso: " . $permiso -> permiso . " se ha agregado correctamente, pero no se han podido agregar satisfactoriamente los usuarios asignados al permiso. Porfavor verifique y vuelva a itentarlo.";
-                    return $arreglo;
+                    $arreglo["msj"] = "El Permiso: " . $permiso -> permiso . " se ha agregado correctamente, pero no se han podido agregar satisfactoriamente los usuarios asignados al permiso. Porfavor verifique y vuelva a asignarlos.";
                 }
             }
-            $this -> pk_Permiso["permiso"] = $permiso -> permiso;
+
+            $this -> pk_Permiso["id"] = $newIdPermiso["id"];
             $permisoNew = $this -> getPermisosGral(false);
             $arreglo["permisoNew"] = $permisoNew;
             $arreglo["permiso"]["error"] = $permisoNew["error"];
             $arreglo["permiso"]["titulo"] = $permisoNew["titulo"];
             $arreglo["permiso"]["msj"] = $permisoNew["msj"];
-            if (!$arreglo["permiso"]["error"]) $arreglo["permiso"]["new"] = $permisoNew["permisos"][0];
+            if (!$arreglo["permiso"]["error"]) {
+                $arreglo["permiso"]["new"] = $permisoNew["permisos"][0];
+            }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ PERMISO NO AGREGADO !";
@@ -120,35 +139,35 @@ class ControlPermiso extends Valida
         $arreglo = array();
         $permiso = json_decode(Form::getValue("permiso", false, false));
         $permisoSelected = json_decode(Form::getValue("permisoSelected", false, false));
-        $userSelected = json_decode(Form::getValue("userSelected", false, false));
+        $isChangeUsers = json_decode(Form::getValue("isChangeUsers", false, false));
 
         if (strtoupper($permiso -> permiso) != strtoupper($permisoSelected -> permiso)) {
             $arreglo = $this -> verifyExistsPermiso($permiso -> permiso, true);
             if ($arreglo["error"]) return $arreglo;
-        }
-        $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permisoSelected -> permiso);
-        if (!$deleteUsuarios_Permiso) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE DEPEDENCIAS !";
-            $arreglo["msj"] = "No se pudieron actualizar la relación entre usuarios asignados al permiso. Porvafor, verifique y vuelta a intentarlo";
-            return $arreglo;
         }
         $update = $this -> p -> actualizar($permiso, $permisoSelected);
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ PERMISO ACTUALIZADO !";
             $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente";
-            // Eliminar los usuarios relacionados con el privilegio y volverlos a agregar de acuerdo a l lista de $userSelected.
-            if (count($userSelected) > 0) {
-                $updateUsuarios_Permiso = $this -> p -> agregarUsuarios_Permiso($permiso -> permiso, $userSelected);
-                if (!$updateUsuarios_Permiso) {
-                    $arreglo["error"] = true;
-                    $arreglo["titulo"] = "¡ PERMISO ACTUALIZADO !";
-                    $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los usuarios asignados al permiso. Porfavor verifique y vuelva a itentarlo.";
+
+            if ($isChangeUsers -> isChangeUsers) { // Actualizar usuarios
+                $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado y también asignados los usuarios correctamente.";
+                $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permisoSelected -> id);
+                if (!$deleteUsuarios_Permiso) {
+                    $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los usuarios asignados al permiso (Error en 1° etapa). Porfavor verifique y vuelva a itentarlo.";
                     return $arreglo;
                 }
+                if (count($isChangeUsers -> userSelected) > 0) {
+                    $updateUsuarios_Permiso = $this -> p -> agregarUsuarios_Permiso($permiso -> id, $isChangeUsers -> userSelected);
+                    if (!$updateUsuarios_Permiso) {
+                        $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los usuarios asignados al permiso (Error en 1° etapa). Porfavor verifique y vuelva a itentarlo.";
+                    }
+                }
+
             }
-            $this -> pk_Permiso["permiso"] = $permiso -> permiso;
+
+            $this -> pk_Permiso["id"] = $permiso -> id;
             $permisoUpdate = $this -> getPermisosGral(false);
             $arreglo["permisoUpdate"] = $permisoUpdate;
             $arreglo["permiso"]["error"] = $permisoUpdate["error"];
@@ -165,9 +184,9 @@ class ControlPermiso extends Valida
     public function eliminarPermiso () {
         $arreglo = array();
         $permiso = json_decode(Form::getValue("permiso", false, false));
-        $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permiso -> permiso);
+        $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permiso -> id);
         if ($deleteUsuarios_Permiso) {
-            $delete = $this -> p -> eliminar($permiso -> permiso);
+            $delete = $this -> p -> eliminar($permiso -> id);
             if ($delete) {
                 $arreglo["error"] = false;
                 $arreglo["titulo"] = "¡ PERMISO ELIMINADO !";
@@ -181,6 +200,44 @@ class ControlPermiso extends Valida
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ERROR DE DEPENDENCIAS !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar los usuarios asociados al Permiso: " . $permiso -> permiso;
+        }
+        return $arreglo;
+    }
+    public function actualizarUsuarios_Permiso() {
+        $arreglo = array();
+        $isChangeUsers = json_decode(Form::getValue("isChangeUsers", false, false));
+        if ($isChangeUsers -> isChangeUsers) { // Actualizar usuarios
+            $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($isChangeUsers -> permisoSelected -> id);
+            if (!$deleteUsuarios_Permiso) {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Usuarios no asignados !";
+                $arreglo["msj"] = "No se han podido actualizar satisfactoriamente los usuarios asignados al Permiso: " . $isChangeUsers -> permisoSelected -> permiso . ". (Error en 1° etapa => eliminación). Porfavor verifique y vuelva a itentarlo.";
+                return $arreglo;
+            }
+            if (count($isChangeUsers -> userSelected) > 0) {
+                $updateUsuarios_Permiso = $this -> p -> agregarUsuarios_Permiso($isChangeUsers -> permisoSelected -> id, $isChangeUsers -> userSelected);
+                if (!$updateUsuarios_Permiso) {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Usuarios no asignados !";
+                    $arreglo["msj"] = "No se han podido actualizar satisfactoriamente los usuarios asignados al Permiso: " . $isChangeUsers -> permisoSelected -> permiso . ". (Error en 1° etapa). Porfavor verifique y vuelva a itentarlo.";
+                } else {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Usuarios asignados !";
+                    $arreglo["msj"] = "Se actualizo la lista de usuarios asignados al Permiso: " . $isChangeUsers -> permisoSelected -> permiso;
+                    require_once (APP_PATH . "control/ControlUsuario.php");
+                    $ctrlUsuario = new ControlUsuario();
+                    $arreglo["usuarios"] = $ctrlUsuario -> obtUsuarios_Permiso($isChangeUsers -> permisoSelected -> id);
+                }
+            } else {
+                $arreglo["error"] = false;
+                $arreglo["titulo"] = "¡ Usuarios designados !";
+                $arreglo["msj"] = "Se detecto una lista vacia de usuarios asignados por lo tanto se resetearon los usuarios del Permiso: " . $isChangeUsers -> permisoSelected -> permiso;
+            }
+
+        } else {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Operación inecesaria !";
+            $arreglo["msj"] = "No se detecto nigun cambio en la lista de usuarios seleccionados. No es necesario actualizar";
         }
         return $arreglo;
     }

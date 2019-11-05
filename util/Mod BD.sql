@@ -2,7 +2,7 @@
 -- Table `usuarios`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `usuarios` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(50) NOT NULL UNIQUE,
   `password` VARCHAR(255) NOT NULL,
   `tipo` ENUM('admin', 'aux') NOT NULL,
@@ -18,9 +18,10 @@ insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4L
 -- Table `permisos`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `permisos` (
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
   `permiso` VARCHAR(50) NOT NULL UNIQUE,
   `descripcion` VARCHAR(255) NULL,
-  PRIMARY KEY (`permiso`))
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -28,13 +29,13 @@ ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 -- Table `usuarios_permisos`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `usuarios_permisos` (
-  `usuario` INT NOT NULL,
-  `permiso` VARCHAR(50) NOT NULL,
+  `usuario` SMALLINT NOT NULL,
+  `permiso` SMALLINT NOT NULL,
   PRIMARY KEY (`usuario`, `permiso`),
     FOREIGN KEY (`usuario`)
     REFERENCES `usuarios` (`id`),
     FOREIGN KEY (`permiso`)
-    REFERENCES `permisos` (`permiso`))
+    REFERENCES `permisos` (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 /*
@@ -58,7 +59,7 @@ insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4L
 -- Table structure for table `table_currencies`
 --
 CREATE TABLE IF NOT EXISTS `table_currencies` (
-   `_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `_id` SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
    `iso_code` char(3) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
    `symbol` char(5) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
    `icon` varchar(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',

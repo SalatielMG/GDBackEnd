@@ -8,4 +8,5 @@
 Ruta::get("obtPermisosGral", "ControlPermiso@getPermisosGral");
 Ruta::post("agregarPermiso", "ControlPermiso@agregarPermiso");
 Ruta::post("actualizarPermiso", "ControlPermiso@actualizarPermiso");
+Ruta::post("actualizarUsuarios_Permiso", "ControlPermiso@actualizarUsuarios_Permiso");
 Ruta::delete("eliminarPermiso", "ControlPermiso@eliminarPermiso");
