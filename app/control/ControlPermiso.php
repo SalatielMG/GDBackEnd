@@ -22,21 +22,22 @@ class ControlPermiso extends Valida
 
     public function getPermisosGral($isQuery = true) {
         $arreglo = array();
+        if ($isQuery) {
+            $show_usuario = Form::getValue("show_usuario");
+        } else {
+            $show_usuario = 1;
+        }
         $this -> where = ($isQuery) ? "1": "id = " . $this -> pk_Permiso["id"];
         $permisos = $this -> p -> mostrar($this -> where);
         $arreglo["consultaSQL"] = $this -> consultaSQL("*", $this -> p -> nameTable, $this -> where);
         if ($permisos) {
             //$arreglo["Beforepermisos"] = $permisos;
-
-            require_once (APP_PATH . "control/ControlUsuario.php");
-            $ctrlUsuario = new ControlUsuario();
-            foreach ($permisos as $key => $value) {
-                //$UserPermiso = $ctrlUsuario -> obtUsuarios_Permiso($value -> permiso);
-                $value -> usuarios = $ctrlUsuario -> obtUsuarios_Permiso($value -> id)["usuarios"];
-                //$arreglo[$key]["UserPermiso"] = $UserPermiso;
-                //$arreglo[$key]["value"] = $value;
-                //$permisos[$key] = $value;
-                //$p = $ctrlUsuario -> obtUsuarios_Permiso($value -> permiso)["usuarios"];
+            if ($show_usuario == 1) {
+                require_once (APP_PATH . "control/ControlUsuario.php");
+                $ctrlUsuario = new ControlUsuario();
+                foreach ($permisos as $key => $value) {
+                    $value -> usuarios = $ctrlUsuario -> obtUsuarios_Permiso($value -> id)["usuarios"];
+                }
             }
             $arreglo["permisos"] = $permisos;
             $arreglo["error"] = false;
@@ -88,8 +89,8 @@ class ControlPermiso extends Valida
         $result = $this -> p -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PERMISO EXISTENTE !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Permiso, porque ya existe un registro en la BD con el mismo nombre. Porfavor verifique y vuelva a intentarlo";
+            $arreglo["titulo"] = "¡ Permiso existente !";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Permiso, porque ya existe un registro en la BD con el mismo permiso. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }
@@ -121,7 +122,6 @@ class ControlPermiso extends Valida
 
             $this -> pk_Permiso["id"] = $newIdPermiso["id"];
             $permisoNew = $this -> getPermisosGral(false);
-            $arreglo["permisoNew"] = $permisoNew;
             $arreglo["permiso"]["error"] = $permisoNew["error"];
             $arreglo["permiso"]["titulo"] = $permisoNew["titulo"];
             $arreglo["permiso"]["msj"] = $permisoNew["msj"];
@@ -130,7 +130,7 @@ class ControlPermiso extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PERMISO NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Permiso agregado !";
             $arreglo["msj"] = "Ocurrio un error al intentar agregar el nuevo Permiso: " . $permiso -> permiso;
         }
         return $arreglo;
@@ -152,7 +152,7 @@ class ControlPermiso extends Valida
             $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente";
 
             if ($isChangeUsers -> isChangeUsers) { // Actualizar usuarios
-                $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado y también asignados los usuarios correctamente.";
+                $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado y asignados los usuarios correctamente.";
                 $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permisoSelected -> id);
                 if (!$deleteUsuarios_Permiso) {
                     $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los usuarios asignados al permiso (Error en 1° etapa). Porfavor verifique y vuelva a itentarlo.";
@@ -161,7 +161,7 @@ class ControlPermiso extends Valida
                 if (count($isChangeUsers -> userSelected) > 0) {
                     $updateUsuarios_Permiso = $this -> p -> agregarUsuarios_Permiso($permiso -> id, $isChangeUsers -> userSelected);
                     if (!$updateUsuarios_Permiso) {
-                        $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los usuarios asignados al permiso (Error en 1° etapa). Porfavor verifique y vuelva a itentarlo.";
+                        $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los usuarios asignados al permiso (Error en 2° etapa). Porfavor verifique y vuelva a itentarlo.";
                     }
                 }
 
@@ -183,23 +183,23 @@ class ControlPermiso extends Valida
     }
     public function eliminarPermiso () {
         $arreglo = array();
-        $permiso = json_decode(Form::getValue("permiso", false, false));
-        $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permiso -> id);
+        $permisoSelected = json_decode(Form::getValue("permisoSelected", false, false));
+        $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permisoSelected -> id);
         if ($deleteUsuarios_Permiso) {
-            $delete = $this -> p -> eliminar($permiso -> id);
+            $delete = $this -> p -> eliminar($permisoSelected -> id);
             if ($delete) {
                 $arreglo["error"] = false;
                 $arreglo["titulo"] = "¡ PERMISO ELIMINADO !";
-                $arreglo["msj"] = "El Permiso: " . $permiso -> permiso . " se ha eliminado correctamente";
+                $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha eliminado correctamente";
             } else {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ PERMISO NO ELIMINADO !";
-                $arreglo["msj"] = "Ocurrio un error al intentar eliminar el Permiso: " . $permiso -> permiso;
+                $arreglo["msj"] = "Ocurrio un error al intentar eliminar el Permiso: " . $permisoSelected -> permiso;
             }
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ ERROR DE DEPENDENCIAS !";
-            $arreglo["msj"] = "Ocurrio un error al intentar eliminar los usuarios asociados al Permiso: " . $permiso -> permiso;
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar los usuarios asociados al Permiso: " . $permisoSelected -> permiso;
         }
         return $arreglo;
     }
@@ -236,11 +236,10 @@ class ControlPermiso extends Valida
                     "error" => false, "usuarios" => []
                 ];
             }
-
         } else {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Operación inecesaria !";
-            $arreglo["msj"] = "No se detecto nigun cambio en la lista de usuarios seleccionados. No es necesario actualizar";
+            $arreglo["msj"] = "No se detecto nigun cambio en la lista de usuarios seleccionados. No fue necesario actualizar";
         }
         return $arreglo;
     }

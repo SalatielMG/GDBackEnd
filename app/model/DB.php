@@ -145,6 +145,7 @@ class DB {
         $campos = array_keys($datos);
         $values = array_values($datos);
         $sql = "INSERT INTO ".$tabla." (".implode(", " , $campos).") VALUES (".implode(", ", $values).");";
+        //return $sql;
         return $this -> solicitud($sql);
     }
 
