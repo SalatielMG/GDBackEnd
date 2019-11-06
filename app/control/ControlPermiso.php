@@ -219,7 +219,7 @@ class ControlPermiso extends Valida
                 if (!$updateUsuarios_Permiso) {
                     $arreglo["error"] = true;
                     $arreglo["titulo"] = "¡ Usuarios no asignados !";
-                    $arreglo["msj"] = "No se han podido actualizar satisfactoriamente los usuarios asignados al Permiso: " . $isChangeUsers -> permisoSelected -> permiso . ". (Error en 1° etapa). Porfavor verifique y vuelva a itentarlo.";
+                    $arreglo["msj"] = "No se han podido actualizar satisfactoriamente los usuarios asignados al Permiso: " . $isChangeUsers -> permisoSelected -> permiso . ". (Error en 1° etapa => insercción). Porfavor verifique y vuelva a itentarlo.";
                 } else {
                     $arreglo["error"] = false;
                     $arreglo["titulo"] = "¡ Usuarios asignados !";
@@ -232,6 +232,9 @@ class ControlPermiso extends Valida
                 $arreglo["error"] = false;
                 $arreglo["titulo"] = "¡ Usuarios designados !";
                 $arreglo["msj"] = "Se detecto una lista vacia de usuarios asignados por lo tanto se resetearon los usuarios del Permiso: " . $isChangeUsers -> permisoSelected -> permiso;
+                $arreglo["usuarios"] = [
+                    "error" => false, "usuarios" => []
+                ];
             }
 
         } else {
