@@ -7,7 +7,9 @@
  */
 require_once(APP_PATH.'model/Usuario.php');
 
-class ControlUsuario extends Valida
+class
+
+ControlUsuario extends Valida
 {
     private $u;
     private $select = "";
@@ -28,7 +30,7 @@ class ControlUsuario extends Valida
         $errores = count($form -> errores);
         if ($errores > 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+            $arreglo["titulo"] = "¡ Error de validación !";
             $arreglo["msj"] = $form -> errores;
             return $arreglo;
         }
@@ -39,17 +41,25 @@ class ControlUsuario extends Valida
             $pass = $data -> pass;
             if (password_verify($pass, $usuario -> password)) {
                 $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ LOGIN EXITOSO !";
-                $arreglo["idEncode"] = base64_encode($usuario -> id);
+                $arreglo["titulo"] = "¡ Login exitoso !";
+                $arreglo["id"] = base64_encode($usuario -> id);
                 $arreglo["msj"] = "Bienvenido usuario $email";
+
+                $this -> pk_Usuario["id"] = $usuario -> id;
+                $usuarioLogin = $this -> obtUsuariosGral(false);
+                if (!$usuarioLogin["error"]){
+                    $usuarioLogin["usuarios"][0] -> id = $arreglo["id"];
+                    $usuarioLogin["usuarios"][0] -> password = "";
+                }
+                $arreglo["usuario"] = $usuarioLogin;
             } else {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ CONTRASEÑA INCORRECTA !";
+                $arreglo["titulo"] = "¡ Contraseña incorrecta !";
                 $arreglo["msj"] = "La contraseña proporcionada no es correcta";
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ EMAIL NO ENCONTRADO !";
+            $arreglo["titulo"] = "¡ Emal no encontrado !";
             $arreglo["msj"] = "No existe ningun usuario registrado con el correo: $email";
         }
         return $arreglo;
@@ -152,12 +162,46 @@ class ControlUsuario extends Valida
         }
         return $arreglo;
     }
+    private function uploadImage($isChange, $nameImg) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        $arreglo["msj"] = "No hay imagen para subir";
+        if ($isChange == "true") {
+            $path = APP_UTIL . "avatar/";
+
+            if (isset($_FILES['imagen'])) {
+                $imagen = $_FILES['imagen'];
+                if (!is_writable($path)) {
+                    $arreglo["error"] = true;
+                    $arreglo["msj"] = "El directorio de destino no tiene permisos de escritura";
+                    return $arreglo;
+                }
+                $ext = '.' . pathinfo($imagen['name'], PATHINFO_EXTENSION);
+                $generatedName = $nameImg . $ext;
+                $filePath = $path . $generatedName;
+                $arreglo["error"] = true;
+                $arreglo["msj"] = "No se pudo subir la imagen.";
+                if (move_uploaded_file($imagen['tmp_name'], $filePath)) {
+                    $arreglo["error"] = false;
+                    $arreglo["msj"] = "Se subio la imagen correctamente.";
+                    $this -> u -> update($this -> u -> nameTable, ["imagen" => "'" . $generatedName . "'"], "id = " . $nameImg);
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["msj"] = "No se recibio ningun imagen para subir.";
+            }
+        }
+        return $arreglo;
+    }
     public function agregarUsuario() {
         $arreglo = array();
         $usuario = json_decode(Form::getValue("usuario", false, false));
+        $isChange = Form::getValue("isChange");
         $permisosSelected = json_decode(Form::getValue("permisosSelected", false, false));
+
         $arreglo = $this -> verifyExistsUsuario($usuario -> email);
         if ($arreglo["error"]) return $arreglo;
+
         $insert = $this -> u -> agregar($usuario);
         if ($insert) {
             $arreglo["error"] = false;
@@ -177,7 +221,10 @@ class ControlUsuario extends Valida
                     $arreglo["msj"] = "El Usuario: " . $usuario -> email . " se ha agregado correctamente, pero no se han podido agregar satisfactoriamente los permisos asignados al usuario. Porfavor verifique y vuelva a asignarlos.";
                 }
             }
-
+            $isUploadIMG = $this -> uploadImage($isChange, $newIdUsuario["id"]);
+            if ($isUploadIMG["error"]) {
+                $arreglo["msj"] .= ". Pero " . $isUploadIMG["msj"];
+            }
             $this -> pk_Usuario["id"] = $newIdUsuario["id"];
             $usuarioNew = $this -> obtUsuariosGral(false);
             $arreglo["usuario"]["error"] = $usuarioNew["error"];
@@ -196,6 +243,7 @@ class ControlUsuario extends Valida
     public function actualizarUsuario() {
         $arreglo = array();
         $usuario = json_decode(Form::getValue("usuario", false, false));
+        $isChange = Form::getValue("isChange");
         $usuarioSelected = json_decode(Form::getValue("usuarioSelected", false, false));
         $isChangePermisos = json_decode(Form::getValue("isChangePermisos", false, false));
 
@@ -222,6 +270,11 @@ class ControlUsuario extends Valida
                         $arreglo["msj"] = "El Usuario: " . $usuarioSelected -> email . " se ha actualizado correctamente, pero no se han podido actualizar satisfactoriamente los permisos asignados al usuario (Error en 2° etapa). Porfavor verifique y vuelva a itentarlo.";
                     }
                 }
+            }
+
+            $arreglo["uploadImg"] = $this -> uploadImage($isChange, $usuario -> id);
+            if ($arreglo["uploadImg"]["error"]) {
+                $arreglo["msj"] .= ". Pero " . $arreglo["uploadImg"]["msj"];
             }
             $this -> pk_Usuario["id"] = $usuario -> id;
             $usuarioUpdate = $this -> obtUsuariosGral(false);
