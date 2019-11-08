@@ -7,6 +7,7 @@
  */
 Ruta::post("login","ControlUsuario@login");
 Ruta::get("obtUsuariosGral","ControlUsuario@obtUsuariosGral");
+Ruta::get("verifyPasswordCurrent","ControlUsuario@verifyPasswordCurrent");
 Ruta::post("agregarUsuario","ControlUsuario@agregarUsuario");
 Ruta::post("UpdateProfile","ControlUsuario@updateProfile");
 Ruta::post("UpdateImage","ControlUsuario@updateImage");

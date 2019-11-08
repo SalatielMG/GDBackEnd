@@ -408,4 +408,36 @@ ControlUsuario extends Valida
         }
         return $arreglo;
     }
+    public function verifyPasswordCurrent() {
+        $arreglo = array();
+        $password = Form::getValue("password");
+        $id_usuario = Form::getValue("id_usuario");
+        if (!empty($id_usuario)) {
+            $id_usuario = base64_decode($id_usuario);
+            $this -> where = "id != $id_usuario";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuario no recibido !";
+            $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
+            return $arreglo;
+        }
+        $usuario = $this -> u -> mostrar("id = $id_usuario", "password");
+        if ($usuario) {
+            $usuario = $usuario[0];
+            if (password_verify($password, $usuario -> password)) {
+                $arreglo["error"] = false;
+                $arreglo["titulo"] = "¡ Contraseña verificada !";
+                $arreglo["msj"] = "Contraseña correcta";
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Contraseña incorrecta !";
+                $arreglo["msj"] = "La contraseña proporcionada no es correcta";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuario no encontrado !";
+            $arreglo["msj"] = "No se encontro el usuario solicitadp";
+        }
+        return $arreglo;
+    }
 }

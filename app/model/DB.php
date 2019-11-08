@@ -123,6 +123,15 @@ class DB {
         }
     }
 
+
+    public function arreglo(){
+        $arreglo = array();
+        if($this -> result -> rowCount() > 0){
+            $arreglo = $this -> result -> fetchAll(PDO::FETCH_OBJ);
+        }
+        return $arreglo;
+    }
+
     //creando metodo de consulta
     public function getDatos($tablas, $select = "*", $where = 1, $limit="", $bnd = true){
         $sql = "SELECT $select FROM $tablas WHERE $where $limit";
@@ -132,14 +141,6 @@ class DB {
             return $this -> arreglo();
         return [];
     }
-    public function arreglo(){
-        $arreglo = array();
-        if($this -> result -> rowCount() > 0){
-            $arreglo = $this -> result -> fetchAll(PDO::FETCH_OBJ);
-        }
-        return $arreglo;
-    }
-
     //creando metodo de inserccion
     public function insert($tabla, $datos){
         $campos = array_keys($datos);
