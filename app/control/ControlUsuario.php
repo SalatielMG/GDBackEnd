@@ -12,7 +12,7 @@ class
 ControlUsuario extends Valida
 {
     private $u;
-    private $select = "";
+    private $select = "*";
     private $table = "";
     private $where = "";
     private $pk_Usuario = array();
@@ -89,16 +89,16 @@ ControlUsuario extends Valida
             }
         }
         $arreglo = array();
-        $arreglo["consultaSQL"] = $this -> consultaSQL("*", $this -> u -> nameTable, $this -> where);
-        $usuarios = $this -> u -> mostrar($this -> where);
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> u -> nameTable, $this -> where);
+        $usuarios = $this -> u -> mostrar($this -> where, $this -> select);
         if ($usuarios) {
-            /*for ($i = 0; $i < 35 ; $i++)
+            /*for ($i = 0; $i < 7 ; $i++)
             {
                 foreach ($usuarios as $key => $user) {
                     $usuarios[$i] = $user;
                 }
             }*/
-            if ($show_permiso == 1) { //Buscar los permisos de cada usuario
+            if ($show_permiso == 1 && $this -> select == "*") { //Buscar los permisos de cada usuario
                 require_once (APP_PATH . "control/ControlPermiso.php");
                 $ctrlPermiso = new ControlPermiso();
                 foreach ($usuarios as $key => $value) {
@@ -165,6 +165,7 @@ ControlUsuario extends Valida
     private function uploadImage($isChange, $nameImg) {
         $arreglo = array();
         $arreglo["error"] = false;
+        $arreglo["titulo"] = "¡ Operación inecesaria !";
         $arreglo["msj"] = "No hay imagen para subir";
         if ($isChange == "true") {
             $path = APP_UTIL . "avatar/";
@@ -173,6 +174,7 @@ ControlUsuario extends Valida
                 $imagen = $_FILES['imagen'];
                 if (!is_writable($path)) {
                     $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Directorio sin permisos !";
                     $arreglo["msj"] = "El directorio de destino no tiene permisos de escritura";
                     return $arreglo;
                 }
@@ -180,14 +182,18 @@ ControlUsuario extends Valida
                 $generatedName = $nameImg . $ext;
                 $filePath = $path . $generatedName;
                 $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error de subida !";
                 $arreglo["msj"] = "No se pudo subir la imagen.";
                 if (move_uploaded_file($imagen['tmp_name'], $filePath)) {
                     $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Imagen subido !";
                     $arreglo["msj"] = "Se subio la imagen correctamente.";
+                    $arreglo["generatedName"] = $generatedName;
                     $this -> u -> update($this -> u -> nameTable, ["imagen" => "'" . $generatedName . "'"], "id = " . $nameImg);
                 }
             } else {
                 $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error de solicitud !";
                 $arreglo["msj"] = "No se recibio ningun imagen para subir.";
             }
         }
@@ -348,6 +354,57 @@ ControlUsuario extends Valida
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Operación inecesaria !";
             $arreglo["msj"] = "No se detecto nigun cambio en la lista de permisos seleccionados. No fue necesario actualizar";
+        }
+        return $arreglo;
+    }
+    public function updateProfile() {
+        $arreglo = array();
+        $usuarioProfile = json_decode(Form::getValue("usuarioProfile", false, false));
+        $usuarioCurrent = json_decode(Form::getValue("usuarioCurrent", false, false));
+        if (strtoupper($usuarioProfile -> email) != strtoupper($usuarioCurrent -> email)) {
+            $arreglo = $this -> verifyExistsUsuario($usuarioProfile -> email, true);
+            if ($arreglo["error"]) return $arreglo;
+        }
+        if(!empty($usuarioCurrent -> id)) {
+            $usuarioCurrent -> id = base64_decode($usuarioCurrent -> id);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuario no recibido !";
+            $arreglo["msj"] = "NO se recibio ningun dato referente al usuario solicitado en el servidor";
+            return $arreglo;
+        }
+        $updateProfile = $this -> u -> actualizar($usuarioProfile, $usuarioCurrent, true);
+        if ($updateProfile) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Perfil actualizado !";
+            $arreglo["msj"] = "Se actualizaron correctamente los datos de su perfil";
+
+            $this -> pk_Usuario["id"] = $usuarioCurrent -> id;
+            $this -> select = "email, cargo";
+            $arreglo["usuario"] = $this -> obtUsuariosGral(false);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Perfil no actualizado !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actuaizar los datos del servidor";
+        }
+        return $arreglo;
+    }
+    public function updateImage() {
+        $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario");
+        $isChange = Form::getValue("isChange");
+
+        if(!empty($id_usuario)) {
+            $id_usuario = base64_decode($id_usuario);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuario no recibido !";
+            $arreglo["msj"] = "NO se recibio ningun dato referente al usuario solicitado en el servidor";
+            return $arreglo;
+        }
+        $arreglo = $this -> uploadImage($isChange, $id_usuario);
+        if (!$arreglo["error"] && $arreglo["msj"] == "No hay imagen para subir") {
+            $arreglo["error"] = true;
         }
         return $arreglo;
     }

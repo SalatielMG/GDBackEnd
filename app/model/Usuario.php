@@ -34,10 +34,13 @@ class Usuario extends DB
         }
         return $this -> insertMultipleData($this -> nameTableMM, $data);
     }
-    public function actualizar($usuarioNuevo, $usuarioSelected) {
-        $usuario = [
+    public function actualizar($usuarioNuevo, $usuarioSelected, $isUpdateProfile = false) {
+        $usuario = (!$isUpdateProfile) ? [
             "email" => "'$usuarioNuevo->email'",
             "tipo" => "'$usuarioNuevo->tipo'",
+            "cargo" => "'$usuarioNuevo->cargo'",
+        ] : [
+            "email" => "'$usuarioNuevo->email'",
             "cargo" => "'$usuarioNuevo->cargo'",
         ];
         return $this -> update($this -> nameTable, $usuario, "id = $usuarioSelected->id");
