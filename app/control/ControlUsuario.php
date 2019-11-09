@@ -75,35 +75,47 @@ ControlUsuario extends Valida
             $show_permiso = 1;
         }
 
-        if ($id_usuario === "0") { // Busca todos los usuarios
-            $this -> where = ($isQuery) ? "1" : "id = " . $this -> pk_Usuario["id"];
-        } else { // Busca todos los usuarios esxcepto con el id recibido
+        if ($isQuery) { // Conultar todos los usuarios de acuerdo al privilegio del uusario recibido
             if(!empty($id_usuario)) {
+                $tipos = "";
                 $id_usuario = base64_decode($id_usuario);
-                $this -> where = "id != $id_usuario";
+                $tipoUsuario = $this -> u -> mostrar("id = $id_usuario", "tipo");
+                if ($tipoUsuario) {
+                    $tipoUsuario = $tipoUsuario[0] -> tipo;
+                    switch ($tipoUsuario) {
+                        case "superAdmin":
+                            $tipos = "('admin', 'aux')";
+                            break;
+                        case "admin":
+                            $tipos = "('aux')";
+                            break;
+                    }
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error Interno !";
+                    $arreglo["msj"] = "Ocurrio un error al intentar listar los usuarios, de acuerdo a su privilegio.";
+                    return $arreglo;
+                }
+                $this -> where = "tipo IN $tipos";
             } else {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ USUARIO NO RECIBIDO !";
                 $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
                 return $arreglo;
             }
+        } else { //Consultar los datos de un usuario en especifico.
+            $this -> where = "id = " . $this -> pk_Usuario["id"];
         }
+
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> u -> nameTable, $this -> where);
         $usuarios = $this -> u -> mostrar($this -> where, $this -> select);
         if ($usuarios) {
-            /*for ($i = 0; $i < 7 ; $i++)
-            {
-                foreach ($usuarios as $key => $user) {
-                    $usuarios[$i] = $user;
-                }
-            }*/
             if ($show_permiso == 1 && $this -> select == "*") { //Buscar los permisos de cada usuario
                 require_once (APP_PATH . "control/ControlPermiso.php");
                 $ctrlPermiso = new ControlPermiso();
                 foreach ($usuarios as $key => $value) {
                     $value -> permisos = $ctrlPermiso -> obtPermisosUsuario($value -> id)["permisos"];
-                    //$usuarios[$key]["permisos"] = $ctrlPermiso -> obtPermisosUsuario($value -> id)["permisos"];
                 }
             }
             $arreglo["usuarios"] = $usuarios;

@@ -5,13 +5,13 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` SMALLINT NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(50) NOT NULL UNIQUE,
   `password` VARCHAR(255) NOT NULL,
-  `tipo` ENUM('admin', 'aux') NOT NULL,
+  `tipo` ENUM('superAdmin', 'admin', 'aux') NOT NULL,
   `cargo` VARCHAR(50) NOT NULL,
   `imagen` VARCHAR(255) NULL default 'anonymus.png',
   PRIMARY KEY (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 'admin', 'CEO', 'anonymus.png');
+insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 'superAdmin', 'CEO', 'anonymus.png');
 
 
 -- -----------------------------------------------------
