@@ -440,4 +440,28 @@ ControlUsuario extends Valida
         }
         return $arreglo;
     }
+    public function updatePassword() {
+        $arreglo = array();
+        $newPassword = Form::getValue("newPassword");
+        $id_usuario = Form::getValue("id_usuario");
+        if (!empty($id_usuario)) {
+            $id_usuario = base64_decode($id_usuario);
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuario no recibido !";
+            $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
+            return $arreglo;
+        }
+        $updatePassword = $this -> u -> actualizarPassword($newPassword, $id_usuario);
+        if ($updatePassword) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Password actualizado !";
+            $arreglo["msj"] = "Se actualizo correctamente su contraseña";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Password no actualizado !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar su contraseña";
+        }
+        return $arreglo;
+    }
 }

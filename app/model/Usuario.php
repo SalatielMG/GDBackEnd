@@ -45,6 +45,12 @@ class Usuario extends DB
         ];
         return $this -> update($this -> nameTable, $usuario, "id = $usuarioSelected->id");
     }
+    public function actualizarPassword($newPassword, $id_usuario){
+        $usuario = [
+            "password" => "'" . $this -> generatePassEncrypted($newPassword) . "'",
+        ];
+        return $this -> update($this -> nameTable, $usuario, "id = $id_usuario");
+    }
     public function eliminar($id_usuario) {
         return $this -> delete($this -> nameTable, "id = $id_usuario");
     }
