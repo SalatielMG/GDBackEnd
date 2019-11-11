@@ -103,6 +103,8 @@ class ControlCardView extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> cv -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> cv -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -133,6 +135,8 @@ class ControlCardView extends Valida
         return $arreglo;
     }
     public function agregarCardview() {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $cardview = json_decode(Form::getValue("cardview", false, false));
         $arreglo = array();
         $arreglo = $this -> verifyExistsIndexUnique($cardview);
@@ -159,6 +163,8 @@ class ControlCardView extends Valida
         return $arreglo;
     }
     public function actualizarCardview() {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $cardview = json_decode(Form::getValue("cardview", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -189,6 +195,8 @@ class ControlCardView extends Valida
         return $arreglo;
     }
     public function eliminarCardview() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> cv -> eliminar($indexUnique);

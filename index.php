@@ -11,9 +11,6 @@
 	define("APP_UTIL","util/");
 
 	require_once APP_UTIL."inicio.php";
-	//require_once APP_UTIL."respaldo.php";
-
-
 
 	//creando App
 	$app = new App;

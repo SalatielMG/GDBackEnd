@@ -210,6 +210,8 @@ class ControlBackup extends Valida
         return $arreglo;
     }
     public function eliminarBackup() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $id = Form::getValue('id_backup');
 
         $arreglo = array();
@@ -228,6 +230,8 @@ class ControlBackup extends Valida
     }
 
     public function limpiarBackups() {
+        $this -> verificarPermiso(PERMISO_MNTBACKUPS);
+
         $this -> idUser = Form::getValue("idUser");
         $this -> rango = Form::getValue("rango");
         $arreglo = array();
@@ -299,6 +303,8 @@ class ControlBackup extends Valida
     }
     // ------------------------ limpiarBackupsUsers ----------------------------
     public function limpiarBackupsUsers() {
+        $this -> verificarPermiso(PERMISO_MNTBACKUPS);
+
         $users = json_decode(Form::getValue("users", false, false));
         $this -> rango = Form::getValue("rangoBackups");
 
@@ -335,11 +341,8 @@ class ControlBackup extends Valida
     }
     // ------------------------ limpiarBackupsUsers ----------------------------
     public function actualizarBackup() {
-        /*$id_backup = Form::getValue("id_backup");
-        $automatic = Form::getValue("automatic");
-        $date_creation = Form::getValue("date_creation");
-        $date_download = Form::getValue("date_download");
-        $created_in = Form::getValue("created_in");*/
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $backup = json_decode(Form::getValue("backup", false, false));
         $update = $this -> b -> actualizar($backup);
         $arreglo = array();
@@ -385,6 +388,8 @@ class ControlBackup extends Valida
         return $arreglo;
     }
     public function exportarBackup() {
+        $this -> verificarPermiso(PERMISO_EXPORT);
+
         $arreglo = array();
         $id_backup = Form::getValue("id_backup");
         $typeExport = Form::getValue("typeExport");
@@ -400,7 +405,4 @@ class ControlBackup extends Valida
         return $arreglo;
     }
 
-    private function xlsExport($id_backup) {
-
-    }
 }

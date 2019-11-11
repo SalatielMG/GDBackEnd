@@ -155,6 +155,8 @@ class ControlAccount extends Valida
     }
 
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $arreglo = array();
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
         if ($exixstIndexUnique["indice"]) {
@@ -208,6 +210,8 @@ class ControlAccount extends Valida
         return $arreglo;
     }
     public function agregarAccount() {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $account = json_decode(Form::getValue("account", false, false));
         $arreglo = array();
 
@@ -237,6 +241,8 @@ class ControlAccount extends Valida
         return $arreglo;
     }
     public function actualizarAccount() {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $account = json_decode(Form::getValue("account", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -270,6 +276,8 @@ class ControlAccount extends Valida
         return $arreglo;
     }
     public function eliminarAccount() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> a -> eliminar($indexUnique);

@@ -102,6 +102,8 @@ class ControlAutomatic extends Valida
     }
 
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $arreglo = array();
         $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
         if ($exixstIndexUnique["indice"]) {
@@ -165,6 +167,8 @@ class ControlAutomatic extends Valida
     }
 
     public function agregarAutomatic() {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $arreglo = array();
         $automatic = json_decode(Form::getValue("automatic", false, false));
 
@@ -204,6 +208,8 @@ class ControlAutomatic extends Valida
     }
 
     public function actualizarAutomatic() {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $automatic = json_decode(Form::getValue("automatic", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
 
@@ -253,6 +259,8 @@ class ControlAutomatic extends Valida
     }
 
     public function eliminarAutomatic() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> a -> eliminar($indexUnique);

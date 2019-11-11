@@ -124,6 +124,8 @@ class ControlCategory extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> c -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> c -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -187,6 +189,8 @@ class ControlCategory extends Valida
         return $arreglo;
     }
     public function agregarCategoria() {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $category = json_decode(Form::getValue("category", false, false));
         $arreglo = array();
 
@@ -220,6 +224,8 @@ class ControlCategory extends Valida
         return $arreglo;
     }
     public function actualizarCategoria() {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $category = json_decode(Form::getValue("category", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -258,6 +264,8 @@ class ControlCategory extends Valida
         return $arreglo;
     }
     public function eliminarCategoria() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> c -> eliminar($indexUnique);

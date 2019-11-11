@@ -109,6 +109,8 @@ class ControlMovement extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> m -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> m -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -140,6 +142,8 @@ class ControlMovement extends Valida
         return $arreglo;
     }
     public function agregarMovement () {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $movement = json_decode(Form::getValue("movement", false, false));
         $arreglo = array();
         $arreglo = $this -> verifyExistsIndexUnique($movement);
@@ -174,6 +178,8 @@ class ControlMovement extends Valida
         return $arreglo;
     }
     public function actualizarMovement () {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $movement = json_decode(Form::getValue("movement", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -216,6 +222,8 @@ class ControlMovement extends Valida
         return $arreglo;
     }
     public function eliminarMovement () {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> m -> eliminar($indexUnique);

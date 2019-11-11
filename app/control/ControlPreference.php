@@ -83,6 +83,8 @@ class ControlPreference extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> p -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> p -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -113,6 +115,8 @@ class ControlPreference extends Valida
         return $arreglo;
     }
     public function agregarPreference () {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $preference = json_decode(Form::getValue("preference", false, false));
         $arreglo = array();
         $arreglo = $this -> verifyExistsIndexUnique($preference);
@@ -138,6 +142,8 @@ class ControlPreference extends Valida
         return $arreglo;
     }
     public function actualizarPreference () {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $preference = json_decode(Form::getValue("preference", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -169,6 +175,8 @@ class ControlPreference extends Valida
         return $arreglo;
     }
     public function eliminarPreference () {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> p -> eliminar($indexUnique);

@@ -1,11 +1,40 @@
 <?php
 
 // require_once(APP_PATH."model/Usuario.php");
-// require_once(APP_PATH."model/Permiso.php");
+require_once(APP_PATH . "model/Permiso.php");
 class Valida {
+
+    protected $id_usuario;
     protected $limit = 50;
     protected $limit_Inconsistencia = 10;
     protected $having_Count = 2;
+
+    public function verificarPermiso($permiso) {
+        $this -> id_usuario = Form::getValue("id_usuario",false);
+        if(!empty($this -> id_usuario)) {
+            $this -> id_usuario = base64_decode($this -> id_usuario);
+            $p = new Permiso();
+            if (count($p -> verificarPermiso($this -> id_usuario, $permiso)) == 0) {
+                $permiso = $p -> mostrar("id = $permiso");
+                $msj = "El permiso no existe";
+                if (count($permiso) > 0)
+                    $msj = "No tiene el permiso de " . $permiso[0] -> permiso . " pongase en contacto con algun administrador o super administrador del sistema";
+                echo json_encode([
+                    "error" => true,
+                    "titulo" => "¡ Error de permisos !",
+                    "msj" => $msj,
+                ]);
+                exit();
+            }
+        } else {
+            echo json_encode([
+                "error" => true,
+                "titulo" => "¡ Datos no recibidos !",
+                "msj" => "NO se recibio ningun dato del usuario solicitado en el servidor"
+            ]);
+            exit();
+        }
+    }
 
     public function keyValueArray($arreglo){
         $string = "";

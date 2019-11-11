@@ -2,6 +2,7 @@
 	chdir(dirname(__DIR__));
 
 	//cargando clases
+	require_once(APP_UTIL."constantes.php");
 	require_once(APP_UTIL."config.php");
 	require_once(APP_UTIL."Form.php");
 	require_once(APP_PATH."model/DB.php");

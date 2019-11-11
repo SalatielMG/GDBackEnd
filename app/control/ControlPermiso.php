@@ -23,7 +23,31 @@ class ControlPermiso extends Valida
     public function getPermisosGral($isQuery = true) {
         $arreglo = array();
         if ($isQuery) {
+            $id_usuario = Form::getValue("id_usuario", false);
             $show_usuario = Form::getValue("show_usuario");
+            if(!empty($id_usuario)) {
+                $id_usuario = base64_decode($id_usuario);
+                $tipoUsuario = $this -> p -> mostrar("id = $id_usuario", "tipo", "usuarios");
+                if ($tipoUsuario) {
+                    $tipoUsuario = $tipoUsuario[0] -> tipo;
+                    if ($tipoUsuario != SUPERADMIN) {
+                        $arreglo["error"] = true;
+                        $arreglo["titulo"] = "¡ Error de privilegios !";
+                        $arreglo["msj"] = "No tienes privilegios para poder ver la información de los permisos de la aplicacion web. Debes autenticarte como Super Administrador";
+                        return $arreglo;
+                    }
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error Interno !";
+                    $arreglo["msj"] = "Ocurrio un error al intentar listar los permisos, de acuerdo a su privilegio.";
+                    return $arreglo;
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Datos no recibidos !";
+                $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
+                return $arreglo;
+            }
         } else {
             $show_usuario = 1;
         }
@@ -94,9 +118,46 @@ class ControlPermiso extends Valida
         }
         return $arreglo;
     }
+    private function validarOperacionPermiso($id_usuario, $permiso, $operacion, $isOperacionUsuario = false) {
+        $arreglo = array();
+        $arreglo["error"] = false;
+        if(!empty($id_usuario)) {
+            $id_usuario = base64_decode($id_usuario);
+            $tipoUsuario = $this -> p -> mostrar("id = $id_usuario", "tipo", "usuarios");
+            if ($tipoUsuario) {
+                $tipoUsuario = $tipoUsuario[0] -> tipo;
+                if ($tipoUsuario != SUPERADMIN) {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error de privilegios !";
+                    $arreglo["msj"] = "No puedes $operacion " . (($isOperacionUsuario) ? "del": "el") . " permiso: $permiso->permiso. Debes autenticarte como Super Administrador";
+                    return $arreglo;
+                } else if ($operacion == OPERACION_ELIMINAR && $permiso -> id <= 6) {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error !";
+                    $arreglo["msj"] = "No puedes $operacion  el permiso: $permiso->permiso, puesto que son basicas para el funcionamiento del Aplicación Web";
+                    return $arreglo;
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error Interno !";
+                $arreglo["msj"] = "Ocurrio un error al intentar corroboar sus permisos";
+                return $arreglo;
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Datos no recibidos !";
+            $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
+            return $arreglo;
+        }
+        return $arreglo;
+    }
     public function agregarPermiso () {
         $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario", false);
         $permiso = json_decode(Form::getValue("permiso", false, false));
+        $arreglo = $this -> validarOperacionPermiso($id_usuario, $permiso, OPERACION_AGREGAR);
+        if ($arreglo["error"]) return $arreglo;
+
         $userSelected = json_decode(Form::getValue("userSelected", false, false));
         $arreglo = $this -> verifyExistsPermiso($permiso -> permiso);
         if ($arreglo["error"]) return $arreglo;
@@ -137,7 +198,11 @@ class ControlPermiso extends Valida
     }
     public function actualizarPermiso () {
         $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario", false);
         $permiso = json_decode(Form::getValue("permiso", false, false));
+        $arreglo = $this -> validarOperacionPermiso($id_usuario, $permiso, OPERACION_ACTUALIZAR);
+        if ($arreglo["error"]) return $arreglo;
+
         $permisoSelected = json_decode(Form::getValue("permisoSelected", false, false));
         $isChangeUsers = json_decode(Form::getValue("isChangeUsers", false, false));
 
@@ -184,6 +249,10 @@ class ControlPermiso extends Valida
     public function eliminarPermiso () {
         $arreglo = array();
         $permisoSelected = json_decode(Form::getValue("permisoSelected", false, false));
+        $id_usuario = Form::getValue("id_usuario", false);
+        $arreglo = $this -> validarOperacionPermiso($id_usuario, $permisoSelected, OPERACION_ELIMINAR);
+        if ($arreglo["error"]) return $arreglo;
+
         $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($permisoSelected -> id);
         if ($deleteUsuarios_Permiso) {
             $delete = $this -> p -> eliminar($permisoSelected -> id);
@@ -207,6 +276,9 @@ class ControlPermiso extends Valida
         $arreglo = array();
         $isChangeUsers = json_decode(Form::getValue("isChangeUsers", false, false));
         if ($isChangeUsers -> isChangeUsers) { // Actualizar usuarios
+            $arreglo = $this -> validarOperacionPermiso($isChangeUsers -> id_usuario, $isChangeUsers -> permisoSelected, OPERACION_ACTUALIZAR_PERMISOSUSUARIOS, true);
+            if ($arreglo["error"]) return $arreglo;
+
             $deleteUsuarios_Permiso = $this -> p -> eliminarUsuario_Permiso($isChangeUsers -> permisoSelected -> id);
             if (!$deleteUsuarios_Permiso) {
                 $arreglo["error"] = true;

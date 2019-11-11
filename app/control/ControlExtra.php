@@ -73,6 +73,8 @@ class ControlExtra extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> e -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> e -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -103,6 +105,8 @@ class ControlExtra extends Valida
         return $arreglo;
     }
     public function agregarExtra() {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $extra = json_decode(Form::getValue("extra", false, false));
         $arreglo = array();
         $arreglo = $this -> verifyExistsIndexUnique($extra);
@@ -127,6 +131,8 @@ class ControlExtra extends Valida
         return $arreglo;
     }
     public function actualizarExtra() {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $extra = json_decode(Form::getValue("extra", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -157,6 +163,8 @@ class ControlExtra extends Valida
         return $arreglo;
     }
     public function eliminarExtra() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> e -> eliminar($indexUnique);

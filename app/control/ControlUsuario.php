@@ -65,7 +65,7 @@ ControlUsuario extends Valida
     }
     public function obtUsuario() {
         $arreglo = array();
-        $id_usuario = Form::getValue("id_usuario");
+        $id_usuario = Form::getValue("id_usuario", false);
         if(!empty($id_usuario)) {
             $id_usuario = base64_decode($id_usuario);
             $this -> pk_Usuario["id"] = $id_usuario;
@@ -234,8 +234,9 @@ ControlUsuario extends Valida
         }
         return $arreglo;
     }
-    private function validarOperacionUsuario($id_usuario, $usuario, $operacion) {
+    private function validarOperacionUsuario($id_usuario, $usuario, $operacion, $isOperacionPermiso = false) {
         $arreglo = array();
+        $arreglo["error"] = false;
         if(!empty($id_usuario)) {
             $id_usuario = base64_decode($id_usuario);
             $tipoUsuario = $this -> u -> mostrar("id = $id_usuario", "tipo");
@@ -243,23 +244,32 @@ ControlUsuario extends Valida
                 $tipoUsuario = $tipoUsuario[0] -> tipo;
                 switch ($tipoUsuario) {
                     case "superAdmin":
-                        if ($usuario -> tipo != "admin")
-                        $tipos = "('admin', 'aux')";
+                        if ($usuario -> tipo != ADMIN && $usuario -> tipo != AUX) {
+                            $arreglo["error"] = true;
+                            $arreglo["titulo"] = "¡ Error de privilegios !";
+                            $arreglo["msj"] = "No puedes $operacion " . (($isOperacionPermiso) ? "del": "el") . " usuario $usuario->email con el tipo: " . $usuario -> tipo . ". Solo puedes $operacion " . (($isOperacionPermiso) ? "de los": "") . " usuarios de tipo: Administrador y Auxiliar";
+                            return $arreglo;
+                        }
                         break;
                     case "admin":
-                        $tipos = "('aux')";
+                        if ($usuario -> tipo != AUX) {
+                            $arreglo["error"] = true;
+                            $arreglo["titulo"] = "¡ Error de privilegios !";
+                            $arreglo["msj"] = "No puedes $operacion " . (($isOperacionPermiso) ? "del": "el") . " usuario $usuario->email con el tipo: " . $usuario -> tipo . ". Solo puedes $operacion " . (($isOperacionPermiso) ? "de los": "") . " usuarios de tipo: Auxiliar";
+                            return $arreglo;
+                        }
                         break;
                     default:
                         $arreglo["error"] = true;
                         $arreglo["titulo"] = "¡ Error de privilegios !";
-                        $arreglo["msj"] = "No tienes privilegios para poder $operacion el usuario $usuario->email de la aplicacion web.";
+                        $arreglo["msj"] = "No tienes privilegios para poder $operacion " . (($isOperacionPermiso) ? "del": "el") . " usuario $usuario->email de la aplicacion web.";
                         return $arreglo;
                         break;
                 }
             } else {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ Error Interno !";
-                $arreglo["msj"] = "Ocurrio un error al intentar corroboar el permiso del usuario logeado, de acuerdo a su privilegio.";
+                $arreglo["msj"] = "Ocurrio un error al intentar corroboar sus permisos.";
                 return $arreglo;
             }
         } else {
@@ -272,7 +282,11 @@ ControlUsuario extends Valida
     }
     public function agregarUsuario() {
         $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario", false);
         $usuario = json_decode(Form::getValue("usuario", false, false));
+        $arreglo = $this -> validarOperacionUsuario($id_usuario, $usuario, OPERACION_AGREGAR);
+        if ($arreglo["error"]) return $arreglo;
+
         $isChange = Form::getValue("isChange");
         $permisosSelected = json_decode(Form::getValue("permisosSelected", false, false));
 
@@ -319,7 +333,11 @@ ControlUsuario extends Valida
     }
     public function actualizarUsuario() {
         $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario", false);
         $usuario = json_decode(Form::getValue("usuario", false, false));
+        $arreglo = $this -> validarOperacionUsuario($id_usuario, $usuario, OPERACION_ACTUALIZAR);
+        if ($arreglo["error"]) return $arreglo;
+
         $isChange = Form::getValue("isChange");
         $usuarioSelected = json_decode(Form::getValue("usuarioSelected", false, false));
         $isChangePermisos = json_decode(Form::getValue("isChangePermisos", false, false));
@@ -368,7 +386,11 @@ ControlUsuario extends Valida
     }
     public function eliminarUsuario() {
         $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario", false);
         $usuarioSelected = json_decode(Form::getValue("usuarioSelected", false, false));
+        $arreglo = $this -> validarOperacionUsuario($id_usuario, $usuarioSelected, OPERACION_ELIMINAR);
+        if ($arreglo["error"]) return $arreglo;
+
         $deletePermisos_Usuario = $this -> u -> eliminarPermisos_Usuario($usuarioSelected -> id);
         if ($deletePermisos_Usuario) {
             $delete = $this -> u -> eliminar($usuarioSelected -> id);
@@ -392,6 +414,9 @@ ControlUsuario extends Valida
         $arreglo = array();
         $isChangePermisos = json_decode(Form::getValue("isChangePermisos", false, false));
         if ($isChangePermisos -> isChangePermisos) {
+            $arreglo = $this -> validarOperacionUsuario($isChangePermisos -> id_usuario, $isChangePermisos -> usuarioSelected, OPERACION_ACTUALIZAR_PERMISOSUSUARIOS, true);
+            if ($arreglo["error"]) return $arreglo;
+
             $deletePermisos_Usuario = $this -> u -> eliminarPermisos_Usuario($isChangePermisos -> usuarioSelected -> id);
             if (!$deletePermisos_Usuario) {
                 $arreglo["error"] = true;
@@ -462,7 +487,7 @@ ControlUsuario extends Valida
     }
     public function updateImage() {
         $arreglo = array();
-        $id_usuario = Form::getValue("id_usuario");
+        $id_usuario = Form::getValue("id_usuario", false);
         $isChange = Form::getValue("isChange");
 
         if(!empty($id_usuario)) {
@@ -482,7 +507,7 @@ ControlUsuario extends Valida
     public function verifyPasswordCurrent() {
         $arreglo = array();
         $password = Form::getValue("password");
-        $id_usuario = Form::getValue("id_usuario");
+        $id_usuario = Form::getValue("id_usuario", false);
         if (!empty($id_usuario)) {
             $id_usuario = base64_decode($id_usuario);
             $this -> where = "id != $id_usuario";
@@ -514,7 +539,7 @@ ControlUsuario extends Valida
     public function updatePassword() {
         $arreglo = array();
         $newPassword = Form::getValue("newPassword");
-        $id_usuario = Form::getValue("id_usuario");
+        $id_usuario = Form::getValue("id_usuario", false);
         if (!empty($id_usuario)) {
             $id_usuario = base64_decode($id_usuario);
         } else {

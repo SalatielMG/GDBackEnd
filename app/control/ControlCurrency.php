@@ -27,10 +27,13 @@ class ControlCurrency extends Valida
         return $this -> c;
     }
     public function insertCurrencies() {
+        $insert = $this -> c -> agregarCurrencies();
+        var_dump($insert);
+        exit();
         $arreglo = array();
         $result = $this -> c -> mostrar("1", "*", "table_currencies");
         if (!$result) { // No tiene regitros => Hay que ingresarlos
-            $insert = $this -> c -> agregarCurrencies();
+            $insert = false;
             if ($insert) {
                 $arreglo["error"] = false;
                 $arreglo["titulo"] = "¡ DATOS AGREGADOS !";
@@ -169,6 +172,8 @@ class ControlCurrency extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> c -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> c -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -199,6 +204,8 @@ class ControlCurrency extends Valida
         return $arreglo;
     }
     public function agregarCurrency () {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $currency = json_decode(Form::getValue("currency", false, false));
         $arreglo = array();
         $arreglo = $this -> verifyExistsIndexUnique($currency);
@@ -224,6 +231,8 @@ class ControlCurrency extends Valida
         return $arreglo;
     }
     public function actualizarCurrency () {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $currency = json_decode(Form::getValue("currency", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -253,6 +262,8 @@ class ControlCurrency extends Valida
         return $arreglo;
     }
     public function eliminarCurrency () {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> c -> eliminar($indexUnique);

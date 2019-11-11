@@ -49,7 +49,7 @@ INSERT INTO `usuarios_permisos` (`usuario`, `permiso`) VALUES
 	(1, 3),
 	(1, 4),
 	(1, 5),
-	(1, 6),
+	(1, 6);
 
 --
 -- Table structure for table `table_currencies`
@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS `table_currencies` (
    `selected` tinyint(1) NOT NULL DEFAULT 0)
   ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+INSERT INTO table_currencies (_id, iso_code, symbol, icon, selected) VALUES (1, 'AED', 'د.إ ', 'flag_aed', 0),(2, 'AKZ', 'Kz', 'flag_akz', 0),(3, 'AFS', 'Af', 'flag_afs', 0),(4, 'ARS', '$', 'flag_ars', 0),(5, 'AUD', '$', 'flag_aud', 0),(6, 'AZN', 'ман.', 'flag_azn', 0),(7, 'BAM', 'KM', 'flag_bam', 0),(8, 'BDT', '৳', 'flag_bdt', 0),(9, 'BGN', 'лв.', 'flag_bgn', 0),(10, 'BHD', '.د.ب', 'flag_bhd', 0),(11, 'BOB', 'Bs.', 'flag_bob', 0),(12, 'BTC', 'Ƀ', 'flag_btc', 0),(13, 'BRL', 'R$', 'flag_brl', 0),(14, 'CAD', 'C$', 'flag_cad', 0),(15, 'CHF', 'Fr.', 'flag_chf', 0),(16, 'CLP', '$', 'flag_clp', 0),(17, 'CNY', '¥', 'flag_cny', 0),(18, 'COP', '$', 'flag_cop', 0),(19, 'CRC', '₡', 'flag_crc', 0),(20, 'CZK', 'Kč', 'flag_czk', 0),(21, 'DKK', 'kr', 'flag_dkk', 0),(22, 'DOP', 'RD$', 'flag_dop', 0),(23, 'EGP', 'ج.م', 'flag_egp', 0),(24, 'EUR', '€', 'flag_eur', 0),(25, 'GBP', '£', 'flag_gbp', 0),(26, 'GTQ', 'Q', 'flag_gtq', 0),(27, 'HKD', '$', 'flag_hkd', 0),(28, 'HNL', 'L', 'flag_huf', 0),(29, 'HRK', 'kn', 'flag_hrk', 0),(30, 'HUF', 'Ft', 'flag_huf', 0),(31, 'IDR', 'Rp', 'flag_idr', 0),(32, 'ILS', '₪', 'flag_ils', 0),(33, 'INR', '₹', 'flag_inr', 0),(34, 'JPY', '¥', 'flag_jpy', 0),(35, 'KES', 'KSh', 'flag_kes', 0),(36, 'KRW', '₩', 'flag_krw', 0),(37, 'KWD', 'د.ك', 'flag_kwd', 0),(38, 'KZT', 'T', 'flag_kzt', 0),(39, 'MAD', 'درهم', 'flag_mad', 0),(40, 'LBP', 'ل.ل.', 'flag_lbp', 0),(41, 'LKR', 'Rs', 'flag_lkr', 0),(42, 'MXN', '$', 'flag_mxn', 0),(43, 'MYR', 'RM', 'flag_myr', 0),(44, 'NGN', '₦', 'flag_ngn', 0),(45, 'NIO', 'C$', 'flag_nio', 0),(46, 'NOK', 'kr', 'flag_nok', 0),(47, 'NZD', '$', 'flag_nzd', 0),(48, 'OMR', 'ر.ع.', 'flag_omr', 0),(49, 'PAB', '$', 'flag_pab', 0),(50, 'PEN', 'S/.', 'flag_pen', 0),(51, 'PHP', '₱', 'flag_php', 0),(52, 'PKR', 'Rs', 'flag_pkr', 0),(53, 'PLN', 'zł', 'flag_pln', 0),(54, 'PYG', 'Gs.', 'flag_pyg', 0),(55, 'RON', 'lei', 'flag_ron', 0),(56, 'RUB', '₽', 'flag_rub', 0),(57, 'RWF', 'R₣', 'flag_rwf', 0),(58, 'SAR', 'ر.س', 'flag_sar', 0),(59, 'SEK', 'kr', 'flag_sek', 0),(60, 'SGD', '$', 'flag_sgd', 0),(61, 'SVC', '₡', 'flag_svd', 0),(62, 'THB', '฿', 'flag_thb', 0),(63, 'TND', 'د.ت', 'flag_tnd', 0),(64, 'TRY', '₺', 'flag_try', 0),(65, 'TWD', '$', 'flag_twd', 0),(66, 'TZS', 'Tsh', 'flag_tzs', 0),(67, 'UAH', '₴', 'flag_uah', 0),(68, 'USD', '$', 'flag_usd', 0),(69, 'UYU', '$U', 'flag_uyu', 0),(70, 'VEF', 'Bs.', 'flag_vef', 0),(71, 'VND', '₫', 'flag_vnd', 0),(72, 'XOF', 'CFA', 'flag_xof', 0),(73, 'ZAR', 'R', 'flag_zar', 0);
 
 
 

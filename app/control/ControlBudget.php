@@ -96,6 +96,8 @@ class ControlBudget extends Valida
         return $arreglo;
     }
     public function corregirInconsitencia() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indices = $this -> b -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> b -> nameTable);
         $arreglo = array();
         $arreglo["indice"] = false;
@@ -130,6 +132,8 @@ class ControlBudget extends Valida
     }
 
     public function agregarBudget() {
+        $this -> verificarPermiso(PERMISO_INSERT);
+
         $budget = json_decode(Form::getValue("budget", false, false));
         $arreglo = array();
         $arreglo = $this -> verifyExistsIndexUnique($budget);
@@ -161,6 +165,8 @@ class ControlBudget extends Valida
         return $arreglo;
     }
     public function actualizarBudget() {
+        $this -> verificarPermiso(PERMISO_UPDATE);
+
         $budget = json_decode(Form::getValue("budget", false, false));
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
@@ -202,6 +208,8 @@ class ControlBudget extends Valida
         return $arreglo;
     }
     public function eliminarBudget() {
+        $this -> verificarPermiso(PERMISO_DELETE);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $delete = $this -> b -> eliminar($indexUnique);

@@ -11,6 +11,10 @@ class Permiso extends DB
     public $nameTable = "permisos";
     public $nameTableMM = "usuarios_permisos";
 
+    public function verificarPermiso($id_usuario, $permiso) {
+        return $this -> getDatos($this -> nameTableMM, "*", "usuario = $id_usuario AND permiso = $permiso");
+    }
+
     public function mostrar($where = "1", $select = "*", $table = "permisos") {
         return $this -> getDatos($table, $select, $where);
     }

@@ -204,20 +204,6 @@ class ControlUsers extends Valida
         $arreglo["ultimoAño"] = $año;
 
 
-        /*$años = $this -> extraerAñosMovements($idUser, $idBackup);
-        if (count($años) == 0) {
-            $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY MOVIMIENTOS DEL RESPALDO SELECCIONADO  !";
-            $arreglo["msj"] = "¡ No se encontraron nigun registro de movimientos del respaldo selecionado para poder realizar al grafica. !";
-            return $arreglo;
-        }
-        $arreglo["años"] = $años;
-        $arreglo["ultimoAño"] = $año;
-        if ($año == "0") {
-            $año = $años[0] -> year;
-            $arreglo["ultimoAño"] = $años[0] -> year;
-        }*/
-
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
         $select = "tempTable.month, SUM(tempTable.amount) Total";
         $table = "(SELECT bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
@@ -231,12 +217,6 @@ class ControlUsers extends Valida
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $ingresos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLIngresos"] = $this -> consultaSQL($select, $table, $where);
-
-
-        /*$gastos = $this -> u -> mostrar("b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY bm.month ORDER BY bm.month ", "bm.month, SUM(bm.amount) Total", "backup_movements bm, backups b");
-        $ingresos = $this -> u -> mostrar("b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . "  AND bm.sign = '+' and b.id_user = $idUser GROUP BY bm.month ORDER BY bm.month ", "bm.month, SUM(bm.amount) Total", "backup_movements bm, backups b");
-        */
-
 
 
         if ($gastos || $ingresos) {
@@ -319,17 +299,6 @@ class ControlUsers extends Valida
             $arreglo["titulo"] = "¡ USUARIO ENCONTRADO !";
             $arreglo["msj"] = "Usuario localizado en la BD";
             $arreglo["user"] = $usuario;
-            /*$backups = $this -> u -> mostrar("b.id_user = u.id_user and b.id_user = $usuario->id_user", "*", "backups as b, users as u");
-            if (count($backups) > 0) {
-                $arreglo["backups"]["error"] = false;
-                $arreglo["backups"]["respaldos"] = $backups;
-                $arreglo["backups"]["titulo"] = "¡ BACKUPS ENCONTRADOS !";
-                $arreglo["backups"]["msj"] = "Se localizaron Backups realizados por el usuario: $email";
-            } else {
-                $arreglo["backups"]["error"] = true;
-                $arreglo["backups"]["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
-                $arreglo["backups"]["msj"] = "No se localizaron Backups realizados por el usuario: $email";
-            }*/
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
