@@ -35,20 +35,19 @@ ControlUsuario extends Valida
             return $arreglo;
         }
         $email = $data -> email;
-        $usuario = $this -> u -> mostrar("email = '$email'", "id, email, password" );
+        $usuario = $this -> u -> mostrar("email = '$email'", "id, email, password, tipo" );
         if (count($usuario) > 0) {
             $usuario = $usuario[0];
             $pass = $data -> pass;
             if (password_verify($pass, $usuario -> password)) {
                 $arreglo["error"] = false;
                 $arreglo["titulo"] = "¡ Login exitoso !";
-                $arreglo["id"] = base64_encode($usuario -> id);
-                $arreglo["msj"] = "Bienvenido usuario $email";
+                $arreglo["msj"] = "Bienvenido " . $usuario -> tipo . "  $email";
 
                 $this -> pk_Usuario["id"] = $usuario -> id;
                 $usuarioLogin = $this -> obtUsuariosGral(false);
                 if (!$usuarioLogin["error"]){
-                    $usuarioLogin["usuarios"][0] -> id = $arreglo["id"];
+                    $usuarioLogin["usuarios"][0] -> id = base64_encode($usuario -> id);
                     $usuarioLogin["usuarios"][0] -> password = "";
                 }
                 $arreglo["usuario"] = $usuarioLogin;
@@ -64,7 +63,25 @@ ControlUsuario extends Valida
         }
         return $arreglo;
     }
-
+    public function obtUsuario() {
+        $arreglo = array();
+        $id_usuario = Form::getValue("id_usuario");
+        if(!empty($id_usuario)) {
+            $id_usuario = base64_decode($id_usuario);
+            $this -> pk_Usuario["id"] = $id_usuario;
+            $arreglo = $this -> obtUsuariosGral(false);
+            if (!$arreglo["error"]){
+                $arreglo["usuarios"][0] -> id = base64_encode($arreglo["usuarios"][0] -> id);
+                $arreglo["usuarios"][0] -> password = "";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Datos no recibidos !";
+            $arreglo["msj"] = "No se recibio ningun dato del usuario solicitado en el servidor";
+            return $arreglo;
+        }
+        return $arreglo;
+    }
     public function obtUsuariosGral($isQuery = true) {
         if ($isQuery) {
             $id_usuario = Form::getValue("id_usuario", false);
@@ -89,6 +106,12 @@ ControlUsuario extends Valida
                         case "admin":
                             $tipos = "('aux')";
                             break;
+                        default:
+                            $arreglo["error"] = true;
+                            $arreglo["titulo"] = "¡ Error de privilegios !";
+                            $arreglo["msj"] = "No tienes privilegios para poder ver la información de los usuarios de la aplicacion web.";
+                            return $arreglo;
+                            break;
                     }
                 } else {
                     $arreglo["error"] = true;
@@ -99,7 +122,7 @@ ControlUsuario extends Valida
                 $this -> where = "tipo IN $tipos";
             } else {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ USUARIO NO RECIBIDO !";
+                $arreglo["titulo"] = "¡ Datos no recibidos !";
                 $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
                 return $arreglo;
             }
@@ -121,13 +144,13 @@ ControlUsuario extends Valida
             $arreglo["usuarios"] = $usuarios;
             $arreglo["error"] = false;
             $arreglo["titulo"] = ($isQuery) ? "¡ Usuarios encontrados !" : "¡ Usuario encontrado !";
-            $arreglo["msj"] = ($isQuery) ? "Se encontraron usuarios regsitrados en la base de datos" : "Se encontro el Usuario: " . $this -> pk_Usuario["id"]. " en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "Se encontraron usuarios regsitrados en la base de datos" : "Se encontro el Usuario en la base de datos.";
 
         } else {
             $arreglo["usuarios"] = [];
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ? "¡ Usuarios no econtrados !" : "¡ Usuario no encontrado !";
-            $arreglo["msj"] = ($isQuery) ? "No se encontraron usuarios regsitrados en la base de datos" : "No se encontro el Usuario: " . $this -> pk_Usuario["id"]. " en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "No se encontraron usuarios regsitrados en la base de datos" : "No se encontro el Usuario en la base de datos.";
         }
         return $arreglo;
     }
@@ -208,6 +231,42 @@ ControlUsuario extends Valida
                 $arreglo["titulo"] = "¡ Error de solicitud !";
                 $arreglo["msj"] = "No se recibio ningun imagen para subir.";
             }
+        }
+        return $arreglo;
+    }
+    private function validarOperacionUsuario($id_usuario, $usuario, $operacion) {
+        $arreglo = array();
+        if(!empty($id_usuario)) {
+            $id_usuario = base64_decode($id_usuario);
+            $tipoUsuario = $this -> u -> mostrar("id = $id_usuario", "tipo");
+            if ($tipoUsuario) {
+                $tipoUsuario = $tipoUsuario[0] -> tipo;
+                switch ($tipoUsuario) {
+                    case "superAdmin":
+                        if ($usuario -> tipo != "admin")
+                        $tipos = "('admin', 'aux')";
+                        break;
+                    case "admin":
+                        $tipos = "('aux')";
+                        break;
+                    default:
+                        $arreglo["error"] = true;
+                        $arreglo["titulo"] = "¡ Error de privilegios !";
+                        $arreglo["msj"] = "No tienes privilegios para poder $operacion el usuario $usuario->email de la aplicacion web.";
+                        return $arreglo;
+                        break;
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error Interno !";
+                $arreglo["msj"] = "Ocurrio un error al intentar corroboar el permiso del usuario logeado, de acuerdo a su privilegio.";
+                return $arreglo;
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Datos no recibidos !";
+            $arreglo["msj"] = "NO se recibio ningun dato del usuario solicitado en el servidor";
+            return $arreglo;
         }
         return $arreglo;
     }

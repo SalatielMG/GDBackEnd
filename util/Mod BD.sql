@@ -23,7 +23,13 @@ CREATE TABLE IF NOT EXISTS `permisos` (
   `descripcion` VARCHAR(255) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
+INSERT INTO `permisos` (`id`, `permiso`, `descripcion`) VALUES
+	(1, 'Insert', 'Agregar registros'),
+	(2, 'Update', 'Actualizar registros'),
+	(3, 'Delete', 'Eliminar registos'),
+	(4, 'Export', 'Exportar Backups a ficheros SQLITE y XLSX'),
+	(5, 'Mnt Backups', 'Permite ajustar los backups a una cantidad minina según la indicada'),
+	(6, 'Mnt inconsistencia', 'Permite corregir los problemas de inconsistencia en la Base de Datos');
 
 -- -----------------------------------------------------
 -- Table `usuarios_permisos`
@@ -37,23 +43,13 @@ CREATE TABLE IF NOT EXISTS `usuarios_permisos` (
     FOREIGN KEY (`permiso`)
     REFERENCES `permisos` (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-/*
---
--- Table structure for table `usuarios`
---
-CREATE TABLE IF NOT EXISTS `usuarios` (
-   `id` INT NOT NULL AUTO_INCREMENT,
-   `email` VARCHAR(50) NOT NULL unique,
-   `password` VARCHAR(255) NOT NULL,
-   `insert` TINYINT NOT NULL,
-   `update` TINYINT NOT NULL,
-   `delete` TINYINT NOT NULL,
-   `export` TINYINT NOT NULL,
-   PRIMARY KEY (`id`))
-  ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 1, 1, 1, 1);*/
+INSERT INTO `usuarios_permisos` (`usuario`, `permiso`) VALUES
+	(1, 1),
+	(1, 2),
+	(1, 3),
+	(1, 4),
+	(1, 5),
+	(1, 6),
 
 --
 -- Table structure for table `table_currencies`
