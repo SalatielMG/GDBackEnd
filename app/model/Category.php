@@ -42,6 +42,7 @@ class Category extends DB
         parent::__construct();
         foreach ($this -> columnsTable as $key => $value) {
             if (($value["name"] == "id_backup")
+                || ($value["name"] == "id_category")
                 || ($value["name"] == "id_account")
                 || ($value["name"] == "name")
                 || ($value["name"] == "sign")) {

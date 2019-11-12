@@ -37,35 +37,18 @@ class ControlMovement extends Valida
             $this -> pagina = $this -> pagina * $this -> limit;
         }
         $arreglo = array();
-        $exixstIndexUnique = $this -> m -> verifyIfExistsIndexUnique($this -> m -> nameTable);
-
-        if ($exixstIndexUnique["indice"]) {
-
-        } else {
-            if ($export)
-                if ($typeExport == "sqlite")
-                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, bm.confirmed, bm.transfer, bm.date_idx, bm.day, bm.week, bm.fortnight, bm.month, bm.year, bm.operation_code as code, bm.picture, bm.iso_code, 0 as selected";
-                else
-                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol";
-
+        if ($export)
+            if ($typeExport == "sqlite")
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, (ANY_VALUE(bm.sign)) sign, bm.detail, DATE_FORMAT((ANY_VALUE(bm.date_record)), '%d/%m/%Y') as date, DATE_FORMAT((ANY_VALUE(bm.time_record)), '%h:%i %p') as time, (ANY_VALUE(bm.confirmed)) confirmed, (ANY_VALUE(bm.transfer)) transfer, bm.date_idx, (ANY_VALUE(bm.day)) day, (ANY_VALUE(bm.week)) week, (ANY_VALUE(bm.fortnight)) fortnight, (ANY_VALUE(bm.month)) month, (ANY_VALUE(bm.year)) year, (ANY_VALUE(bm.operation_code)) code, (ANY_VALUE(bm.picture)) picture, (ANY_VALUE(bm.iso_code)) iso_code, 0 as selected";
             else
-                $this -> select = "bm.*, (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
-            $this -> table = "backup_movements bm";
-            $this -> where = (($isQuery || $export) ? "bm.id_backup = " . $this -> pk_Movement["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Movement, $this -> m -> columnsTableIndexUnique, false, "bm.")) . " GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.") . " HAVING COUNT( * ) >= 1 ORDER BY bm.date_idx " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
-        }
-        /*$select = $this -> m -> mostrar("1 ORDER BY CC.date_record",
-            "CC.*",
-            "(SELECT bm.*, bc.symbol, bac.name as account, bcat.name as category FROM backup_movements bm, backup_currencies bc, backup_accounts bac, backup_categories bcat WHERE bm.id_backup = bc.id_backup AND bm.id_backup = bac.id_backup AND bm.id_account = bac.id_account AND bm.id_backup = bcat.id_backup AND (bm.id_category = bcat.id_category) AND bm.id_backup = $idBackup
-                    UNION
-                   SELECT bm.*, bc.symbol, bac.name as account, '' AS category FROM backup_movements bm, backup_currencies bc, backup_accounts bac WHERE bm.id_backup = bc.id_backup AND bm.id_backup = bac.id_backup AND bm.id_account = bac.id_account AND bm.id_backup = $idBackup AND bm.id_category >= 10000) AS CC");
-
-        $select = $this -> m -> mostrar("bm.id_backup = bc.id_backup AND bm.id_backup = $idBackup", "bm.*, bc.symbol", "backup_movements bm, backup_currencies bc");
-        $select = $this -> m -> mostrar("bm.id_backup = bc.id_backup AND bm.id_backup = bac.id_backup AND bm.id_account = bac.id_account AND bm.id_backup = bcat.id_backup AND (bm.id_category = bcat.id_category OR bm.id_category >= 10000) AND bm.id_backup = $idBackup",
-            "bm.*, bc.symbol, bac.name as account, bcat.name as category",
-            "backup_movements bm, backup_currencies bc, backup_accounts bac, backup_categories bcat");*/
-
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as category, bm.amount, bm.sign, bm.detail, DATE_FORMAT(bm.date_record, '%d/%m/%Y') as date, DATE_FORMAT(bm.time_record, '%h:%i %p') as time, (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol";
+        else
+            $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> m -> columnsTable, $this -> m -> columnsTableIndexUnique, "bm.") . ", (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
+        $this -> table = "backup_movements bm";
+        $this -> where = (($isQuery || $export) ? "bm.id_backup = " . $this -> pk_Movement["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Movement, $this -> m -> columnsTableIndexUnique, false, "bm.")) . " GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.") . " HAVING COUNT( * ) >= 1 ORDER BY bm.date_idx " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
 
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        //return $arreglo;
         $select = $this -> m -> mostrar($this -> where, $this -> select, $this -> table);
 
         if ($select) {
@@ -91,11 +74,11 @@ class ControlMovement extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "bm.*, COUNT(bm.id_backup) cantidadRepetida";
-        $table = "backup_movements bm, backups b";
-        $where = "b.id_backup = bm.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bm.id_backup") . " GROUP BY ". $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> m -> mostrar($where, $select, $table);
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> m -> columnsTable, $this -> m -> columnsTableIndexUnique, "bm.") . ", (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
+        $this -> table = "backup_movements bm, backups b";
+        $this -> where = "b.id_backup = bm.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bm.id_backup") . " GROUP BY ". $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> m -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["movements"] = $consulta;

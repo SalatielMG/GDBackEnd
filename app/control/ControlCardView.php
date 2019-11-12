@@ -28,7 +28,10 @@ class ControlCardView extends Valida
             $this -> pk_CardView["id_backup"] = Form::getValue("id_backup");
         }
         $arreglo = array();
-        $this -> select = ($isExport) ? "id_card, name, period, sign, show_card as show_item, number" : "id_card, name";
+        $this -> select = ($isExport) ? "id_card, (ANY_VALUE(name)) name, (ANY_VALUE(period)) period, (ANY_VALUE(sign)) sign, (ANY_VALUE(show_card)) show_item, (ANY_VALUE(number)) number" : $this -> selectMode_Only_Full_Group_By_Enabled([
+            ["name" => "id_card"],
+            ["name" => "name"]
+        ], $this -> cv -> columnsTableIndexUnique);
         $this -> where = "id_backup = " . $this -> pk_CardView["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> cv -> columnsTableIndexUnique, ""). " HAVING COUNT( * ) >= 1 ORDER BY id_card";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> cv -> nameTable, $this -> where);
         //return $arreglo;
@@ -52,15 +55,15 @@ class ControlCardView extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        $exixstIndexUnique = $this -> cv -> verifyIfExistsIndexUnique($this -> cv -> nameTable);
+        /*$exixstIndexUnique = $this -> cv -> verifyIfExistsIndexUnique($this -> cv -> nameTable);
 
         if ($exixstIndexUnique["indice"]) {
 
-        } else {
-            $this -> select = "bcv.*, COUNT(bcv.id_card) repeated";
-            $this -> table = $this -> cv -> nameTable . " bcv";
-            $this -> where = (($isQuery) ? "bcv.id_backup = " . $this -> pk_CardView["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_CardView, $this -> cv -> columnsTableIndexUnique, false, "bcv.") ) . " GROUP BY " . $this -> namesColumns($this -> cv -> columnsTableIndexUnique, "bcv.") . " HAVING COUNT( * ) >= 1 ORDER BY bcv.id_card " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
-        }
+        } else {*/
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> cv -> columnsTable, $this -> cv -> columnsTableIndexUnique, "bcv.") . ", COUNT(bcv.id_card) repeated";
+        $this -> table = $this -> cv -> nameTable . " bcv";
+        $this -> where = (($isQuery) ? "bcv.id_backup = " . $this -> pk_CardView["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_CardView, $this -> cv -> columnsTableIndexUnique, false, "bcv.") ) . " GROUP BY " . $this -> namesColumns($this -> cv -> columnsTableIndexUnique, "bcv.") . " HAVING COUNT( * ) >= 1 ORDER BY bcv.id_card " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
+        //}
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> cv -> mostrar($this -> where, $this -> select, $this -> table);
         if ($select) {
@@ -85,11 +88,11 @@ class ControlCardView extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "cv.*, COUNT(cv.id_backup) cantidadRepetida";
-        $table = "backup_cardviews cv, backups b";
-        $where = "b.id_backup = cv.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "cv.id_backup") . " GROUP BY ". $this -> namesColumns($this -> cv -> columnsTableIndexUnique, "cv.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> cv -> mostrar($where, $select, $table);
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> cv -> columnsTable, $this -> cv -> columnsTableIndexUnique, "bcv.") . ", COUNT(bcv.id_card) repeated";
+        $this -> table = $this -> cv -> nameTable . " cv, backups b";
+        $this -> where = "b.id_backup = cv.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "cv.id_backup") . " GROUP BY ". $this -> namesColumns($this -> cv -> columnsTableIndexUnique, "cv.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> cv -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["cardviews"] = $consulta;

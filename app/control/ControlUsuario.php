@@ -426,6 +426,7 @@ ControlUsuario extends Valida
             }
             if (count($isChangePermisos -> permisosSelected) > 0) {
                 $updatePermisos_Usuario = $this -> u -> agregarPermisos_Usuario($isChangePermisos -> usuarioSelected -> id, $isChangePermisos -> permisosSelected);
+
                 if (!$updatePermisos_Usuario) {
                     $arreglo["error"] = true;
                     $arreglo["titulo"] = "¡ Permisos no asignados !";

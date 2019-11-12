@@ -36,20 +36,20 @@ class ControlBudget extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        $exixstIndexUnique = $this -> b -> verifyIfExistsIndexUnique($this -> b -> nameTable);
+        /*$exixstIndexUnique = $this -> b -> verifyIfExistsIndexUnique($this -> b -> nameTable);
         if ($exixstIndexUnique["indice"]) {
 
-        } else {
-            if ($isExport)
-                if ($typeExport == "sqlite")
-                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, DATE_FORMAT(bd.initial_date, '%d/%m/%Y') as initial_date,  DATE_FORMAT(bd.final_date, '%d/%m/%Y') as final_date, 0 as show_item, bd.number, 0 as selected";
-                else
-                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol";
+        } else {*/
+        if ($isExport)
+            if ($typeExport == "sqlite")
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, DATE_FORMAT((ANY_VALUE(bd.initial_date)), '%d/%m/%Y') as initial_date,  DATE_FORMAT((ANY_VALUE(bd.final_date)), '%d/%m/%Y') as final_date, 0 as show_item, (ANY_VALUE(bd.number)) number, 0 as selected";
             else
-                $this -> select = "bd.*, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
-            $this -> table = "backup_budgets bd";
-            $this -> where = (($isQuery || $isExport) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
-        }
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol";
+        else
+            $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> b -> columnsTable, $this -> b -> columnsTableIndexUnique, "bd.") . ", (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
+        $this -> table = "backup_budgets bd";
+        $this -> where = (($isQuery || $isExport) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+        //}
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -78,11 +78,11 @@ class ControlBudget extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "bd.*, COUNT(bd.id_backup) cantidadRepetida";
-        $table = "backup_budgets bd, backups b";
-        $where = "b.id_backup = bd.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bd.id_backup") . " GROUP BY ". $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> b -> mostrar($where, $select, $table);
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> b -> columnsTable, $this -> b -> columnsTableIndexUnique, "bd.") . ", (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
+        $this -> table = $this -> b -> nameTable . " bd, backups b";
+        $this -> where = "b.id_backup = bd.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bd.id_backup") . " GROUP BY ". $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["budgets"] = $consulta;

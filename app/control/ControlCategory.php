@@ -43,7 +43,11 @@ class ControlCategory extends Valida
             }
         }
         $arreglo = array();
-        $this -> select = "id_category, name, sign";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled([
+            ["name" => "id_category"],
+            ["name" => "name"],
+            ["name" => "sign"],
+        ], $this -> c -> columnsTableIndexUnique);
         $this -> where = "id_backup = " . $this -> pk_Category["id_backup"] . " AND id_account = " . $this -> pk_Category["id_account"] . $this -> condicionarConsulta($signCategories, "sign", "both") . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . "  HAVING COUNT( * ) >= 1 ORDER BY id_category";
         $categoriesBackup = $this -> c -> mostrar($this -> where, $this -> select);
         if ($categoriesBackup) {
@@ -65,22 +69,19 @@ class ControlCategory extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        $exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
-        if ($exixstIndexUnique["indice"]) { // Table sin inconsistencia de datos.
-
-        } else { // Table con inconsistencia de datos.
-            if ($isExport)
-                if ($typeExport == "sqlite")
-                    $this -> select = "bc.id_category as _id, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign, bc.icon_name as icon, number, 0 as selected";
-                else
-                    $this -> select = "(SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign";
+        if ($isExport)
+            if ($typeExport == "sqlite")
+                $this -> select = "bc.id_category as _id, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign, (ANY_VALUE(bc.icon_name)) icon, (ANY_VALUE(bc.number)) number, 0 as selected";
             else
-                $this -> select = "bc.*, (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
-            $this -> table = $this -> c -> nameTable . " bc";
-            $this -> where = (($isQuery || $isExport) ? "bc.id_backup = " . $this -> pk_Category["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Category, $this -> c -> columnsTableIndexUnique, false, "bc.") . " AND bc.id_category = " . $this -> pk_Category["id_category"]) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 ORDER BY bc.id_category " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
-        }
+                $this -> select = "(SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS account, bc.name as category, bc.sign";
+        else
+            $this -> select =  $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
+        $this -> table = $this -> c -> nameTable . " bc";
+        $this -> where = (($isQuery || $isExport) ? "bc.id_backup = " . $this -> pk_Category["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Category, $this -> c -> columnsTableIndexUnique, false, "bc.") . " AND bc.id_category = " . $this -> pk_Category["id_category"]) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc."). " HAVING COUNT( * ) >= 1 ORDER BY bc.id_category " . (($isQuery) ? "limit $this->pagina,$this->limit" : "");
+
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select , $this -> table, $this -> where);
+        //return $arreglo;
         $select = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
-        //$select = $this -> c -> mostrar("bc.id_backup = ba.id_backup AND bc.id_account = ba.id_account AND bc.id_backup = " . $this -> pk_Category["id_backup"], "bc.*, ba.name as account", "backup_categories bc, backup_accounts ba");
         $arreglo = array();
         if ($select) {
             $arreglo["error"] = false;
@@ -106,11 +107,11 @@ class ControlCategory extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
-        $table = "backup_categories bc, backups b";
-        $where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> c -> mostrar($where, $select, $table);
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
+         $this -> table = $this -> c -> nameTable . " bc, backups b";
+        $this -> where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["categories"] = $consulta;

@@ -27,14 +27,14 @@ class ControlExtra extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        $exixstIndexUnique = $this -> e -> verifyIfExistsIndexUnique($this -> e -> nameTable);
+        /*$exixstIndexUnique = $this -> e -> verifyIfExistsIndexUnique($this -> e -> nameTable);
 
         if ($exixstIndexUnique["indice"]) {
 
-        } else {
-            $this -> select = "*, COUNT(id_extra) repeated";
-            $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Extra["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Extra, $this -> e -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> e -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
-        }
+        } else {*/
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> e -> columnsTable, $this -> e -> columnsTableIndexUnique) . ", COUNT(id_extra) repeated";
+        $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Extra["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Extra, $this -> e -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> e -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
+        //}
         $select = $this -> e -> mostrar($this -> where, $this -> select);
         if ($select) {
             $arreglo["error"] = false;
@@ -55,11 +55,11 @@ class ControlExtra extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "be.*, COUNT(be.id_backup) cantidadRepetida";
-        $table = "backup_extras be, backups b";
-        $where = "b.id_backup = be.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "be.id_backup") . " GROUP BY ". $this -> namesColumns($this -> e -> columnsTableIndexUnique, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> e -> mostrar($where, $select, $table);
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> e -> columnsTable, $this -> e -> columnsTableIndexUnique, "be.") . ", COUNT(be.id_extra) repeated";
+        $this -> table = "backup_extras be, backups b";
+        $this -> where = "b.id_backup = be.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "be.id_backup") . " GROUP BY ". $this -> namesColumns($this -> e -> columnsTableIndexUnique, "be.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> e -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["extras"] = $consulta;

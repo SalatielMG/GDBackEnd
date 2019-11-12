@@ -70,6 +70,7 @@ class Automatic extends DB
         parent::__construct();
         foreach ($this -> columnsTable as $key => $value) {
             if (($value["name"] == "id_backup")
+                || ($value["name"] == "id_operation")
                 || ($value["name"] == "id_account")
                 || ($value["name"] == "id_category")
                 || ($value["name"] == "period")

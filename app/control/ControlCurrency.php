@@ -81,11 +81,16 @@ class ControlCurrency extends Valida
         $arreglo = array();
         if ($isExport)
             if ($typeExport == "sqlite")
-                $this -> select = "iso_code, symbol, icon_name as icon, selected";
+                $this -> select = "iso_code, (ANY_VALUE(symbol)) symbol, (ANY_VALUE(icon_name)) icon, (ANY_VALUE(selected)) selected";
             else
-                $this -> select = "iso_code, symbol";
+                $this -> select = "iso_code, (ANY_VALUE(symbol)) symbol";
         else
-            $this -> select = "iso_code, symbol, icon_name, selected";
+            $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled([
+                ["name" => "iso_code"],
+                ["name" => "symbol"],
+                ["name" => "icon_name"],
+                ["name" => "selected"],
+            ], $this -> c -> columnsTableIndexUnique);
         $this -> where = "id_backup = " . $this -> pk_Currency["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ";
         $select = $this -> c -> mostrar($this -> where, $this -> select);
         $this -> where = "('')";
@@ -123,13 +128,13 @@ class ControlCurrency extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        $exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
+        /*$exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
         if ($exixstIndexUnique["indice"]) {
 
-        } else {
-            $this -> select = "*, count(id_backup) as repeated";
-            $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Currency["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Currency, $this -> c -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
-        }
+        } else {*/
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique) . ", count(id_backup) as repeated";
+        $this -> where = (($isQuery) ? "id_backup = " . $this -> pk_Currency["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Currency, $this -> c -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> c -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+        //}
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> c -> mostrar($this -> where, $this -> select);
         if ($select) {
@@ -154,11 +159,11 @@ class ControlCurrency extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "bc.*, COUNT(bc.id_backup) cantidadRepetida";
-        $table = "backup_currencies bc, backups b";
-        $where = "b.id_backup = bc.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> c -> mostrar($where, $select, $table);
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", count(id_backup) as repeated";
+        $this -> table = "backup_currencies bc, backups b";
+        $this -> where = "b.id_backup = bc.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> c -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["currencies"] = $consulta;

@@ -157,8 +157,8 @@ class DB {
             $sql .= "(" . implode(", ", array_values($value)) . "),";
         }
         $sql = substr_replace($sql, ";", strlen($sql) - 1);
-        //return $this -> solicitud($sql);
-        return $sql;
+        return $this -> solicitud($sql);
+        //return $sql;
     }
 
     //creando metodo de actualizacion
