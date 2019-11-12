@@ -81,17 +81,18 @@ class ControlAccount extends Valida
 
     public function buscarAccountsBackup($isQuery = true, $isExport = false, $typeExport = "sqlite") {
         if ($isQuery) {
-            $this -> pk_Account["id_backup"] = Form::getValue('idBack');
-            $this -> pagina = Form::getValue("pagina");
-            $this -> symbolName = Form::getValue("symbolName");
-            $this -> pagina = $this -> pagina * $this -> limit;
+            $this->pk_Account["id_backup"] = Form::getValue('idBack');
+            $this->pagina = Form::getValue("pagina");
+            $this->symbolName = Form::getValue("symbolName");
+            $this->pagina = $this->pagina * $this->limit;
         }
-        $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
+
+        /*$exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
         if ($exixstIndexUnique["indice"]) {
             $this -> where = "ba.id_backup = bc.id_backup AND ba.iso_code = bc.iso_code " . (($isQuery) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") ) . " GROUP by " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
             $this -> select = "ba.*, bc.symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba, backup_currencies bc";
-        } else {
+        } else {*/
             if ($isExport)
                 if ($typeExport == "sqlite")
                     $this -> select = "ba.id_account as _id, ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.icon_name as icon, ba.income, ba.expense, ba.final_balance as balance, ba.month, ba.year, ba.negative_max, ba.positive_max, ba.iso_code, ba.rate, ba.include_total, ba.value_type, ba.selected";
@@ -101,7 +102,7 @@ class ControlAccount extends Valida
                 $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
             $this -> table = "backup_accounts ba";
             $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
-        }
+        //}
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -136,11 +137,11 @@ class ControlAccount extends Valida
         $arreglo = array();
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $select = "ba.*, COUNT(ba.id_backup) cantidadRepetida";
-        $table = "backup_accounts ba, backups b";
-        $where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
-        $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
-        $consulta = $this -> a -> mostrar($where, $select, $table);
+        $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) cantidadRepetida";
+        $this -> table = "backup_accounts ba, backups b";
+        $this -> where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
+        $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
+        $consulta = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["accounts"] = $consulta;
