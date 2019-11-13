@@ -94,13 +94,13 @@ class ControlAccount extends Valida
 
         if ($isExport)
             if ($typeExport == "sqlite")
-                $this -> select = "ba.id_account as _id, ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.icon_name as icon, ba.income, ba.expense, ba.final_balance as balance, ba.month, ba.year, ba.negative_max, ba.positive_max, ba.iso_code, ba.rate, ba.include_total, ba.value_type, ba.selected";
+                $this -> select = "(ANY_VALUE(ba.id_account)) _id, ba.name as account, (ANY_VALUE(ba.detail)) detail, (ANY_VALUE(ba.initial_balance)) initial_balance, (ANY_VALUE(ba.sign)) sign, (ANY_VALUE(ba.icon_name)) icon, (ANY_VALUE(ba.income)) income, (ANY_VALUE(ba.expense)) expense, (ANY_VALUE(ba.final_balance)) balance, (ANY_VALUE(ba.month)) month, (ANY_VALUE(ba.year)) year, (ANY_VALUE(ba.negative_max)) negative_max, (ANY_VALUE(ba.positive_max)) positive_max, (ANY_VALUE(ba.iso_code)) iso_code, (ANY_VALUE(ba.rate)) rate, (ANY_VALUE(ba.include_total)) include_total, (ANY_VALUE(ba.value_type)) value_type, (ANY_VALUE(ba.selected)) selected";
             else
-                $this -> select = "ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.income, ba.expense, ba.final_balance as balance, ba.iso_code, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol";
+                $this -> select = "ba.name as account, (ANY_VALUE(ba.detail)) detail, (ANY_VALUE(ba.initial_balance)) initial_balance, (ANY_VALUE(ba.sign)) sign, (ANY_VALUE(ba.income)) income, (ANY_VALUE(ba.expense)) expense, (ANY_VALUE(ba.final_balance)) balance, (ANY_VALUE(ba.iso_code)) iso_code, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ANY_VALUE(ba.iso_code), 0)) as symbol";
         else
             $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", (ANY_VALUE(ba.iso_code)), 0)) as symbol, COUNT(ba.id_backup) repeated";
         $this -> table = "backup_accounts ba";
-        $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
+        $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
