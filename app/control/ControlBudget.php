@@ -36,10 +36,6 @@ class ControlBudget extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        /*$exixstIndexUnique = $this -> b -> verifyIfExistsIndexUnique($this -> b -> nameTable);
-        if ($exixstIndexUnique["indice"]) {
-
-        } else {*/
         if ($isExport)
             if ($typeExport == "sqlite")
                 $this -> select = "(SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as category, bd.period, bd.amount, bd.budget, DATE_FORMAT((ANY_VALUE(bd.initial_date)), '%d/%m/%Y') as initial_date,  DATE_FORMAT((ANY_VALUE(bd.final_date)), '%d/%m/%Y') as final_date, 0 as show_item, (ANY_VALUE(bd.number)) number, 0 as selected";
@@ -49,7 +45,7 @@ class ControlBudget extends Valida
             $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> b -> columnsTable, $this -> b -> columnsTableIndexUnique, "bd.") . ", (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
         $this -> table = "backup_budgets bd";
         $this -> where = (($isQuery || $isExport) ? "bd.id_backup = " . $this -> pk_Budget["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Budget, $this -> b -> columnsTableIndexUnique, false, "bd.")) . " GROUP BY " . $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
-        //}
+
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $select = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
         $arreglo = array();
@@ -57,7 +53,7 @@ class ControlBudget extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["budgets"] = $select;
-            $arreglo["titulo"] = "¡ BUDGETS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Budgets encontrados !";
             $arreglo["msj"] = "Se encontraron budgets del Respaldo con " . $this -> keyValueArray($this -> pk_Budget);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Budget["id_backup"]);
@@ -65,7 +61,7 @@ class ControlBudget extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BUDGETS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Budgets no encontrados !";
             $arreglo["msj"] = "No se encontraron budgets del Respaldo con id_backup: " . $this -> keyValueArray($this -> pk_Budget);
         }
         return $arreglo;
@@ -78,7 +74,7 @@ class ControlBudget extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> b -> columnsTable, $this -> b -> columnsTableIndexUnique, "bd.") . ", (SELECT symbolCurrency(" . $this -> pk_Budget["id_backup"] . ", '', bd.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Budget["id_backup"] . ", bd.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Budget["id_backup"] . ", bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> b -> columnsTable, $this -> b -> columnsTableIndexUnique, "bd.") . ", (SELECT symbolCurrency(bd.id_backup, '', bd.id_account)) AS symbol, (SELECT nameAccount(bd.id_backup, bd.id_account)) AS nameAccount, (SELECT nameCategory(bd.id_backup, bd.id_category)) as nameCategory,  COUNT(bd.id_backup) repeated";
         $this -> table = $this -> b -> nameTable . " bd, backups b";
         $this -> where = "b.id_backup = bd.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bd.id_backup") . " GROUP BY ". $this -> namesColumns($this -> b -> columnsTableIndexUnique, "bd.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -86,11 +82,11 @@ class ControlBudget extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["budgets"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Budgets ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Budgets ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -98,16 +94,10 @@ class ControlBudget extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> b -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> b -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Budgets, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> b -> verifyIfExistsIndexUnique($this -> b -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> b -> nameTable, $this -> b -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> b -> ejecutarMultSentMySQLi($sql);
@@ -124,7 +114,7 @@ class ControlBudget extends Valida
         $result = $this -> b -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el" : "registrar el nuevo") . " presupuesto, porque ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifica y vuleva a intentarlo";
 
         }
@@ -142,7 +132,7 @@ class ControlBudget extends Valida
         $insert = $this -> b -> agregar($budget);
         if ($insert) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BUDGET AGREGADO !";
+            $arreglo["titulo"] = "¡ Budget agregado !";
             $arreglo["msj"] = "Se agrego correctamente el nuevo presupuesto.";
 
             $this -> pk_Budget["id_backup"] = $budget -> id_backup;
@@ -159,7 +149,7 @@ class ControlBudget extends Valida
                 $arreglo["budget"]["new"]  = $queryBudgetNew["budgets"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BUDGET NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Budget no agregado !";
             $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo presupuesto.";
         }
         return $arreglo;
@@ -184,7 +174,7 @@ class ControlBudget extends Valida
         $update = $this -> b -> actualizar($budget, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BUDGET ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Budget actualizada !";
             $arreglo["msj"] = "El presupuesto con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
 
             $this -> pk_Budget["id_backup"] = $budget -> id_backup;
@@ -202,7 +192,7 @@ class ControlBudget extends Valida
                 $arreglo["budget"]["update"]  = $queryBudgetUpdate["budgets"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BUDGET NO ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Budget no actualizada !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar el presupusto con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -215,11 +205,11 @@ class ControlBudget extends Valida
         $delete = $this -> b -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BUDGET ELIMINADA !";
+            $arreglo["titulo"] = "¡ Budget eliminada !";
             $arreglo["msj"] = "El presupuesto " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BUDGET NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Budget no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar el presupuesto con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

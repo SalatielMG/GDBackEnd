@@ -73,11 +73,11 @@ class ControlAccount extends Valida
             }
 
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ACCOUNTS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Accounts encontrados !";
             $arreglo["msj"] = "Se encontraron cuentas con " . $this -> keyValueArray($this -> pk_Account);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ACCOUNTS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Accounts no encontrados !";
             $arreglo["msj"] = "No se encontraron cuentas con " . $this -> keyValueArray($this -> pk_Account);
         }
         //sleep(5);
@@ -109,7 +109,7 @@ class ControlAccount extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["accounts"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ ACCOUNTS ENCONTRADOS !" : "¡ ACCOUNT ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Accounts encontrados !" : "¡ Account encontrado !";
             $arreglo["msj"] = (($isQuery) ? "Se encontraron cuentas con " : "Se recupero la Cuenta con ") . $this -> keyValueArray($this -> pk_Account);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> categorieSearch = 0;
@@ -122,7 +122,7 @@ class ControlAccount extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ?"¡ ACCOUNTS NO ENCONTRADOS !" : "¡ ACCOUNT NO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ?"¡ Accounts no encontrados !" : "¡ Account no encontrado !";
             $arreglo["msj"] = (($isQuery) ? "No se encontraron cuentas con ": "No se recupero la Cuenta con ") . $this -> keyValueArray($this -> pk_Account);
         }
         return $arreglo;
@@ -135,7 +135,7 @@ class ControlAccount extends Valida
         $arreglo = array();
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", (ANY_VALUE(ba.iso_code)), 0)) as symbol, COUNT(ba.id_backup) repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(ba.id_backup, (ANY_VALUE(ba.iso_code)), 0)) as symbol, COUNT(ba.id_backup) repeated";
 
         $this -> table = "backup_accounts ba, backups b";
         $this -> where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
@@ -144,11 +144,11 @@ class ControlAccount extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["accounts"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -176,11 +176,11 @@ class ControlAccount extends Valida
             $newId_Account = $query[0] -> max + 1;
             $arreglo["newId_account"] = $newId_Account;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ID ACCOUNT CALCULADO !";
+            $arreglo["titulo"] = "¡ Id Account calculado !";
             $arreglo["msj"] = "Se calculo correctamente el id_account de la nueva cuenta a ingresar";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ID ACCOUNT NO CALCULADO !";
+            $arreglo["titulo"] = "¡ Id Account no calculado !";
             $arreglo["msj"] = "NO se calculo correctamente el id_account de la nueva cuenta a ingresar";
         }
         return $arreglo;
@@ -194,7 +194,7 @@ class ControlAccount extends Valida
             $result = $this -> a -> mostrar("id_backup = $newAccount->id_backup AND id_account = $newAccount->id_account");
             if ($result) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+                $arreglo["titulo"] = "¡ Registro existente !";
                 $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo ID_ACCOUNT del mismo backup. Porfavor verifique el id e intente cambiarlo";
                 return $arreglo;
             }
@@ -204,7 +204,7 @@ class ControlAccount extends Valida
         $result = $this -> a -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie l nombre y vuleva a intentarlo";
         }
         return $arreglo;
@@ -231,11 +231,11 @@ class ControlAccount extends Valida
                 $arreglo["account"]["new"] = $queryAccountNew["accounts"][0];
 
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ACCOUNT AGREGADO !";
+            $arreglo["titulo"] = "¡ Account agregado !";
             $arreglo["msj"] = "Se agrego correctamente la cuenta con " . $this -> keyValueArray($this -> pk_Account);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ACCOUNT NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Account no agregado !";
             $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con " . $this -> keyValueArray($account);
         }
         return $arreglo;
@@ -255,7 +255,7 @@ class ControlAccount extends Valida
         $update = $this -> a -> actualizar($account, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ACCOUNT ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Account actualizado !";
             $arreglo["msj"] = "La cuenta con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
 
             $this -> pk_Account["id_backup"] = $account -> id_backup;
@@ -270,7 +270,7 @@ class ControlAccount extends Valida
                 $arreglo["account"]["update"] = $queryAccountUpdate["accounts"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ACCOUNT NO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Account no actualizado !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar la cuenta con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -283,11 +283,11 @@ class ControlAccount extends Valida
         $delete = $this -> a -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ACCOUNT ELIMINADA !";
+            $arreglo["titulo"] = "¡ Account eliminada !";
             $arreglo["msj"] = "La cuenta con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ACCOUNT NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Account no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar la cuenta con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

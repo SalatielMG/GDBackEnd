@@ -51,11 +51,11 @@ class ControlPreference extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["preferences"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ PREFERENCES ENCONTRADOS !" : "¡ PREFERENCE ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Preferences Ecnontrados !" : "¡ Prefernece encontrado !";
             $arreglo["msj"] = (($isQuery) ? "Se encontraron preferencias con " : "Se encontro preferencia con ") . $this -> keyValueArray($this -> pk_Preference);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ? "¡ PREFERENCES NO ENCONTRADOS !" : "¡ PREFERENCE NO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Preferences no Ecnontrados !" : "¡ Prefernece no encontrado !";
             $arreglo["msj"] = (($isQuery) ? "No se encontraron preferencias con " : "No se preferencia extra con ") . $this -> keyValueArray($this -> pk_Preference);
         }
         return $arreglo;
@@ -77,11 +77,11 @@ class ControlPreference extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["preferences"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontrados !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Preference ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontrados !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Preference ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -89,16 +89,10 @@ class ControlPreference extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> p -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> p -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Preference, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> p -> verifyIfExistsIndexUnique($this -> p -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> p -> nameTable, $this -> p -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> p -> ejecutarMultSentMySQLi($sql);
@@ -113,7 +107,7 @@ class ControlPreference extends Valida
         $result = $this -> p -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Preferencia, porque ya existe un registro en la BD con el mismo key_name del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
@@ -136,11 +130,11 @@ class ControlPreference extends Valida
             $arreglo["preference"]["msj"] = $queryPreferenceNew["msj"];
             if (!$arreglo["preference"]["error"]) $arreglo["preference"]["new"] = $queryPreferenceNew["preferences"][0];
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ PREFERENCIA AGREGADO !";
+            $arreglo["titulo"] = "¡ Preferencia agregado !";
             $arreglo["msj"] = "Se agrego correctamente la nueva Preferencia con " . $this -> keyValueArray($this -> pk_Preference);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PREFERENCIA NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Preferencia no agregado !";
             $arreglo["msj"] = "Ocurrio un error al ingresar la nueva Preferencia con " . $this -> keyValueArray($this -> pk_Preference);
         }
         return $arreglo;
@@ -169,11 +163,11 @@ class ControlPreference extends Valida
             $arreglo["preference"]["msj"] = $queryPreferenceUpdate["msj"];
             if (!$arreglo["preference"]["error"]) $arreglo["preference"]["update"] = $queryPreferenceUpdate["preferences"][0];
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ PREFERENCIA AGREGADO !";
+            $arreglo["titulo"] = "¡ Prefrencia agregado !";
             $arreglo["msj"] = "Se actualizo correctamente la Preferencia con " . $this -> keyValueArray($indexUnique);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PREFERENCIA NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Prefrencia no agregado !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar la Preferencia con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -186,11 +180,11 @@ class ControlPreference extends Valida
         $delete = $this -> p -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ PREFERENCIA ELIMINADA !";
+            $arreglo["titulo"] = "¡ Preferncia eliminada !";
             $arreglo["msj"] = "La preferencia con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PREFERENCIA NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Preferncia no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar la preferencia con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

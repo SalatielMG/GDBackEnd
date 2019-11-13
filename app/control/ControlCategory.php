@@ -53,11 +53,11 @@ class ControlCategory extends Valida
         if ($categoriesBackup) {
             $arreglo["categories"] = $categoriesBackup;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CATEGORIES ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Categories encontrados !";
             $arreglo["msj"] = "Se encontraron categorias con " . $this -> keyValueArray($this -> pk_Category);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CATEGORIES NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Categories no encontrados !";
             $arreglo["msj"] = "No se encontraron categorias con " . $this -> keyValueArray($this -> pk_Category);
         }
         return $arreglo;
@@ -86,7 +86,7 @@ class ControlCategory extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["categories"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ CATEGORIAS ENCONTRADOS !" : "¡ CATEGORIA ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Categories encontradas !" : "¡ Category encontrado !";
             $arreglo["msj"] = (($isQuery) ? "Se encontraron categorias con " : "Se encontro la categoría con ") . $this -> keyValueArray($this -> pk_Category);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Category["id_backup"]);
@@ -94,7 +94,7 @@ class ControlCategory extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ? "¡ CATEGORIAS NO ENCONTRADOS !" : "¡ CATEGORIA NO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Categories no encontradas !" : "¡ Category no encontrado !";
             $arreglo["msj"] = (($isQuery) ? "No se encontraron categorias con " : "No se encontro la categoría con ") . $this -> keyValueArray($this -> pk_Category);
         }
         return $arreglo;
@@ -107,7 +107,7 @@ class ControlCategory extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", (SELECT nameAccount(" . $this -> pk_Category["id_backup"] . ", bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", (SELECT nameAccount(bc.id_backup, bc.id_account)) AS nameAccount, COUNT(bc.id_backup) as repeated";
          $this -> table = $this -> c -> nameTable . " bc, backups b";
         $this -> where = "b.id_backup = bc.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina , $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -115,11 +115,11 @@ class ControlCategory extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["categories"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsitencias encontrados !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Category ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsitencias no encontrados !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Category ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -127,16 +127,10 @@ class ControlCategory extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> c -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> c -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Categories, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c ->columnsTableIndexUnique, "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
@@ -156,11 +150,11 @@ class ControlCategory extends Valida
             $newId_Category = $result[0] -> max + 1;
             $arreglo["newId_Category"] = $newId_Category;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ID CATEGORY CALCULADO !";
+            $arreglo["titulo"] = "¡ Id Category calculado !";
             $arreglo["msj"] = "Se calculo correctamente la nueva id_category del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ID CATEGORY NO CALCULADO !";
+            $arreglo["titulo"] = "¡ Id Category no calculado !";
             $arreglo["msj"] = "NO se pudo calcular correctamente la nueva id_category del respaldo con id_backup: " . $this -> pk_Category["id_backup"];
         }
         return $arreglo;
@@ -174,7 +168,7 @@ class ControlCategory extends Valida
             $result = $this -> c -> mostrar("id_backup = $newCategory->id_backup AND id_category = $newCategory->id_category");
             if ($result) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+                $arreglo["titulo"] = "¡ Registro existente !";
                 $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Categoria, puesto que ya existe un registro en la BD con el mismo ID_CATEGORY del mismo backup. Porfavor verifique el id e intente cambiarlo";
                 return $arreglo;
             }
@@ -184,7 +178,7 @@ class ControlCategory extends Valida
         $result = $this -> c -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Categoria, puesto que ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifique los datos y vuelva a intentarlo";
         }
         return $arreglo;
@@ -214,12 +208,12 @@ class ControlCategory extends Valida
             if (!$arreglo["category"]["error"]) $arreglo["category"]["new"] = $queryNewCategory["categories"][0];
 
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CATEGORIA AGREGADO !";
+            $arreglo["titulo"] = "¡ Categoria agregado !";
             $arreglo["msj"] = "Se agrego correctamente la categoria con " . $this -> keyValueArray($this -> pk_Category);
 
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CATEGORIA NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Categoria no agregado !";
             $arreglo["msj"] = "Ocurrio un error al agregar la categoria con " . $this -> keyValueArray($this -> pk_Category);
         }
         return $arreglo;
@@ -243,7 +237,7 @@ class ControlCategory extends Valida
         $update = $this -> c -> actualizar($category, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CATEGORIA ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Categoria actualizada !";
             $arreglo["msj"] = "Se actualizo correctamente la categoria con " . $this -> keyValueArray($indexUnique);
 
             $this -> pk_Category["id_backup"] = $category -> id_backup;
@@ -259,7 +253,7 @@ class ControlCategory extends Valida
             if (!$arreglo["category"]["error"]) $arreglo["category"]["update"] = $queryUpdateCategory["categories"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CATEGORIA NO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Categoria no actualizada !";
             $arreglo["msj"] = "Ocurrio un error al actualizar la categoria con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -272,11 +266,11 @@ class ControlCategory extends Valida
         $delete = $this -> c -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CATEGORIA ELIMINADA !";
+            $arreglo["titulo"] = "¡ Categoria eliminada !";
             $arreglo["msj"] = "La categoria con " . $this -> keyValueArray($indexUnique) . " se ha eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CATEGORIA NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Categoria no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar la categoría con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

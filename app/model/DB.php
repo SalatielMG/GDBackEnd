@@ -80,7 +80,7 @@ class DB {
             if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
                 $arreglo["indice"] = true;
                 $arreglo["msj"] = "Ya existe el campo unico en la tabla $nameTable, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
+                $arreglo["titulo"] = "¡ Tabla corregida anteriormente !";
                 break;
             }
         }

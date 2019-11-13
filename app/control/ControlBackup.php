@@ -43,7 +43,7 @@ class ControlBackup extends Valida
             $form -> validarDatos($this -> email, 'Correo electronico', 'email');
             if (count($form -> errores) > 0) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["titulo"] = "¡ Error de validación !";
                 $arreglo["msj"] = $form -> errores;
                 return $arreglo;
             }
@@ -53,7 +53,7 @@ class ControlBackup extends Valida
             $consultaUser = $this -> b -> mostrar($this -> where, $this -> select, $this -> table);
             if (!$consultaUser) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+                $arreglo["titulo"] = "¡ Usuario no encontrado !";
                 $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
                 return $arreglo;
             }
@@ -69,11 +69,11 @@ class ControlBackup extends Valida
             if ($this -> pagina == 0) array_unshift($backups, array('id_backup' => '0'));
 
             $arreglo["backups"] = $backups;
-            $arreglo["titulo"] = "¡ BACKUPS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Backups encontrados !";
             $arreglo["msj"] = "Se encontraron backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Backups no encontrados !";
             $arreglo["msj"] = "No se encontraron backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
         }
         return $arreglo;
@@ -92,11 +92,11 @@ class ControlBackup extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["backups"] = $select;
-            $arreglo["titulo"] = "¡ BACKUPS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Backups encontrados !";
             $arreglo["msj"] = "Se encontraron backups del usuario solicitado.";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Backups no encontrados !";
             $arreglo["msj"] = "No se encontraron backups del usuario solicitado.";
         }
         return $arreglo;
@@ -111,7 +111,7 @@ class ControlBackup extends Valida
             $form -> validarDatos($this -> email, "Correo electronico", "email");
             if (count($form -> errores) > 0) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["titulo"] = "¡ Error de validación !";
                 $arreglo["msj"] = $form -> errores;
                 return $arreglo;
             }
@@ -136,11 +136,11 @@ class ControlBackup extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["users"] = $consulta;
-            $arreglo["titulo"] = ($this -> email == "Generales") ? "¡ USUARIOS ENCONTRADOS !" : "¡ USUARIO ENCONTRADO !";
+            $arreglo["titulo"] = ($this -> email == "Generales") ? "¡ Usuarios encontrados !" : "¡ Usuario encontrado !";
             $arreglo["msj"] = "Se encontraron Usuario". (($this -> email == "Generales") ? "s: " : ": ") . $this->email;
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($this->email == "Generales") ? "¡ USUARIOS NO ENCONTRADOS !" : "¡ USUARIO NO ENCONTRADO !";
+            $arreglo["titulo"] = ($this->email == "Generales") ? "¡ Usuarios no encontrados !" : "¡ Usuario no encontrado !";
             $arreglo["msj"] = "No se encontraron Usuario". (($this -> email == "Generales") ? "s: " : ": ") . $this->email;
         }
         return $arreglo;
@@ -159,7 +159,7 @@ class ControlBackup extends Valida
         }
         if (count($form -> errores) > 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+            $arreglo["titulo"] = "¡ Error de validación !";
             $arreglo["msj"] = $form -> errores;
             return $arreglo;
         }
@@ -174,7 +174,7 @@ class ControlBackup extends Valida
         $consultaUser = $this -> b -> mostrar($where, $select, $table);
         if (!$consultaUser) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+            $arreglo["titulo"] = "¡ Usuario no encontrado !";
             $arreglo["msj"] = " El usuario con email: $this->email no se encuentra registrado en la base de datos ";
             return $arreglo;
         } else {
@@ -200,11 +200,11 @@ class ControlBackup extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["backups"] = $consulta;
-            $arreglo["titulo"] = "¡ BACKUPS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Backups encontrados !";
             $arreglo["msj"] = "Se encontraron mas de $this->rango backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUPS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Backups no encontrados !";
             $arreglo["msj"] = "No se encontraron mas de $this->rango backups ". (($this -> email == "Generales") ? "de todos los usuarios generales" : "del usuario: $this->email");
         }
         return $arreglo;
@@ -219,11 +219,11 @@ class ControlBackup extends Valida
         $delete = $this -> b -> eliminar($id);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BACKUP ELIMINADA !";
+            $arreglo["titulo"] = "¡ Backup eliminada !";
             $arreglo["msj"] = "El backup $id ha sido eliminado satisfactoriamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUP NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Backup no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar el backup: $id";
         }
         return $arreglo;
@@ -240,7 +240,7 @@ class ControlBackup extends Valida
         if ($this -> idUser == 0) { // Limpieza general
             if (count($form -> errores) > 0) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["titulo"] = "¡ Error de validación !";
                 $arreglo["msj"] = $form -> errores;
                 return $arreglo;
             }
@@ -265,7 +265,7 @@ class ControlBackup extends Valida
                 }
                 if ($error == 0){
                     $arreglo["error"] = false;
-                    $arreglo["titulo"] = "¡ BACKUPS AJUSTADOS !";
+                    $arreglo["titulo"] = "¡ Backups ajustados !";
                     $arreglo["msj"] = "Se ajustaron correctamente todos los backups de los usuarios que tenian mas de $this->rango Respaldos.";
                 }
             } else {
@@ -277,7 +277,7 @@ class ControlBackup extends Valida
             $this -> cantidad = $this -> cantidad - $this -> rango;
             if (count($form -> errores) > 0) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+                $arreglo["titulo"] = "¡ Error de validación !";
                 $arreglo["msj"] = $form -> errores;
                 return $arreglo;
             }
@@ -292,11 +292,11 @@ class ControlBackup extends Valida
         $arreglo["id_user"] = $this -> idUser;
         if ($delete) {
             $arreglo["error"] = "success";
-            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP AJUSTADO !" : "¡ BACKUPS AJUSTADOS !";
+            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ Backup ajustado !" : "¡ Backups ajustados !";
             $arreglo["msj"] = (($this -> cantidad == 1) ? "El backup ha sido eliminado satisfactoriamente" : "Los bakups han sido eliminados satisfactoriamente") . " del usuario : " . $this -> email;
         } else {
             $arreglo["error"] = "warning";
-            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ BACKUP NO AJUSTADO !" : "¡ BACKUPS NO AJUSTADOS !";
+            $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ Backup no ajustado !" : "¡ Backups no ajustados !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar " . (($this -> cantidad == 1) ? "el backup" : " algunos o todos los backups") . " del usuario : " . $this -> email;
         }
         return $arreglo;
@@ -329,12 +329,12 @@ class ControlBackup extends Valida
         $arreglo["resultCleanBackupsUser"] = $resultCleanBackupsUser;
         if ($warning == 0){
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BACKUPS AJUSTADOS !";
+            $arreglo["titulo"] = "¡ Backups ajustados !";
             $arreglo["msj"] = "Se ajustaron correctamente todos los backups de los usuarios que tenian mas de $this->rango Respaldos.";
         } else {
             $arreglo["usuariosError"] = $errorUserCleanBackup;
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($warning == 1) ? "¡ ERROR DE AJUSTE DE 1 USUARIO !" : "¡ ERROR DE AJUTE DE $warning USUARIOS !";
+            $arreglo["titulo"] = ($warning == 1) ? "¡ Error de ajuste de 1 ussuario !" : "¡ Error de ajuste de $warning usuarios !";
             $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $warning usuario" . (($warning == 1) ? "": "s");
         }
         return $arreglo;
@@ -349,7 +349,7 @@ class ControlBackup extends Valida
         //return $update;
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BACKUP ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Backups actualizado !";
             $arreglo["msj"] = "El backup con id $backup->id_backup se actualizo correctamente";
             $this -> id_backup = $backup->id_backup;
             $queryBackupUpdate = $this -> consultarBackup(false);
@@ -363,7 +363,7 @@ class ControlBackup extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUP NO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Backups no actualizado !";
             $arreglo["msj"] = "El backup con id $backup->id_backup no se actualizo correctamente";
         }
         return $arreglo;
@@ -378,11 +378,11 @@ class ControlBackup extends Valida
         if ($query) {
             $arreglo["backup"] = $query;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ BACKUP LOCALIZADO !";
+            $arreglo["titulo"] = "¡ Backup localizado !";
             $arreglo["msj"] = "El backup con id $this->id_backup se encuentra en la base de daos";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ BACKUP NO LOCALIZADO !";
+            $arreglo["titulo"] = "¡ Backup no localizado !";
             $arreglo["msj"] = "El backup con id $this->id_backup no se encuentra en la base de datos";
         }
         return $arreglo;

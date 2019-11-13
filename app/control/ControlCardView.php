@@ -39,11 +39,11 @@ class ControlCardView extends Valida
         if ($cardviewBackup) {
             $arreglo["cardviews"] = $cardviewBackup;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CARDVIEWS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Cardviews encontrados !";
             $arreglo["msj"] = "Se encontraron cardviews con ". $this -> keyValueArray($this -> pk_CardView);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CARDVIEWS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Cardviews no encontrados !";
             $arreglo["msj"] = "No se encontraron cardviews con " . $this -> keyValueArray($this -> pk_CardView);
         }
         return $arreglo;
@@ -69,14 +69,14 @@ class ControlCardView extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["cardviews"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ CARDVIEWS ENCONTRADOS !" : "CARDVIEW ENCONTRADO";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Cardviews encontrados !" : "Cardview encontrado";
             $arreglo["msj"] = (($isQuery) ? "Se econtraron cardviews con " : "Se econtro cardview con " ) . $this -> keyValueArray($this -> pk_CardView);
             if ($isQuery && $this -> pagina == 0) {
                 $arreglo["cardviewsBackup"] = $this -> obtCardViewsGralBackup(false);
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CARDVIEWS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Cardviews no encontrados !";
             $arreglo["msj"] = "No se encontraron cardviews del respaldo solicitado.";
         }
         return $arreglo;
@@ -88,7 +88,7 @@ class ControlCardView extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> cv -> columnsTable, $this -> cv -> columnsTableIndexUnique, "bcv.") . ", COUNT(bcv.id_card) repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> cv -> columnsTable, $this -> cv -> columnsTableIndexUnique, "cv.") . ", COUNT(cv.id_card) repeated";
         $this -> table = $this -> cv -> nameTable . " cv, backups b";
         $this -> where = "b.id_backup = cv.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "cv.id_backup") . " GROUP BY ". $this -> namesColumns($this -> cv -> columnsTableIndexUnique, "cv.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -96,11 +96,11 @@ class ControlCardView extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["cardviews"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontrados !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla CardView ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontrados !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla CardView ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -108,16 +108,10 @@ class ControlCardView extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> cv -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> cv -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla CardViews, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> cv -> verifyIfExistsIndexUnique($this -> cv -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> cv -> nameTable, $this -> cv -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> cv -> ejecutarMultSentMySQLi($sql);
@@ -132,7 +126,7 @@ class ControlCardView extends Valida
         $result = $this -> cv -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro Existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " CardView, porque ya existe un registro en la BD con el mismo id_card del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
@@ -155,12 +149,12 @@ class ControlCardView extends Valida
             $arreglo["cardview"]["msj"] = $queryCardviewNew["msj"];
             if (!$arreglo["cardview"]["error"]) $arreglo["cardview"]["new"] = $queryCardviewNew["cardviews"][0];
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CARDVIEW AGREGADO !";
+            $arreglo["titulo"] = "¡ Cardview agregado !";
             $arreglo["msj"] = "Se agrego correctamente el nuevo cardview con " . $this -> keyValueArray($this -> pk_CardView);
             $arreglo["cardviewsBackup"] = $this -> obtCardViewsGralBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CARDVIEW NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Cardview no agregado !";
             $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo cardview con " . $this -> keyValueArray($this -> pk_CardView);
         }
         return $arreglo;
@@ -180,7 +174,7 @@ class ControlCardView extends Valida
         $update = $this -> cv -> actualizar($cardview, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CARDVIEW ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Cardview actualizada !";
             $arreglo["msj"] = "La cardview con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
             $this -> pk_CardView["id_backup"] = $cardview -> id_backup;
             $this -> pk_CardView["id_card"] = $cardview -> id_card;
@@ -192,7 +186,7 @@ class ControlCardView extends Valida
             $arreglo["cardviewsBackup"] = $this -> obtCardViewsGralBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CARDVIEW NO ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Cardview no actualizada !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar la cardview con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -205,13 +199,13 @@ class ControlCardView extends Valida
         $delete = $this -> cv -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CARDVIEW ELIMINADA !";
+            $arreglo["titulo"] = "¡ Cardview eliminada !";
             $arreglo["msj"] = "La cardview con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
             $this -> pk_CardView["id_backup"] = $indexUnique -> id_backup;
             $arreglo["cardviewsBackup"] = $this -> obtCardViewsGralBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CARDVIEW NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Cardview no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar la cardview con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

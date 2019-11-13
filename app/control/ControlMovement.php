@@ -54,7 +54,7 @@ class ControlMovement extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["movements"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ MOVIMIENTOS ENCONTRADOS !": "¡ MOVIMIENTO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Movimientos encontrados !": "¡ Movimiento encontrado !";
             $arreglo["msj"] = (($isQuery) ? "Se encontraron movimientos con " : "Se encontro movimiento con ") . $this -> keyValueArray($this -> pk_Movement);
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Movement["id_backup"]);
@@ -62,7 +62,7 @@ class ControlMovement extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ? "¡ MOVIMIENTOS NO ENCONTRADOS !": "¡ MOVIMIENTO NO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Movimientos no encontrados !": "¡ Movimiento no encontrado !";
             $arreglo["msj"] = (($isQuery) ? "NO se encontraron movimientos con " : "NO se encontro movimiento con ") . $this -> keyValueArray($this -> pk_Movement);
         }
         return $arreglo;
@@ -74,7 +74,7 @@ class ControlMovement extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> m -> columnsTable, $this -> m -> columnsTableIndexUnique, "bm.") . ", (SELECT symbolCurrency(" . $this -> pk_Movement["id_backup"] . ", '', bm.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Movement["id_backup"] . ", bm.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Movement["id_backup"] . ", bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> m -> columnsTable, $this -> m -> columnsTableIndexUnique, "bm.") . ", (SELECT symbolCurrency(bm.id_backup, '', bm.id_account)) AS symbol, (SELECT nameAccount(bm.id_backup, bm.id_account)) AS nameAccount, (SELECT nameCategory(bm.id_backup, bm.id_category)) as nameCategory,  COUNT(bm.id_backup) repeated";
         $this -> table = "backup_movements bm, backups b";
         $this -> where = "b.id_backup = bm.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bm.id_backup") . " GROUP BY ". $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -82,11 +82,11 @@ class ControlMovement extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["movements"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Movement ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Movement ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -94,16 +94,10 @@ class ControlMovement extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> m -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> m -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Movements, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> m -> verifyIfExistsIndexUnique($this -> m -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> m -> nameTable, $this -> m -> columnsTableIndexUnique,"id_backup");
         $operacion = $this -> m -> ejecutarMultSentMySQLi($sql);
@@ -118,7 +112,7 @@ class ControlMovement extends Valida
         $result = $this -> m -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el" : "registrar el nuevo") . " Movimiento, porque ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifica y vuleva a intentarlo";
 
         }
@@ -139,7 +133,7 @@ class ControlMovement extends Valida
 
         if ($insert) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ MOVIMIENTO AGREGADO !";
+            $arreglo["titulo"] = "¡ Movimiento agregado !";
             $arreglo["msj"] = "Se agrego correctamente el nuevo movimiento.";
 
             $this -> pk_Movement["id_backup"] = $movement -> id_backup;
@@ -155,7 +149,7 @@ class ControlMovement extends Valida
             if (!$arreglo["movement"]["error"]) $arreglo["movement"]["new"] = $queryMovementNew["movements"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ MOVIMIENTO NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Movimiento no agregado !";
             $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo movimiento.";
         }
         return $arreglo;
@@ -184,7 +178,7 @@ class ControlMovement extends Valida
 
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ MOVIMIENTO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Movimiento actualizada !";
             $arreglo["msj"] = "El movimiento con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
             $this -> pk_Movement["id_backup"] = $movement -> id_backup;
             $this -> pk_Movement["id_account"] = $movement -> id_account;
@@ -199,7 +193,7 @@ class ControlMovement extends Valida
             if (!$arreglo["movement"]["error"]) $arreglo["movement"]["update"] = $queryMovementUpdate["movements"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ MOVIMIENTO NO ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Movimiento no actualizada !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar el movimiento con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -212,11 +206,11 @@ class ControlMovement extends Valida
         $delete = $this -> m -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ MOVIMIENTO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Movimiento eliminada !";
             $arreglo["msj"] = "El movimiento con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ MOVIMIENTO NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Movimiento no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar el movimiento con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

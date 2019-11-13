@@ -56,7 +56,7 @@ class ControlAutomatic extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["automatics"] = $select;
-            $arreglo["titulo"] = "¡ AUTOMATICS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Automatics encontrados !";
             $arreglo["msj"] = "Se encontraron automatics del Respaldo con id_backup: " . $this -> pk_Automatic["id_backup"];
             if ($isQuery && $this -> pagina == 0) {
                 $this -> ctrlAccount = new ControlAccount($this -> pk_Automatic["id_backup"]);
@@ -64,7 +64,7 @@ class ControlAutomatic extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ AUTOMATICS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Automatics no encontrados !";
             $arreglo["msj"] = "No se encontraron automatics del Respaldo con id_backup: " . $this -> pk_Automatic["id_backup"];
         }
         return $arreglo;
@@ -77,7 +77,7 @@ class ControlAutomatic extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(ba.id_backup, '', ba.id_account)) AS symbol, (SELECT nameAccount(ba.id_backup, ba.id_account)) AS nameAccount, (SELECT nameCategory(ba.id_backup, ba.id_category)) as nameCategory,  COUNT(ba.id_backup) repeated";
 
         $this -> table = "backup_automatics ba, backups b";
         $this -> where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
@@ -86,11 +86,11 @@ class ControlAutomatic extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["automatics"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Automatics ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Automatics ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -122,14 +122,14 @@ class ControlAutomatic extends Valida
             $newId_Operation = $queryIdMaxOperation[0] -> max + 1;
             $arreglo["newId_Operation"] = $newId_Operation;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ ID OPERATION CALCULADO !";
+            $arreglo["titulo"] = "¡ Id Operation calculado !";
             $arreglo["msj"] = "Se calculo correctamente el id_operation de la nueva operación automática a ingresar";
 
             $this -> ctrlAccount = new ControlAccount($this -> pk_Automatic["id_backup"]);
             $arreglo["accountsBackup"] = $this -> ctrlAccount -> obtAccountsBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ID OPERATION NO CALCULADO !";
+            $arreglo["titulo"] = "¡ Id Operation no calculado !";
             $arreglo["msj"] = "NO se calculo correctamente el id_operation de la nueva operación automática a ingresar";
         }
         return $arreglo;
@@ -144,7 +144,7 @@ class ControlAutomatic extends Valida
             $result = $this -> a -> mostrar("id_backup = $newAutomatic->id_backup AND id_operation = $newAutomatic->id_operation");
             if ($result) {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+                $arreglo["titulo"] = "¡ Registro existente !";
                 $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " operación automatica, puesto que ya existe un registro en la BD con el mismo ID_OPERATION del mismo backup. Porfavor verifique el id e intente cambiarlo";
                 return $arreglo;
             }
@@ -154,7 +154,7 @@ class ControlAutomatic extends Valida
         $result = $this -> a -> mostrar($arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " operación automática, puesto que ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifique y vuelta a intentarlo";
 
         }
@@ -192,11 +192,11 @@ class ControlAutomatic extends Valida
                 $arreglo["automatic"]["new"] = $queryAutomaticNew["automatics"][0];
 
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ AUTOMATIC AGREGADO !";
+            $arreglo["titulo"] = "¡ Automatic agregado !";
             $arreglo["msj"] = "Se agrego correctamente la operación automática con " . $this -> keyValueArray($this -> pk_Automatic);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ AUTOMATIC NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Automatic no agregado !";
             $arreglo["msj"] = "Ocurrio un error al ingresar la operación automática con " . $this -> keyValueArray($automatic);
         }
         return $arreglo;
@@ -225,7 +225,7 @@ class ControlAutomatic extends Valida
         $update = $this -> a -> actualizar($automatic, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ AUTOMATIC ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Automatic actualizada !";
             $arreglo["msj"] = "La operación automática con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
 
             $this -> pk_Automatic["id_backup"] = $automatic -> id_backup;
@@ -247,7 +247,7 @@ class ControlAutomatic extends Valida
                 $arreglo["automatic"]["update"] = $queryAutomaticUpdate["automatics"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ AUTOMATIC NO ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Automatic no actualizada !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar la operación automática con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -261,11 +261,11 @@ class ControlAutomatic extends Valida
         $delete = $this -> a -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ AUTOMATIC ELIMINADA !";
+            $arreglo["titulo"] = "¡ Automatic eliminada !";
             $arreglo["msj"] = "La operación automática con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ AUTOMATIC NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Automatic no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar la operación automática con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

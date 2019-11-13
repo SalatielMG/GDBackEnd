@@ -37,7 +37,7 @@ class ControlUsers extends Valida
         $backups = $this -> extraerBackupsMovements($idUser); //Todos los id de los Backup del usuario
         if (count($backups) == 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY RESPALDOS DE ESTE USUARIO !";
+            $arreglo["titulo"] = "¡ No existen respaldos de este usuario !";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de respaldos del usuario seleccionado para poder realizar la grafica de $mov !";
             return $arreglo;
         }
@@ -50,7 +50,7 @@ class ControlUsers extends Valida
         $accounts = $this -> extraerCuentasUser($idUser, $idBackup);
         if (count($accounts) == 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY CUENTAS DE ESTE USUARIO !";
+            $arreglo["titulo"] = "¡ No exixten cuentas de este usuario!";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de cuentas del usuario seleccionado para poder realizar la grafica de $mov !";
             return $arreglo;
         }
@@ -61,7 +61,7 @@ class ControlUsers extends Valida
         $años = $this -> extraerAñosMovements($idUser, $idBackup, $idAccount);
         if (count($años) == 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY MOVIMIENTOS DEL RESPALDO SELECCIONADO  !";
+            $arreglo["titulo"] = "¡ No hay movimientos del respaldo seleccionado !";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de movimientos del respaldo selecionado para poder realizar la grafica de $mov !";
             return $arreglo;
         }
@@ -72,7 +72,7 @@ class ControlUsers extends Valida
         $meses = $this -> extraerMesesMovements($idUser, $idBackup, $idAccount, $año);
         if (count($meses) == 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY MOVIMIENTOS DEL RESPALDO SELECCIONADO  !";
+            $arreglo["titulo"] = "¡ No hay movimientos del respaldo seleccionado !";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de movimientos del respaldo selecionado para poder realizar la grafica de $mov !";
             return $arreglo;
         }
@@ -81,7 +81,7 @@ class ControlUsers extends Valida
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup "  . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " " . $this -> condicionarConsulta($año, 'bm.year') . " " . $this -> condicionarConsulta($mes, 'bm.month') . " AND b.id_user = $idUser AND bm.sign = '$tipo' GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
 
-        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, sum(cat.amount) AS total";
+        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, sum((ANY_VALUE(cat.amount))) AS total";
         $table = "(SELECT bm.id_category, bm.amount FROM backup_movements bm, backups b WHERE $where) as cat";
         $where = "1 GROUP BY cat.id_category ORDER BY total DESC";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
@@ -94,11 +94,11 @@ class ControlUsers extends Valida
             $arreglo["categoria"] = $categoria;
             $arreglo["labels"] = $categoria["namesCategories"];
             $arreglo["values"] = $categoria["total"];
-            $arreglo["titulo"] = "¡ MOVIMIENTOS ECONTRADOS !";
+            $arreglo["titulo"] = "¡ Movimientos encontrados !";
             $arreglo["msj"] = "Se encontraron movimientos de tipo $mov del usuario solicitaddo";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ MOVIMIENTOS NO ECONTRADOS !";
+            $arreglo["titulo"] = "¡ Movimientos no encontrados !";
             $arreglo["msj"] = "No se encontro ningun movimiento de tipo $mov del usuario solicitado";
         }
         return $arreglo;
@@ -180,7 +180,7 @@ class ControlUsers extends Valida
         $backups = $this -> extraerBackupsMovements($idUser); //Todos los id de los Backup del usuario
         if (count($backups)== 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY RESPALDOS DE ESTE USUARIO !";
+            $arreglo["titulo"] = "¡ No existen respaldos de este uusario !";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de respaldos del usuario seleccionado para poder realizar la grafica !";
             return $arreglo;
         }
@@ -195,7 +195,7 @@ class ControlUsers extends Valida
         $años = $this -> extraerAñosMovements($idUser, $idBackup);
         if (count($años) == 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY MOVIMIENTOS DEL RESPALDO SELECCIONADO  !";
+            $arreglo["titulo"] = "¡ No hay movimientos del respaldo seleccionado !";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de movimientos del respaldo selecionado para poder realizar la grafica !";
             return $arreglo;
         }
@@ -205,15 +205,15 @@ class ControlUsers extends Valida
 
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
-        $select = "tempTable.month, SUM(tempTable.amount) Total";
-        $table = "(SELECT bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total";
+        $table = "(SELECT (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $gastos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLGastos"] = $this -> consultaSQL($select, $table, $where);
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '+' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
-        $select = "tempTable.month, SUM(tempTable.amount) Total";
-        $table = "(SELECT bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total";
+        $table = "(SELECT (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $ingresos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLIngresos"] = $this -> consultaSQL($select, $table, $where);
@@ -230,13 +230,12 @@ class ControlUsers extends Valida
             $arreglo["TotalIngresos"] = $this -> sumaTotales($arreglo["Ingresos"]);
             $arreglo["TotalAnhoLabel"] = array(0 => (($año == 0) ? 'Todos' : $año));
 
-
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ MOVIMIENTOS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Movimientos encontrados !";
             $arreglo["msj"] = "¡ Movimientos encontrados del año seleccionado !";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ NO HAY NINGUN MOVIMIENTOS !";
+            $arreglo["titulo"] = "¡ No hay ningun movimientos !";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de movimientos del año seleccionado para poder realizar al grafica. !";
         }
         return $arreglo;
@@ -272,7 +271,7 @@ class ControlUsers extends Valida
         return $select = $this -> u -> mostrar("b.id_backup = bm.id_backup and bm.id_backup = $id_backup and b.id_user = $idUSer GROUP BY bm.id_account ORDER BY bm.id_account desc", "bm.id_account", "backup_movements bm, backups b");
     }
     private function  extraerCuentasUser($idUSer, $id_backup) {
-        return $select = $this -> u -> mostrar("b.id_backup = ba.id_backup and ba.id_backup = $id_backup and b.id_user = $idUSer GROUP BY ba.id_account ORDER BY ba.id_account desc", "ba.id_account, ba.name", "backup_accounts ba, backups b");
+        return $select = $this -> u -> mostrar("b.id_backup = ba.id_backup and ba.id_backup = $id_backup and b.id_user = $idUSer GROUP BY ba.id_account ORDER BY ba.id_account desc", "ba.id_account, (ANY_VALUE(ba.name)) name", "backup_accounts ba, backups b");
     }
     /**********************************************************************************************/
 
@@ -286,7 +285,7 @@ class ControlUsers extends Valida
 
         if (count($form -> errores) > 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE VALIDACIÓN !";
+            $arreglo["titulo"] = "¡ Error de validación !";
             $arreglo["msj"] = $form -> errores;
             return $arreglo;
         }
@@ -296,12 +295,12 @@ class ControlUsers extends Valida
         if (count($usuario) > 0) {
             $usuario = $usuario[0];
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ USUARIO ENCONTRADO !";
+            $arreglo["titulo"] = "¡ Usuario encontrado !";
             $arreglo["msj"] = "Usuario localizado en la BD";
             $arreglo["user"] = $usuario;
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ USUARIO NO ENCONTRADO !";
+            $arreglo["titulo"] = "¡ Usuario no encontrado !";
             $arreglo["msj"] = "No se encontro ningun usuario registrado con el correo: '$email' proporcionado";
         }
         return $arreglo;

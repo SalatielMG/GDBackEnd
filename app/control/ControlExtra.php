@@ -39,11 +39,11 @@ class ControlExtra extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["extras"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ EXTRAS ENCONTRADOS !" : "¡ EXTRA ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Extras encontrados !" : "¡ Extra encontrado !";
             $arreglo["msj"] = (($isQuery) ? "Se encontraron extras con " : "Se encontro extra con ") . $this -> keyValueArray($this -> pk_Extra);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ? "¡ EXTRAS NO ENCONTRADOS !" : "¡ EXTRA NO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Extras no encontrados !" : "¡ Extra no encontrado !";
             $arreglo["msj"] = (($isQuery) ? "No se encontraron extras con " : "No se encontro extra con ") . $this -> keyValueArray($this -> pk_Extra);
         }
         return $arreglo;
@@ -63,11 +63,11 @@ class ControlExtra extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["extras"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias encontrados !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Extra ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconsistencias no encontrados !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Extra ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -75,16 +75,10 @@ class ControlExtra extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> e -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> e -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Extras, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> e -> verifyIfExistsIndexUnique($this -> e -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> e -> nameTable, $this -> e -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> e -> ejecutarMultSentMySQLi($sql);
@@ -99,7 +93,7 @@ class ControlExtra extends Valida
         $result = $this -> e -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Extra, porque ya existe un registro en la BD con el mismo id_extra del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
@@ -121,11 +115,11 @@ class ControlExtra extends Valida
             $arreglo["extra"]["msj"] = $queryExtraNew["msj"];
             if (!$arreglo["extra"]["error"]) $arreglo["extra"]["new"] = $queryExtraNew["extras"][0];
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ EXTRA AGREGADO !";
+            $arreglo["titulo"] = "¡ Extra agregado !";
             $arreglo["msj"] = "Se agrego correctamente el nuevo Extra con " . $this -> keyValueArray($this -> pk_Extra);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ EXTRA NO AGREGADO !";
+            $arreglo["titulo"] = "¡ Extra no agregado !";
             $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo Extra con " . $this -> keyValueArray($this -> pk_Extra);
         }
         return $arreglo;
@@ -153,11 +147,11 @@ class ControlExtra extends Valida
             $arreglo["extra"]["msj"] = $queryExtraUpdate["msj"];
             if (!$arreglo["extra"]["error"]) $arreglo["extra"]["update"] = $queryExtraUpdate["extras"][0];
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ EXTRA ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Extra actualizado !";
             $arreglo["msj"] = "Se acualizo correctamente el Extra con " . $this -> keyValueArray($indexUnique);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ EXTRA NO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Extra no actualizado !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar el Extra con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -170,11 +164,11 @@ class ControlExtra extends Valida
         $delete = $this -> e -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ EXTRA ELIMINADA !";
+            $arreglo["titulo"] = "¡ Extra eliminada !";
             $arreglo["msj"] = "El Extra con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ EXTRA NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Extra no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar el Extra con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

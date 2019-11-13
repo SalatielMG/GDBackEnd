@@ -28,24 +28,22 @@ class ControlCurrency extends Valida
     }
     public function insertCurrencies() {
         $insert = $this -> c -> agregarCurrencies();
-        var_dump($insert);
-        exit();
         $arreglo = array();
         $result = $this -> c -> mostrar("1", "*", "table_currencies");
         if (!$result) { // No tiene regitros => Hay que ingresarlos
             $insert = false;
             if ($insert) {
                 $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ DATOS AGREGADOS !";
+                $arreglo["titulo"] = "¡ Datos agregados !";
                 $arreglo["msj"] = "Se agregaron correctamente los registros a la tabla table_currencies";
             } else {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ ERROR INSERT !";
+                $arreglo["titulo"] = "¡ Error Insert !";
                 $arreglo["msj"] = "Ocurrio un error al intentar agregar los registros a la tabla table_currencies";
             }
         } else { // Ya tiene registros
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ TABLA CON REGISTROS !";
+            $arreglo["titulo"] = "¡ Tabla con registros !";
             $arreglo["msj"] = "No se puede realizar las insercciones de datos, puesto que ya existen los registros en la tabla: table_currencies";
         }
         return $arreglo;
@@ -65,11 +63,11 @@ class ControlCurrency extends Valida
         if ($select) {
             $arreglo["currencies"] = $select;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Currencies encontrados !";
             $arreglo["msj"] = "Se encontraron currencies en la tabla Table_Currencies";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Currencies no encontrados !";
             $arreglo["msj"] = "No se encontraron currencies en la tabla Table_Currencies";
         }
         return $arreglo;
@@ -112,11 +110,11 @@ class ControlCurrency extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["currenciesSelected"] = $select;
-            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Currencies encontrados !";
             $arreglo["msj"] = "Se encontraron currencies del respaldo con " . $this -> keyValueArray($this -> pk_Currency);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Currencies no encontrados !";
             $arreglo["msj"] = "No se encontraron currencies del respaldo con " . $this -> keyValueArray($this -> pk_Currency);
         }
         return $arreglo;
@@ -140,13 +138,13 @@ class ControlCurrency extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["currencies"] = $select;
-            $arreglo["titulo"] = "¡ CURRENCIES ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Currencies encontrados !";
             $arreglo["msj"] = "Se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
             if ($isQuery && $this -> pagina == 0)
                 $arreglo["curreciesGralBackup"] = $this -> obtCurrenciesGralBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCIES NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Currencies no encontrados !";
             $arreglo["msj"] = "No se encontraron currencies del respaldo con id_backup: " . $this -> pk_Currency["id_backup"];
         }
         return $arreglo;
@@ -159,7 +157,7 @@ class ControlCurrency extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", count(id_backup) as repeated";
+        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> c -> columnsTable, $this -> c -> columnsTableIndexUnique, "bc.") . ", count(bc.id_backup) as repeated";
         $this -> table = "backup_currencies bc, backups b";
         $this -> where = "b.id_backup = bc.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bc.id_backup") . " GROUP BY ". $this -> namesColumns($this -> c -> columnsTableIndexUnique, "bc.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
@@ -167,11 +165,11 @@ class ControlCurrency extends Valida
         if ($consulta) {
             $arreglo["error"] = false;
             $arreglo["currencies"] = $consulta;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconcistencias encontradas !";
             $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ INCONSISTENCIAS NO ENCONTRADOS !";
+            $arreglo["titulo"] = "¡ Inconcistencias no encontradas !";
             $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
@@ -179,16 +177,10 @@ class ControlCurrency extends Valida
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 
-        $indices = $this -> c -> ejecutarCodigoSQL("SHOW INDEX from " . $this -> c -> nameTable);
         $arreglo = array();
-        $arreglo["indice"] = false;
-        foreach ($indices as $key => $value) {
-            if ($value -> Key_name == "indiceUnico") { //Ya existe el indice unico... Entonces la tabla ya se encuentra corregida
-                $arreglo["indice"] = true;
-                $arreglo["msj"] = "Ya existe el campo unico en la tabla Currencies, por lo tanto ya se ha realizado la corrección de datos inconsistentes anteriormente.";
-                $arreglo["titulo"] = "¡ TABLA CORREGIDA ANTERIORMENTE !";
-                return $arreglo;
-            }
+        $exixstIndexUnique = $this -> c -> verifyIfExistsIndexUnique($this -> c -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
         }
         $sql = $this -> sentenciaInconsistenicaSQL($this -> c -> nameTable, $this -> c -> columnsTableIndexUnique, "id_backup");
         $operacion = $this -> c -> ejecutarMultSentMySQLi($sql);
@@ -203,7 +195,7 @@ class ControlCurrency extends Valida
         $result = $this -> c -> mostrar( $arreglo["sqlVerfiyIndexUnique"]);
         if ($result) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ REGISTRO EXISTENTE !";
+            $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Currency, porque ya existe un registro en la BD con el mismo iso_code del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
@@ -226,11 +218,11 @@ class ControlCurrency extends Valida
             if (!$arreglo["currency"]["error"]) $arreglo["currency"]["new"] = $queryCurrencyNew["currencies"][0];
             $arreglo["currenciesBackup"] = $this -> obtCurrenciesGralBackup(false);
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CURRENCY AGREGADA !";
+            $arreglo["titulo"] = "¡ Currency agregada !";
             $arreglo["msj"] = "Se agrego correctamente la currency con " . $this -> keyValueArray($this -> pk_Currency);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCY NO AGREGADA !";
+            $arreglo["titulo"] = "¡ Currency no agregada !";
             $arreglo["msj"] = "Ocurrio un error al intentar ingresar la currency con " . $this -> keyValueArray($this -> pk_Currency);
         }
         return $arreglo;
@@ -249,7 +241,7 @@ class ControlCurrency extends Valida
         $update = $this -> c -> actualizar($currency, $indexUnique);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CURRENCY ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Currency actualizada !";
             $arreglo["msj"] = "La currency con " . $this -> keyValueArray($indexUnique) . " se ha actualizado correctamente";
             $this -> pk_Currency["id_backup"] = $currency -> id_backup;
             $this -> pk_Currency["iso_code"] = $currency -> iso_code;
@@ -261,7 +253,7 @@ class ControlCurrency extends Valida
             $arreglo["currenciesBackup"] = $this -> obtCurrenciesGralBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCY NO ACTUALIZADA !";
+            $arreglo["titulo"] = "¡ Currency no actualizada !";
             $arreglo["msj"] = "Ocurrio un error al intentar actualizar la currency con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
@@ -274,13 +266,13 @@ class ControlCurrency extends Valida
         $delete = $this -> c -> eliminar($indexUnique);
         if ($delete) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ CURRENCY ELIMINADA !";
+            $arreglo["titulo"] = "¡ Currency eliminada !";
             $arreglo["msj"] = "La currency con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
             $this -> pk_Currency["id_backup"] = $indexUnique -> id_backup;
             $arreglo["currenciesBackup"] = $this -> obtCurrenciesGralBackup(false);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ CURRENCY NO ELIMINADA !";
+            $arreglo["titulo"] = "¡ Currency no eliminada !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar la currency con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;

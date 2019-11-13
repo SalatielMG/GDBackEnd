@@ -65,11 +65,11 @@ class ControlPermiso extends Valida
             }
             $arreglo["permisos"] = $permisos;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = ($isQuery) ? "¡ PERMISOS ENCONTRADOS !" : "¡ PERMISO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Permisos encontrados !" : "¡ Permiso encontrado !";
             $arreglo["msj"] = ($isQuery) ? "Se econtraron permisos registrados en la base de datos." : "Se encontro el Permiso: " . $this -> pk_Permiso["id"] . " en la base de datos.";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ? "¡ PERMISOS NO ENCONTRADOS !" : "¡ PERMISO NO ENCONTRADO !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Permisos no encontrados !" : "¡ Permiso no encontrado !";
             $arreglo["msj"] = ($isQuery) ? "No se econtraron permisos registrados en la base de datos." : "No se encontro el Permiso " . $this -> pk_Permiso["id"] . " en la base de datos.";
         }
         return $arreglo;
@@ -84,12 +84,12 @@ class ControlPermiso extends Valida
         if ($permisos) {
             $arreglo["permisos"] = $permisos;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ PERMISOS ASIGNADOS !";
+            $arreglo["titulo"] = "¡ Permisos asignados !";
             $arreglo["msj"] = "Se econtraron permisos asignados.";
         } else {
             $arreglo["permisos"] = [];
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PERMISOS NO ASIGNADOS !";
+            $arreglo["titulo"] = "¡ Permisos no asignados !";
             $arreglo["msj"] = "NO se econtraron permisos asignados.";
         }
         return $arreglo;
@@ -213,7 +213,7 @@ class ControlPermiso extends Valida
         $update = $this -> p -> actualizar($permiso, $permisoSelected);
         if ($update) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ PERMISO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Permiso actualizado !";
             $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha actualizado correctamente";
 
             if ($isChangeUsers -> isChangeUsers) { // Actualizar usuarios
@@ -241,7 +241,7 @@ class ControlPermiso extends Valida
             if (!$arreglo["permiso"]["error"]) $arreglo["permiso"]["update"] = $permisoUpdate["permisos"][0];
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ PERMISO NO ACTUALIZADO !";
+            $arreglo["titulo"] = "¡ Permiso no actualizado !";
             $arreglo["msj"] = "Ocurrio un errror al intentar actualizar el Permiso: " . $permisoSelected -> permiso ;
         }
         return $arreglo;
@@ -258,16 +258,16 @@ class ControlPermiso extends Valida
             $delete = $this -> p -> eliminar($permisoSelected -> id);
             if ($delete) {
                 $arreglo["error"] = false;
-                $arreglo["titulo"] = "¡ PERMISO ELIMINADO !";
+                $arreglo["titulo"] = "¡ Permiso elimiando !";
                 $arreglo["msj"] = "El Permiso: " . $permisoSelected -> permiso . " se ha eliminado correctamente";
             } else {
                 $arreglo["error"] = true;
-                $arreglo["titulo"] = "¡ PERMISO NO ELIMINADO !";
+                $arreglo["titulo"] = "¡ Permiso no elimiando !";
                 $arreglo["msj"] = "Ocurrio un error al intentar eliminar el Permiso: " . $permisoSelected -> permiso;
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE DEPENDENCIAS !";
+            $arreglo["titulo"] = "¡ Error de dependencias !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar los usuarios asociados al Permiso: " . $permisoSelected -> permiso;
         }
         return $arreglo;

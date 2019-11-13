@@ -165,12 +165,12 @@ ControlUsuario extends Valida
         if ($usuarios){
             $arreglo["usuarios"] = $usuarios;
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ USUARIOS ASIGNADOS !";
+            $arreglo["titulo"] = "¡ Usuarios asignados !";
             $arreglo["msj"] = "Se econtraron usuarios asignados.";
         } else {
             $arreglo["usuarios"] = [];
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ USUARIOS NO ASIGNADOS !";
+            $arreglo["titulo"] = "¡ Usuarios no asignados !";
             $arreglo["msj"] = "NO se econtraron usuarios asignados.";
         }
         return $arreglo;
@@ -405,7 +405,7 @@ ControlUsuario extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR DE DEPENDENCIAS !";
+            $arreglo["titulo"] = "¡ Error de dependencias !";
             $arreglo["msj"] = "Ocurrio un error al intentar eliminar los permisos asociados al Usuario: " . $usuarioSelected -> email;
         }
         return $arreglo;
