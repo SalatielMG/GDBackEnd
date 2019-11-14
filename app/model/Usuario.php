@@ -34,6 +34,12 @@ class Usuario extends DB
         }
         return $this -> insertMultipleData($this -> nameTableMM, $data);
     }
+    public function actualizarCodigo($codigo, $email, $isConfirm) {
+        $usuario =  [
+            "codigo" => ($isConfirm) ? "null": "'$codigo'",
+        ];
+        return $this -> update($this -> nameTable, $usuario, "email = '$email'");
+    }
     public function actualizar($usuarioNuevo, $usuarioSelected, $isUpdateProfile = false) {
         $usuario = (!$isUpdateProfile) ? [
             "email" => "'$usuarioNuevo->email'",
@@ -45,11 +51,12 @@ class Usuario extends DB
         ];
         return $this -> update($this -> nameTable, $usuario, "id = $usuarioSelected->id");
     }
-    public function actualizarPassword($newPassword, $id_usuario){
+    public function actualizarPassword($newPassword, $condition, $isReset = false){
         $usuario = [
             "password" => "'" . $this -> generatePassEncrypted($newPassword) . "'",
         ];
-        return $this -> update($this -> nameTable, $usuario, "id = $id_usuario");
+        $where = ($isReset) ? "email = '$condition'" : "id = $condition" ;
+        return $this -> update($this -> nameTable, $usuario, $where);
     }
     public function eliminar($id_usuario) {
         return $this -> delete($this -> nameTable, "id = $id_usuario");

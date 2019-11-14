@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `tipo` ENUM('superAdmin', 'admin', 'aux') NOT NULL,
   `cargo` VARCHAR(50) NOT NULL,
   `imagen` VARCHAR(255) NULL default 'anonymus.png',
+  `codigo` VARCHAR(5) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

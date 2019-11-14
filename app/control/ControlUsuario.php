@@ -505,6 +505,65 @@ ControlUsuario extends Valida
         }
         return $arreglo;
     }
+    public function verifyCodeResetPasword() {
+        $arreglo = array();
+        $email = Form::getValue("email");
+        $codigo = Form::getValue("code");
+        $this -> where = "email = '$email' AND codigo = '$codigo'";
+        $isCorrect = $this -> u -> mostrar($this -> where);
+        $arreglo["select"] = $this -> consultaSQL("*", "usuarios", $this -> where);
+        if ($isCorrect) {
+            $this -> u -> actualizarCodigo('', $email, true);
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Codigo verificado !";
+            $arreglo["msj"] = "Porfavor ahora especifique su nueva contraseña";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Codigo no verificado !";
+            $arreglo["msj"] = "El codigo que proporciona no es la correcta. Verfiique porfavor.";
+        }
+        return $arreglo;
+    }
+    public function verifyEmailAndSendCode() {
+        $arreglo = array();
+        $email = Form::getValue("email");
+        $consulta = $this -> u -> mostrar("email = '$email'");
+        if ($consulta) {
+            $msj = "Se encontro el usuario con el correo indicado y se envio un codigo de reseteo al correo: " . $consulta[0] -> email . ". Porfavor verifique su bandeja de entradas y proporcione el codigo que recibio.";
+            $codeGenerated = $this -> generarCodigo(5);
+            $this -> u -> actualizarCodigo($codeGenerated, $consulta[0] -> email, false);
+            if (!$this -> sendEmail($consulta[0] -> email, $codeGenerated)) {
+                $arreglo["error"] = true;
+                $msj .= "Se encontro el usuario con el correo indicado, pero no se pudo enviar el codigo de confirmación. Porfavor vuelva a Intentarlo y verifique. Code: " . $codeGenerated;
+
+            }
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Usuario encontrado !";
+            $arreglo["msj"] = $msj;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Usuario no encontrado !";
+            $arreglo["msj"] = "No se encontro ningun usuario registrado con este correo: " . $email. ". Porfavor proporcione su email de registro verdadero";
+        }
+        return $arreglo;
+    }
+    private function sendEmail($emailTo, $code) {
+        $to      = $emailTo;
+        $subject = 'Codigo reseteo de Password EncodeMX';
+        $message = 'Codigo de confirmación para restablecimiento de contraseña. Codigo: ' . $code;
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html; charset=iso-8859-1\r\n";
+        $headers .= "From: salatiel.montero.glez@gmail.com\r\n";
+        return mail($to, $subject, $message, $headers);
+    }
+    private function generarCodigo($longitud) {
+        $key = '';
+        $pattern = '1234567890abcdefghijklmnopqrstuvwxyz';
+        $max = strlen($pattern)-1;
+        for($i=0;$i < $longitud;$i++) $key .= $pattern{mt_rand(0,$max)};
+        return $key;
+    }
+
     public function verifyPasswordCurrent() {
         $arreglo = array();
         $password = Form::getValue("password");
@@ -534,6 +593,22 @@ ControlUsuario extends Valida
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Usuario no encontrado !";
             $arreglo["msj"] = "No se encontro el usuario solicitadp";
+        }
+        return $arreglo;
+    }
+    public function resetPassword() {
+        $arreglo = array();
+        $newPassword = Form::getValue("newPassword");
+        $email = Form::getValue("email", false);
+        $resetPassword = $this -> u -> actualizarPassword($newPassword, $email, true);
+        if ($resetPassword) {
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Password actualizado !";
+            $arreglo["msj"] = "Se actualizo correctamente su contraseña";
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Password no actualizado !";
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar su contraseña";
         }
         return $arreglo;
     }
