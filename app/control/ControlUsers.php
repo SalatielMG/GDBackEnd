@@ -81,8 +81,8 @@ class ControlUsers extends Valida
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup "  . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " " . $this -> condicionarConsulta($año, 'bm.year') . " " . $this -> condicionarConsulta($mes, 'bm.month') . " AND b.id_user = $idUser AND bm.sign = '$tipo' GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
 
-        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, sum((ANY_VALUE(cat.amount))) AS total";
-        $table = "(SELECT bm.id_category, bm.amount FROM backup_movements bm, backups b WHERE $where) as cat";
+        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, (SELECT symbolCurrency(cat.id_backup, '', ANY_VALUE(cat.id_account))) as symbol, sum((ANY_VALUE(cat.amount))) AS total";
+        $table = "(SELECT bm.id_backup, bm.id_account, bm.id_category, bm.amount FROM backup_movements bm, backups b WHERE $where) as cat";
         $where = "1 GROUP BY cat.id_category ORDER BY total DESC";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
         $select = $this -> u -> mostrar($where, $select, $table);
@@ -94,6 +94,8 @@ class ControlUsers extends Valida
             $arreglo["categoria"] = $categoria;
             $arreglo["labels"] = $categoria["namesCategories"];
             $arreglo["values"] = $categoria["total"];
+            $arreglo["symbols"] = $categoria["symbol"];
+            $arreglo["totales"] = $categoria["totales"];
             $arreglo["titulo"] = "¡ Movimientos encontrados !";
             $arreglo["msj"] = "Se encontraron movimientos de tipo $mov del usuario solicitaddo";
         } else {
@@ -162,11 +164,30 @@ class ControlUsers extends Valida
     }
     private function extraerDatos($arreglo) {
         $data = array();
+        $total = array();
         foreach ($arreglo as $key => $value) {
             $data["namesCategories"][$key] = $value -> nameCategory;
             $data["total"][$key] = $value -> total;
-        }
+            $data["symbol"][$key] = $value -> symbol;
+            if (count($total) > 0) {
+                foreach ($total as $k  => $v) {
+                    //var_dump($v);
+                    if ($v["symbol"] == $value -> symbol) {
+                        $total[$k]["total"] += $value -> total;
+                    } else {
+                        array_push($total, array(
+                            "symbol" => $value -> symbol,
+                            "total" => $value -> total));
+                    }
+                }
+            } else {
+                array_push($total, array(
+                    "symbol" => $value -> symbol,
+                    "total" => $value -> total));
+            }
 
+        }
+        $data["totales"] = $total;
         return $data;
 
     }
@@ -205,15 +226,15 @@ class ControlUsers extends Valida
 
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
-        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total";
-        $table = "(SELECT (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total, (SELECT symbolCurrency(tempTable.id_backup, '', ANY_VALUE(tempTable.id_account))) as symbol";
+        $table = "(SELECT bm.id_backup, bm.id_account, (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $gastos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLGastos"] = $this -> consultaSQL($select, $table, $where);
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '+' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
-        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total";
-        $table = "(SELECT (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total, (SELECT symbolCurrency(tempTable.id_backup, '', ANY_VALUE(tempTable.id_account))) as symbol";
+        $table = "(SELECT bm.id_backup, bm.id_account, (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $ingresos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLIngresos"] = $this -> consultaSQL($select, $table, $where);
@@ -226,10 +247,18 @@ class ControlUsers extends Valida
             $arreglo["Gastos"] = array_values($dataGastos);
             $arreglo["Ingresos"] = array_values($dataIngresos);
 
+
+
             $arreglo["TotalGastos"] = $this -> sumaTotales($arreglo["Gastos"]);
             $arreglo["TotalIngresos"] = $this -> sumaTotales($arreglo["Ingresos"]);
             $arreglo["TotalAnhoLabel"] = array(0 => (($año == 0) ? 'Todos' : $año));
-
+            //var_dump($gastos, $ingresos);
+            $arreglo["SymbolsTotales"] =
+                [
+                    "gastos" => ((count($gastos) > 0) ? $gastos[0] -> symbol : ""),
+                    "ingresos" => ((count($ingresos) > 0) ? $ingresos[0] -> symbol : ""),
+                    "diffe" => ((count($gastos) > 0) ? $gastos[0] -> symbol : ""),
+                ];
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Movimientos encontrados !";
             $arreglo["msj"] = "¡ Movimientos encontrados del año seleccionado !";

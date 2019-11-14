@@ -7,8 +7,6 @@
  */
 require_once(APP_PATH . 'model/Backup.php');
 require APP_UTIL . 'librerias/PHPOffice/vendor/autoload.php';
-use PhpOffice\PhpSpreadsheet\IOFactory;
-
 
 class ControlBackup extends Valida
 {
