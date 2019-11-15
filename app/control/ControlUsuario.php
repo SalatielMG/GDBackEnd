@@ -519,8 +519,8 @@ ControlUsuario extends Valida
             $arreglo["msj"] = "Porfavor ahora especifique su nueva contraseña";
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ Codigo no verificado !";
-            $arreglo["msj"] = "El codigo que proporciona no es la correcta. Verfiique porfavor.";
+            $arreglo["titulo"] = "¡ Codigo incorrecto !";
+            $arreglo["msj"] = "El codigo que proporciona no es la correcta. Verfique porfavor.";
         }
         return $arreglo;
     }

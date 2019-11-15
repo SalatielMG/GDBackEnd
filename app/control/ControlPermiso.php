@@ -30,7 +30,7 @@ class ControlPermiso extends Valida
                 $tipoUsuario = $this -> p -> mostrar("id = $id_usuario", "tipo", "usuarios");
                 if ($tipoUsuario) {
                     $tipoUsuario = $tipoUsuario[0] -> tipo;
-                    if ($tipoUsuario != SUPERADMIN) {
+                    if ($tipoUsuario == AUX) {
                         $arreglo["error"] = true;
                         $arreglo["titulo"] = "¡ Error de privilegios !";
                         $arreglo["msj"] = "No tienes privilegios para poder ver la información de los permisos de la aplicacion web. Debes autenticarte como Super Administrador";
