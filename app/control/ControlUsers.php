@@ -81,7 +81,7 @@ class ControlUsers extends Valida
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup "  . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " " . $this -> condicionarConsulta($año, 'bm.year') . " " . $this -> condicionarConsulta($mes, 'bm.month') . " AND b.id_user = $idUser AND bm.sign = '$tipo' GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
 
-        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, (SELECT symbolCurrency(cat.id_backup, '', ANY_VALUE(cat.id_account))) as symbol, sum((ANY_VALUE(cat.amount))) AS total";
+        $select = "cat.id_category, (SELECT nameCategory($idBackup, cat.id_category)) as nameCategory, (SELECT symbolCurrency(cat.id_backup, '', cat.id_account)) as symbol, sum(cat.amount) AS total";
         $table = "(SELECT bm.id_backup, bm.id_account, bm.id_category, bm.amount FROM backup_movements bm, backups b WHERE $where) as cat";
         $where = "1 GROUP BY cat.id_category ORDER BY total DESC";
         $arreglo["consultaSQL"] = $this -> consultaSQL($select, $table, $where);
@@ -226,15 +226,15 @@ class ControlUsers extends Valida
 
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '-' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
-        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total, (SELECT symbolCurrency(tempTable.id_backup, '', ANY_VALUE(tempTable.id_account))) as symbol";
-        $table = "(SELECT bm.id_backup, bm.id_account, (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $select = "tempTable.month, SUM(tempTable.amount) Total, (SELECT symbolCurrency(tempTable.id_backup, '', tempTable.id_account)) as symbol";
+        $table = "(SELECT bm.id_backup, bm.id_account, bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $gastos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLGastos"] = $this -> consultaSQL($select, $table, $where);
 
         $where = "b.id_backup = bm.id_backup AND bm.id_backup = $idBackup " . $this -> condicionarConsulta($año, "bm.year") . " AND bm.sign = '+' and b.id_user = $idUser GROUP BY " . $this -> namesColumns($this -> m -> columnsTableIndexUnique, "bm.");
-        $select = "tempTable.month, SUM((ANY_VALUE(tempTable.amount))) Total, (SELECT symbolCurrency(tempTable.id_backup, '', ANY_VALUE(tempTable.id_account))) as symbol";
-        $table = "(SELECT bm.id_backup, bm.id_account, (ANY_VALUE(bm.month)) month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
+        $select = "tempTable.month, SUM(tempTable.amount) Total, (SELECT symbolCurrency(tempTable.id_backup, '', tempTable.id_account)) as symbol";
+        $table = "(SELECT bm.id_backup, bm.id_account, bm.month, bm.amount FROM backup_movements bm, backups b WHERE $where) as tempTable";
         $where = "1 GROUP BY tempTable.month ORDER BY tempTable.month";
         $ingresos = $this -> u -> mostrar($where, $select, $table);
         $arrreglo["consultaSQLIngresos"] = $this -> consultaSQL($select, $table, $where);
@@ -288,7 +288,7 @@ class ControlUsers extends Valida
         return $data;
     }
     private function extraerBackupsMovements($idUser) {
-        return $this -> u -> mostrar("b.id_user = $idUser order by b.id_backup asc", "b.id_backup", "backups b");
+        return $this -> u -> mostrar("b.id_user = $idUser order by b.id_backup desc", "b.id_backup", "backups b");
     }
     private function extraerAñosMovements($idUSer, $id_backup, $idAccount = "0") {
         return $select = $this -> u -> mostrar("b.id_backup = bm.id_backup and bm.id_backup = $id_backup " . $this -> condicionarConsulta($idAccount, 'bm.id_account') . " and b.id_user = $idUSer GROUP BY bm.year ORDER BY bm.year desc", "bm.year", "backup_movements bm, backups b");
@@ -300,7 +300,7 @@ class ControlUsers extends Valida
         return $select = $this -> u -> mostrar("b.id_backup = bm.id_backup and bm.id_backup = $id_backup and b.id_user = $idUSer GROUP BY bm.id_account ORDER BY bm.id_account desc", "bm.id_account", "backup_movements bm, backups b");
     }
     private function  extraerCuentasUser($idUSer, $id_backup) {
-        return $select = $this -> u -> mostrar("b.id_backup = ba.id_backup and ba.id_backup = $id_backup and b.id_user = $idUSer GROUP BY ba.id_account ORDER BY ba.id_account desc", "ba.id_account, (ANY_VALUE(ba.name)) name", "backup_accounts ba, backups b");
+        return $select = $this -> u -> mostrar("b.id_backup = ba.id_backup and ba.id_backup = $id_backup and b.id_user = $idUSer GROUP BY ba.id_account ORDER BY ba.id_account desc", "ba.id_account, ba.name", "backup_accounts ba, backups b");
     }
     /**********************************************************************************************/
 

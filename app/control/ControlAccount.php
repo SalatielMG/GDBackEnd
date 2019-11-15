@@ -46,12 +46,7 @@ class ControlAccount extends Valida
             }
         }
         $arreglo = array();
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled([
-            ["name" => "id_account"],
-            ["name" => "name"],
-            ["name" => "sign"],
-            ["name" => "iso_code"],
-        ], $this -> a -> columnsTableIndexUnique);
+        $this -> select = "id_account, name, sign, iso_code";
         $this -> where = "id_backup = " . $this -> pk_Account["id_backup"] . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "") . " HAVING COUNT( * ) >= 1 ORDER BY id_account";
         $accountsBackup = $this -> a -> mostrar($this -> where, $this -> select);
         if ($accountsBackup) {
@@ -94,12 +89,12 @@ class ControlAccount extends Valida
 
         if ($isExport)
             if ($typeExport == "sqlite")
-                $this -> select = "(ANY_VALUE(ba.id_account)) _id, ba.name as account, (ANY_VALUE(ba.detail)) detail, (ANY_VALUE(ba.initial_balance)) initial_balance, (ANY_VALUE(ba.sign)) sign, (ANY_VALUE(ba.icon_name)) icon, (ANY_VALUE(ba.income)) income, (ANY_VALUE(ba.expense)) expense, (ANY_VALUE(ba.final_balance)) balance, (ANY_VALUE(ba.month)) month, (ANY_VALUE(ba.year)) year, (ANY_VALUE(ba.negative_max)) negative_max, (ANY_VALUE(ba.positive_max)) positive_max, (ANY_VALUE(ba.iso_code)) iso_code, (ANY_VALUE(ba.rate)) rate, (ANY_VALUE(ba.include_total)) include_total, (ANY_VALUE(ba.value_type)) value_type, (ANY_VALUE(ba.selected)) selected";
+                $this -> select = "ba.id_account as _id, ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.icon_name as icon, ba.income, ba.expense, ba.final_balance as balance, ba.month, ba.year, ba.negative_max, ba.positive_max, ba.iso_code, ba.rate, ba.include_total, ba.value_type, ba.selected";
             else
-                $this -> select = "ba.name as account, (ANY_VALUE(ba.detail)) detail, (ANY_VALUE(ba.initial_balance)) initial_balance, (ANY_VALUE(ba.sign)) sign, (ANY_VALUE(ba.income)) income, (ANY_VALUE(ba.expense)) expense, (ANY_VALUE(ba.final_balance)) balance, (ANY_VALUE(ba.iso_code)) iso_code, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ANY_VALUE(ba.iso_code), 0)) as symbol";
+                $this -> select = "ba.name as account, ba.detail, ba.initial_balance, ba.sign, ba.income, ba.expense, ba.final_balance as balance, ba.iso_code, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol";
         else
-            $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", (ANY_VALUE(ba.iso_code)), 0)) as symbol, COUNT(ba.id_backup) repeated";
-        $this -> table = "backup_accounts ba";
+            $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Account["id_backup"] . ", ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) repeated";
+        $this -> table = $this -> a -> nameTable . " ba";
         $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Account["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Account, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_account = " . $this -> pk_Account["id_account"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_account " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
@@ -135,9 +130,8 @@ class ControlAccount extends Valida
         $arreglo = array();
         //----------------------------------------------------------------
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(ba.id_backup, (ANY_VALUE(ba.iso_code)), 0)) as symbol, COUNT(ba.id_backup) repeated";
-
-        $this -> table = "backup_accounts ba, backups b";
+        $this -> select = "ba.*, (SELECT symbolCurrency(ba.id_backup, ba.iso_code, 0)) as symbol, COUNT(ba.id_backup) repeated";
+        $this -> table = $this -> a -> nameTable . " ba, backups b";
         $this -> where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count ORDER BY ba.id_backup DESC  limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $consulta = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);

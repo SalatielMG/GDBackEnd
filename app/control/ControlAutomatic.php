@@ -39,11 +39,12 @@ class ControlAutomatic extends Valida
         }
         if ($isExport)
             if ($typeExport == "sqlite")
-                $this -> select = "ba.id_operation as _id, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, (ANY_VALUE(ba.counter)) counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT((ANY_VALUE(ba.next_date)), '%d/%m/%Y') as next_date, (ANY_VALUE(ba.operation_code)) code, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, ba.detail, (ANY_VALUE(ba.enabled)) enabled, 0 as selected";
+                $this -> select = "ba.id_operation as _id, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, ba.counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ba.next_date, '%d/%m/%Y') as next_date, ba.operation_code as code, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, ba.detail, ba.enabled, 0 as selected";
             else
-                $this -> select = "CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, (ANY_VALUE(ba.counter)) counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ANY_VALUE(ba.next_date), '%d/%m/%Y') as next_date, (ANY_VALUE(ba.enabled)) enabled, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol";
+                $this -> select = "CONCAT('Operación ', ba.id_operation) as title, ba.period, ba.each_number, ba.repeat_number, ba.counter, DATE_FORMAT(ba.initial_date, '%d/%m/%Y') as initial_date, DATE_FORMAT(ba.next_date, '%d/%m/%Y') as next_date, ba.enabled, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS account, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as category, ba.amount, ba.sign, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol";
         else
-            $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) repeated";
+            $this -> select = "ba.*, (SELECT symbolCurrency(" . $this -> pk_Automatic["id_backup"] . ", '', ba.id_account)) AS symbol, (SELECT nameAccount(" . $this -> pk_Automatic["id_backup"] . ", ba.id_account)) AS nameAccount, (SELECT nameCategory(" . $this -> pk_Automatic["id_backup"] . ", ba.id_category)) as nameCategory,  COUNT(ba.id_backup) repeated";
+
         $this -> table = $this -> a -> nameTable . " ba";
         $this -> where = (($isQuery || $isExport) ? "ba.id_backup = " . $this -> pk_Automatic["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Automatic, $this -> a -> columnsTableIndexUnique, false, "ba.") . " AND ba.id_operation = " . $this -> pk_Automatic["id_operation"]) . " GROUP BY " . $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") . " HAVING COUNT( * ) >= 1 ORDER BY ba.id_operation " . (($isQuery) ? "limit $this->pagina,$this->limit": "");
 
@@ -77,9 +78,8 @@ class ControlAutomatic extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled($this -> a -> columnsTable, $this -> a -> columnsTableIndexUnique, "ba.") . ", (SELECT symbolCurrency(ba.id_backup, '', ba.id_account)) AS symbol, (SELECT nameAccount(ba.id_backup, ba.id_account)) AS nameAccount, (SELECT nameCategory(ba.id_backup, ba.id_category)) as nameCategory,  COUNT(ba.id_backup) repeated";
-
-        $this -> table = "backup_automatics ba, backups b";
+        $this -> select = "ba.*, (SELECT symbolCurrency(ba.id_backup, '', ba.id_account)) AS symbol, (SELECT nameAccount(ba.id_backup, ba.id_account)) AS nameAccount, (SELECT nameCategory(ba.id_backup, ba.id_category)) as nameCategory,  COUNT(ba.id_backup) repeated";
+        $this -> table = $this -> a -> nameTable . " ba, backups b";
         $this -> where = "b.id_backup = ba.id_backup ". $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups) . " GROUP BY ". $this -> namesColumns($this -> a -> columnsTableIndexUnique, "ba.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         $consulta = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);

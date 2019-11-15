@@ -291,11 +291,11 @@ class ControlBackup extends Valida
         if ($delete) {
             $arreglo["error"] = "success";
             $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ Backup ajustado !" : "¡ Backups ajustados !";
-            $arreglo["msj"] = (($this -> cantidad == 1) ? "El backup ha sido eliminado satisfactoriamente" : "Los bakups han sido eliminados satisfactoriamente") . " del usuario : " . $this -> email;
+            $arreglo["msj"] = (($this -> cantidad == 1) ? "El backup ha sido ajustado satisfactoriamente" : "Los bakups han sido ajustados satisfactoriamente") . " del usuario : " . $this -> email;
         } else {
             $arreglo["error"] = "warning";
             $arreglo["titulo"] = ($this -> cantidad == 1) ? "¡ Backup no ajustado !" : "¡ Backups no ajustados !";
-            $arreglo["msj"] = "Ocurrio un error al intentar eliminar " . (($this -> cantidad == 1) ? "el backup" : " algunos o todos los backups") . " del usuario : " . $this -> email;
+            $arreglo["msj"] = "Ocurrio un error al intentar ajustar " . (($this -> cantidad == 1) ? "el backup" : " algunos o todos los backups") . " del usuario : " . $this -> email;
         }
         return $arreglo;
     }
@@ -328,7 +328,7 @@ class ControlBackup extends Valida
         if ($warning == 0){
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Backups ajustados !";
-            $arreglo["msj"] = "Se ajustaron correctamente todos los backups de los usuarios que tenian mas de $this->rango Respaldos.";
+            $arreglo["msj"] = (count($users) > 1) ? "Se ajustaron correctamente todos los backups de los usuarios a una cantidad mínima de $this->rango Respaldos.": "Se ajusto correctamente los backups del usuario: ". $this -> email ." a un rango mínimo de $this->rango";
         } else {
             $arreglo["usuariosError"] = $errorUserCleanBackup;
             $arreglo["error"] = true;

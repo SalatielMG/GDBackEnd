@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   PRIMARY KEY (`id`))
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-insert into usuarios value(0, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 'superAdmin', 'CEO', 'anonymus.png', null);
+insert into usuarios value(1, 'encodemx@encodemx.com', '$2y$15$53WMNcZtZSNihJQ4LeUEg.mIc31EFj3iCm773Umt85hyb4s.R9srK', 'superAdmin', 'CEO', 'anonymus.png', null);
 
 
 -- -----------------------------------------------------
@@ -71,7 +71,7 @@ INSERT INTO table_currencies (_id, iso_code, symbol, icon, selected) VALUES (1, 
 -- Procedimiento almacenado `symbolCurrency`
 --
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8 COLLATE utf8_unicode_ci
+CREATE DEFINER=`cpses_gay7tk23r0`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8 COLLATE utf8_unicode_ci
 LANGUAGE SQL
 DETERMINISTIC
 CONTAINS SQL
@@ -106,7 +106,7 @@ DELIMITER ;
 -- Procedimiento almacenado `nameAccount`
 --
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `nameAccount`(`idBackup` INT(10), `idAccount` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
+CREATE DEFINER=`cpses_gay7tk23r0`@`localhost` FUNCTION `nameAccount`(`idBackup` INT(10), `idAccount` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
 LANGUAGE SQL
 DETERMINISTIC
 CONTAINS SQL
@@ -143,7 +143,7 @@ DELIMITER ;
 -- Procedimiento almacenado `nameCategory`
 --
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `nameCategory`(`idBackup` INT(10), `idCategory` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
+CREATE DEFINER=`cpses_gay7tk23r0`@`localhost` FUNCTION `nameCategory`(`idBackup` INT(10), `idCategory` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
 LANGUAGE SQL
 DETERMINISTIC
 CONTAINS SQL

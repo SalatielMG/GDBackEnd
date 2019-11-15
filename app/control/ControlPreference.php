@@ -31,18 +31,11 @@ class ControlPreference extends Valida
             $this -> pagina = Form::getValue("pagina");
             $this -> pagina = $this -> pagina * $this -> limit;
         }
-        /*$exixstIndexUnique = $this -> p -> verifyIfExistsIndexUnique($this -> p -> nameTable);
-
-        if ($exixstIndexUnique["indice"]) {
-
-        } else {*/
         if ($isExport)
-            $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled([['name' => 'key_name'], ['name' => 'value']], $this -> p -> columnsTableIndexUnique);
+            $this -> select = "key_name, value";
         else
             $this -> select = "*, COUNT(key_name) repeated";
-
         $this -> where = (($isQuery || $isExport) ? "id_backup = " . $this -> pk_Preference["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Preference, $this -> p -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> p -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
-        //}
 
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
         //return $arreglo;
@@ -67,8 +60,8 @@ class ControlPreference extends Valida
         $arreglo = array();
 
         $this -> pagina = $this -> pagina * $this -> limit_Inconsistencia;
-        $this -> select =  $this -> selectMode_Only_Full_Group_By_Enabled($this -> p -> columnsTable, $this -> p -> columnsTableIndexUnique,"bp.") . ", COUNT(bp.id_backup) repeated";
-        $this -> table = "backup_preferences bp, backups b";
+        $this -> select = "bp.*, COUNT(bp.id_backup) repeated";
+        $this -> table = $this -> p -> nameTable . " bp, backups b";
         $this -> where = "b.id_backup = bp.id_backup " . $this -> condicionarConsulta($data -> id, "b.id_user", 0) . $this -> inBackups($backups, "bp.id_backup") . " GROUP BY ". $this -> namesColumns($this -> p -> columnsTableIndexUnique, "bp.") ." HAVING COUNT( * ) >= $this->having_Count limit $this->pagina, $this->limit_Inconsistencia";
 
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
