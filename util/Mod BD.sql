@@ -71,19 +71,23 @@ INSERT INTO table_currencies (_id, iso_code, symbol, icon, selected) VALUES (1, 
 -- Procedimiento almacenado `symbolCurrency`
 --
 DELIMITER $$
-CREATE DEFINER=`cpses_gaou6ssy88`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8 COLLATE utf8_unicode_ci
+CREATE DEFINER=`root`@`localhost` FUNCTION `symbolCurrency`(`idBackup` INT(10), `isoCode` CHAR(3), `idAccount` SMALLINT(5)) RETURNS CHAR(5) CHARSET utf8 COLLATE utf8_unicode_ci
+LANGUAGE SQL
+DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
 BEGIN
 
   DECLARE symbol CHAR(5) CHARSET utf8 COLLATE utf8_unicode_ci;
   IF (idAccount != 0) then
-    SET isoCode = (SELECT (ANY_VALUE(iso_code)) iso_code  FROM backup_accounts WHERE  id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
+    SET isoCode = (SELECT iso_code  FROM backup_accounts WHERE  id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
     IF (isoCode IS NULL) then
      	SET symbol = '';
       return symbol;
     END IF;
   END IF;
 
-  SET symbol = (SELECT (ANY_VALUE(bc.symbol)) symbol  FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
+  SET symbol = (SELECT bc.symbol FROM backup_currencies bc WHERE bc.id_backup = idBackup AND bc.iso_code = isoCode GROUP BY bc.id_backup, bc.iso_code HAVING COUNT( * ) >= 1);
 
   IF (symbol IS NULL) THEN
     SET symbol = (SELECT tc.symbol FROM table_currencies tc WHERE tc.iso_code = isoCode);
@@ -102,13 +106,17 @@ DELIMITER ;
 -- Procedimiento almacenado `nameAccount`
 --
 DELIMITER $$
-CREATE DEFINER=`cpses_gaou6ssy88`@`localhost` FUNCTION `nameAccount`(`idBackup` INT(10), `idAccount` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
+CREATE DEFINER=`root`@`localhost` FUNCTION `nameAccount`(`idBackup` INT(10), `idAccount` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
+LANGUAGE SQL
+DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
 BEGIN
   DECLARE nameAccount VARCHAR(50) CHARSET utf8 COLLATE utf8_unicode_ci;
-  SET nameAccount = (SELECT (ANY_VALUE(name)) name FROM backup_accounts WHERE id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
+  SET nameAccount = (SELECT name FROM backup_accounts WHERE id_backup = idBackup AND id_account = idAccount GROUP BY id_backup, id_account HAVING COUNT( * ) >= 1);
 
   if (nameAccount IS NULL) then
-  	SET nameAccount = (SELECT (ANY_VALUE(account)) account FROM backup_extras WHERE id_extra = idAccount and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
+  	SET nameAccount = (SELECT account FROM backup_extras WHERE id_extra = idAccount and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
   	if(nameAccount IS NULL) then
 
   	  CASE idAccount
@@ -135,13 +143,17 @@ DELIMITER ;
 -- Procedimiento almacenado `nameCategory`
 --
 DELIMITER $$
-CREATE DEFINER=`cpses_gaou6ssy88`@`localhost` FUNCTION `nameCategory`(`idBackup` INT(10), `idCategory` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
+CREATE DEFINER=`root`@`localhost` FUNCTION `nameCategory`(`idBackup` INT(10), `idCategory` SMALLINT(5)) RETURNS varchar(50) CHARSET utf8 COLLATE utf8_unicode_ci
+LANGUAGE SQL
+DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
 BEGIN
   DECLARE nameCategory VARCHAR(50) CHARSET utf8 COLLATE utf8_unicode_ci;
-  SET nameCategory = (SELECT (ANY_VALUE(name)) name FROM backup_categories WHERE id_backup = idBackup AND id_category = idCategory GROUP BY id_backup, id_category, id_account HAVING COUNT( * ) >= 1);
+  SET nameCategory = (SELECT name FROM backup_categories WHERE id_backup = idBackup AND id_category = idCategory GROUP BY id_backup, id_category, id_account HAVING COUNT( * ) >= 1);
 
   if (nameCategory IS NULL) then
-  	SET nameCategory = (SELECT (ANY_VALUE(category)) category FROM backup_extras WHERE id_extra = idCategory and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
+  	SET nameCategory = (SELECT category FROM backup_extras WHERE id_extra = idCategory and id_backup = idBackup GROUP BY id_backup, id_extra HAVING COUNT( * ) >= 1);
   	if(nameCategory IS NULL) then
 
   	  CASE idCategory

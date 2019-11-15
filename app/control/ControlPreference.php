@@ -39,7 +39,7 @@ class ControlPreference extends Valida
         if ($isExport)
             $this -> select = $this -> selectMode_Only_Full_Group_By_Enabled([['name' => 'key_name'], ['name' => 'value']], $this -> p -> columnsTableIndexUnique);
         else
-            $this -> select =  $this -> selectMode_Only_Full_Group_By_Enabled($this -> p -> columnsTable, $this -> p -> columnsTableIndexUnique) . ", COUNT(key_name) repeated";
+            $this -> select = "*, COUNT(key_name) repeated";
 
         $this -> where = (($isQuery || $isExport) ? "id_backup = " . $this -> pk_Preference["id_backup"] : $this -> conditionVerifyExistsUniqueIndex($this -> pk_Preference, $this -> p -> columnsTableIndexUnique, false)) . " GROUP BY " . $this -> namesColumns($this -> p -> columnsTableIndexUnique) . " HAVING COUNT( * ) >= 1 " . (($isQuery) ? "limit $this->pagina, $this->limit" : "" );
         //}
