@@ -83,11 +83,11 @@ class ControlBudget extends Valida
             $arreglo["error"] = false;
             $arreglo["budgets"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Budgets ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron inconsistencias de registros en la tabla Budgets ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Budgets ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron inconsistencias de registros en la tabla Budgets ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -193,7 +193,7 @@ class ControlBudget extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Budget no actualizada !";
-            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el presupusto con " . $this -> keyValueArray($indexUnique);
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el presupuesto con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }

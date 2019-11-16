@@ -50,7 +50,6 @@ class ControlAutomatic extends Valida
 
         $arreglo = array();
         $arreglo["consultaSQL"] = $this -> consultaSQL($this -> select, $this -> table, $this -> where);
-        //return $arreglo;
 
         $select = $this -> a -> mostrar($this -> where, $this -> select, $this -> table);
 
@@ -87,11 +86,11 @@ class ControlAutomatic extends Valida
             $arreglo["error"] = false;
             $arreglo["automatics"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Automatics ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron inconsistencias de registros en la tabla Automatics ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Automatics ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron inconsistencias de registros en la tabla Automatics ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -156,7 +155,6 @@ class ControlAutomatic extends Valida
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Registro existente !";
             $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " operación automática, puesto que ya existe un registro en la BD con los mismos datos del mismo backup. Porfavor verifique y vuelta a intentarlo";
-
         }
         return $arreglo;
     }

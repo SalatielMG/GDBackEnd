@@ -25,7 +25,6 @@ class ControlAccount extends Valida
 
     public function __construct($id_backup = 0, $categorieSearch = 1, $symbolName = 1)
     {
-        // $this -> currency = new Currency();
         $this -> a = new Account();
         $this -> pk_Account["id_backup"] = $id_backup;
         $this -> categorieSearch = $categorieSearch;
@@ -139,11 +138,11 @@ class ControlAccount extends Valida
             $arreglo["error"] = false;
             $arreglo["accounts"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron incosistencias de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron incosistencias de registros en la tabla Accounts ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -175,7 +174,7 @@ class ControlAccount extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Id Account no calculado !";
-            $arreglo["msj"] = "NO se calculo correctamente el id_account de la nueva cuenta a ingresar";
+            $arreglo["msj"] = "No se calculo correctamente el id_account de la nueva cuenta a ingresar";
         }
         return $arreglo;
     }
@@ -199,7 +198,7 @@ class ControlAccount extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Registro existente !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo nombre del mismo backup. Porfavor cambie l nombre y vuleva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " cuenta, puesto que ya existe un registro en la BD con el mismo NOMBRE del mismo backup. Porfavor cambie el nombre y vuleva a intentarlo";
         }
         return $arreglo;
     }
@@ -230,7 +229,7 @@ class ControlAccount extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Account no agregado !";
-            $arreglo["msj"] = "Ocurrio un error al agregar la cuenta con " . $this -> keyValueArray($account);
+            $arreglo["msj"] = "Ocurrio un error al intentar agregar la cuenta con " . $this -> keyValueArray($account);
         }
         return $arreglo;
     }

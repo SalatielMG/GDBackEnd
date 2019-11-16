@@ -60,11 +60,11 @@ class ControlExtra extends Valida
             $arreglo["error"] = false;
             $arreglo["extras"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontrados !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Extra ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron inconsistencias de registros en la tabla Extra ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontrados !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Extra ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron inconsistencias de registros en la tabla Extra ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -90,7 +90,7 @@ class ControlExtra extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Registro existente !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Extra, porque ya existe un registro en la BD con el mismo id_extra del mismo backup. Porfavor verifique y vuelva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Extra, porque ya existe un registro en la BD con el mismo ID_EXTRA del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }
@@ -112,11 +112,11 @@ class ControlExtra extends Valida
             if (!$arreglo["extra"]["error"]) $arreglo["extra"]["new"] = $queryExtraNew["extras"][0];
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Extra agregado !";
-            $arreglo["msj"] = "Se agrego correctamente el nuevo Extra con " . $this -> keyValueArray($this -> pk_Extra);
+            $arreglo["msj"] = "Se agrego correctamente el nuevo registro Extra con " . $this -> keyValueArray($this -> pk_Extra);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Extra no agregado !";
-            $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo Extra con " . $this -> keyValueArray($this -> pk_Extra);
+            $arreglo["msj"] = "Ocurrio un error al ingresar el nuevo registro Extra con " . $this -> keyValueArray($this -> pk_Extra);
         }
         return $arreglo;
     }
@@ -144,11 +144,11 @@ class ControlExtra extends Valida
             if (!$arreglo["extra"]["error"]) $arreglo["extra"]["update"] = $queryExtraUpdate["extras"][0];
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Extra actualizado !";
-            $arreglo["msj"] = "Se acualizo correctamente el Extra con " . $this -> keyValueArray($indexUnique);
+            $arreglo["msj"] = "Se acualizo correctamente el registro Extra con " . $this -> keyValueArray($indexUnique);
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Extra no actualizado !";
-            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el Extra con " . $this -> keyValueArray($indexUnique);
+            $arreglo["msj"] = "Ocurrio un error al intentar actualizar el registro Extra con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }
@@ -161,11 +161,11 @@ class ControlExtra extends Valida
         if ($delete) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Extra eliminada !";
-            $arreglo["msj"] = "El Extra con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
+            $arreglo["msj"] = "El registro Extra con " . $this -> keyValueArray($indexUnique) . " ha sido eliminado correctamente";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Extra no eliminada !";
-            $arreglo["msj"] = "Ocurrio un error al intentar eliminar el Extra con " . $this -> keyValueArray($indexUnique);
+            $arreglo["msj"] = "Ocurrio un error al intentar eliminar el registro Extra con " . $this -> keyValueArray($indexUnique);
         }
         return $arreglo;
     }

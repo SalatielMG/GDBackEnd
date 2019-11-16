@@ -18,10 +18,10 @@ class Prueba
     }
 
     public function backupBD(){
-        $db_host = 'localhost';
-        $db_name = 'gastos5_app';
-        $db_user = 'root';
-        $db_pass = 'w$cp@HCJ';
+        $db_host = '';
+        $db_name = '';
+        $db_user = '';
+        $db_pass = '';
 // $date = new DateTime();
 
 // $dump = "mysqldump -h$db_host -u$db_user -p$db_pass --opt $db_name | gzip -c > MiRespaldo`date +%Y%m%d_%H%M%S`.sql.gz";

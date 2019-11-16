@@ -58,7 +58,7 @@ ControlUsuario extends Valida
             }
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ Emal no encontrado !";
+            $arreglo["titulo"] = "¡ Email no encontrado !";
             $arreglo["msj"] = "No existe ningun usuario registrado con el correo: $email";
         }
         return $arreglo;
@@ -86,7 +86,6 @@ ControlUsuario extends Valida
         if ($isQuery) {
             $id_usuario = Form::getValue("id_usuario", false);
             $show_permiso = Form::getValue("show_permiso");
-            //var_dump($id_usuario, $show_permiso);
         } else {
             $id_usuario = "0";
             $show_permiso = 1;
@@ -109,14 +108,14 @@ ControlUsuario extends Valida
                         default:
                             $arreglo["error"] = true;
                             $arreglo["titulo"] = "¡ Error de privilegios !";
-                            $arreglo["msj"] = "No tienes privilegios para poder ver la información de los usuarios de la aplicacion web.";
+                            $arreglo["msj"] = "No tienes privilegios para poder ver la información de los usuarios de la Aplicación Web.";
                             return $arreglo;
                             break;
                     }
                 } else {
                     $arreglo["error"] = true;
                     $arreglo["titulo"] = "¡ Error Interno !";
-                    $arreglo["msj"] = "Ocurrio un error al intentar listar los usuarios, de acuerdo a su privilegio.";
+                    $arreglo["msj"] = "Ocurrio un error al intentar listar los usuarios.";
                     return $arreglo;
                 }
                 $this -> where = "tipo IN $tipos";
@@ -144,13 +143,13 @@ ControlUsuario extends Valida
             $arreglo["usuarios"] = $usuarios;
             $arreglo["error"] = false;
             $arreglo["titulo"] = ($isQuery) ? "¡ Usuarios encontrados !" : "¡ Usuario encontrado !";
-            $arreglo["msj"] = ($isQuery) ? "Se encontraron usuarios regsitrados en la base de datos" : "Se encontro el Usuario en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "Se encontraron usuarios registrados en la base de datos" : "Se encontro el Usuario en la base de datos.";
 
         } else {
             $arreglo["usuarios"] = [];
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ? "¡ Usuarios no econtrados !" : "¡ Usuario no encontrado !";
-            $arreglo["msj"] = ($isQuery) ? "No se encontraron usuarios regsitrados en la base de datos" : "No se encontro el Usuario en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "No se encontraron usuarios registrados en la base de datos" : "No se encontro el Usuario en la base de datos.";
         }
         return $arreglo;
     }
@@ -166,12 +165,12 @@ ControlUsuario extends Valida
             $arreglo["usuarios"] = $usuarios;
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Usuarios asignados !";
-            $arreglo["msj"] = "Se econtraron usuarios asignados.";
+            $arreglo["msj"] = "Se encontraron usuarios asignados.";
         } else {
             $arreglo["usuarios"] = [];
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Usuarios no asignados !";
-            $arreglo["msj"] = "NO se econtraron usuarios asignados.";
+            $arreglo["msj"] = "NO se encontraron usuarios asignados.";
         }
         return $arreglo;
     }
@@ -193,7 +192,7 @@ ControlUsuario extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Email existente !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Usuario, porque ya existe un registro en la BD con el mismo email. Porfavor verifique y vuelva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Usuario, porque ya existe un registro en la BD con el mismo EMAIL. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }
@@ -262,7 +261,7 @@ ControlUsuario extends Valida
                     default:
                         $arreglo["error"] = true;
                         $arreglo["titulo"] = "¡ Error de privilegios !";
-                        $arreglo["msj"] = "No tienes privilegios para poder $operacion " . (($isOperacionPermiso) ? "del": "el") . " usuario $usuario->email de la aplicacion web.";
+                        $arreglo["msj"] = "No tienes privilegios para poder $operacion " . (($isOperacionPermiso) ? "del": "el") . " usuario $usuario->email de la Aplicación Web.";
                         return $arreglo;
                         break;
                 }
@@ -534,7 +533,7 @@ ControlUsuario extends Valida
             $this -> u -> actualizarCodigo($codeGenerated, $consulta[0] -> email, false);
             if (!$this -> sendEmail($consulta[0] -> email, $codeGenerated)) {
                 $arreglo["error"] = true;
-                $msj .= "Se encontro el usuario con el correo indicado, pero no se pudo enviar el codigo de confirmación. Porfavor vuelva a Intentarlo y verifique. Code: " . $codeGenerated;
+                $msj .= "Se encontro el usuario con el correo indicado, pero no se pudo enviar el codigo de confirmación. Porfavor vuelva a Intentarlo y verifique.";
 
             }
             $arreglo["error"] = false;
@@ -550,7 +549,7 @@ ControlUsuario extends Valida
     private function sendEmail($emailTo, $code) {
         $to      = $emailTo;
         $subject = 'Codigo reseteo de Password EncodeMX';
-        $message = 'Codigo de confirmación para restablecimiento de contraseña. Codigo: ' . $code;
+        $message = "Codigo de confirmación para restablecimiento de su contraseña. \nCodigo: " . $code;
         $headers = "MIME-Version: 1.0\r\n";
         $headers .= "Content-type: text/html; charset=iso-8859-1\r\n";
         $headers .= "From: passwordrecovery@encodemx.com\r\n";

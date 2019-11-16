@@ -50,7 +50,7 @@ class ControlUsers extends Valida
         $accounts = $this -> extraerCuentasUser($idUser, $idBackup);
         if (count($accounts) == 0) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ No exixten cuentas de este usuario!";
+            $arreglo["titulo"] = "¡ No existen cuentas de este usuario!";
             $arreglo["msj"] = "¡ No se encontraron nigun registro de cuentas del usuario seleccionado para poder realizar la grafica de $mov !";
             return $arreglo;
         }
@@ -330,7 +330,7 @@ class ControlUsers extends Valida
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Usuario no encontrado !";
-            $arreglo["msj"] = "No se encontro ningun usuario registrado con el correo: '$email' proporcionado";
+            $arreglo["msj"] = "No se encontro ningun usuario registrado con el correo: '$email'";
         }
         return $arreglo;
     }

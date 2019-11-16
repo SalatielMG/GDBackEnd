@@ -33,13 +33,13 @@ class ControlPermiso extends Valida
                     if ($tipoUsuario == AUX) {
                         $arreglo["error"] = true;
                         $arreglo["titulo"] = "¡ Error de privilegios !";
-                        $arreglo["msj"] = "No tienes privilegios para poder ver la información de los permisos de la aplicacion web. Debes autenticarte como Super Administrador";
+                        $arreglo["msj"] = "No tienes privilegios para ver la información de los permisos de la Aplicacion Web. Autenticate como Super Administrador";
                         return $arreglo;
                     }
                 } else {
                     $arreglo["error"] = true;
                     $arreglo["titulo"] = "¡ Error Interno !";
-                    $arreglo["msj"] = "Ocurrio un error al intentar listar los permisos, de acuerdo a su privilegio.";
+                    $arreglo["msj"] = "Ocurrio un error al intentar listar los permisos.";
                     return $arreglo;
                 }
             } else {
@@ -66,11 +66,11 @@ class ControlPermiso extends Valida
             $arreglo["permisos"] = $permisos;
             $arreglo["error"] = false;
             $arreglo["titulo"] = ($isQuery) ? "¡ Permisos encontrados !" : "¡ Permiso encontrado !";
-            $arreglo["msj"] = ($isQuery) ? "Se econtraron permisos registrados en la base de datos." : "Se encontro el Permiso: " . $this -> pk_Permiso["id"] . " en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "Se encontraron permisos registrados en la base de datos." : "Se encontro el Permiso: " . $this -> pk_Permiso["id"] . " en la base de datos.";
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = ($isQuery) ? "¡ Permisos no encontrados !" : "¡ Permiso no encontrado !";
-            $arreglo["msj"] = ($isQuery) ? "No se econtraron permisos registrados en la base de datos." : "No se encontro el Permiso " . $this -> pk_Permiso["id"] . " en la base de datos.";
+            $arreglo["msj"] = ($isQuery) ? "No se encontraron permisos registrados en la base de datos." : "No se encontro el Permiso " . $this -> pk_Permiso["id"] . " en la base de datos.";
         }
         return $arreglo;
     }
@@ -114,7 +114,7 @@ class ControlPermiso extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Permiso existente !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Permiso, porque ya existe un registro en la BD con el mismo permiso. Porfavor verifique y vuelva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar el " : "registrar el nuevo ") . "Permiso, porque ya existe un registro en la BD con el mismo Permiso. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }

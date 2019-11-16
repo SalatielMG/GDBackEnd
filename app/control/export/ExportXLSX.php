@@ -30,7 +30,7 @@ class ExportXLSX
         $dstfile = 'exports/Reporte.xlsx';
         if (!copy($srcfile, $dstfile)) {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = "¡ ERROR AL GENERAR LA PLANTILLA EXCEL !";
+            $arreglo["titulo"] = "¡ Error al generar la plantilla Excel !";
             $arreglo["msj"] = "Ocurrio un error al intentar crear la plantilla base del Reporte en Excel desde el Servidor";
             return $arreglo;
         }
@@ -126,11 +126,11 @@ class ExportXLSX
             $writer = new Xlsx($documento);
             $writer -> save($rutaArchivo);
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ EXPORTACIÓN TERMINADA !";
+            $arreglo["titulo"] = "¡ Exportación terminada !";
             $arreglo["msj"] = "Se creo correctamente el archivo XLSX del Respaldo con id_backup: " . $this -> id_backup;
         } else {
             $arreglo["error"] = "warning";
-            $arreglo["titulo"] = "¡ EXPORTACIÓN NO TERMINADA !";
+            $arreglo["titulo"] = "¡ Exportación no terminada !";
             $arreglo["msj"] = "Ocurrieron errores al crear el archivo XLSX del Respaldo con id_backup: " . $this -> id_backup;
         }
         return $arreglo;

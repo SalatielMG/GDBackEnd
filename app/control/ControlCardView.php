@@ -90,11 +90,11 @@ class ControlCardView extends Valida
             $arreglo["error"] = false;
             $arreglo["cardviews"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontrados !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla CardView ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron inconsistencias de registros en la tabla CardView ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontrados !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla CardView ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron inconsistencias de registros en la tabla CardView ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -120,7 +120,7 @@ class ControlCardView extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Registro Existente !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " CardView, porque ya existe un registro en la BD con el mismo id_card del mismo backup. Porfavor verifique y vuelva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " CardView, porque ya existe un registro en la BD con el mismo ID_CARD del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }

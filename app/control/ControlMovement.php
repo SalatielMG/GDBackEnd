@@ -83,11 +83,11 @@ class ControlMovement extends Valida
             $arreglo["error"] = false;
             $arreglo["movements"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontradas !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Movement ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron incosistencias de registros en la tabla Movement ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontradas !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Movement ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron incosistencias de registros en la tabla Movement ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -127,10 +127,6 @@ class ControlMovement extends Valida
         if ($arreglo["error"]) return $arreglo;
 
         $insert = $this -> m -> agregar($movement);
-        /*$arreglo["error"]= true;
-        $arreglo["insert"]= $insert;
-        return $arreglo;*/
-
         if ($insert) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Movimiento agregado !";
@@ -172,10 +168,6 @@ class ControlMovement extends Valida
         }
 
         $update = $this -> m -> actualizar($movement, $indexUnique);
-        /*$arreglo["error"] = true;
-        $arreglo["update"] = $update;
-        return $arreglo;*/
-
         if ($update) {
             $arreglo["error"] = false;
             $arreglo["titulo"] = "¡ Movimiento actualizada !";

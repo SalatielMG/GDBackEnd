@@ -44,12 +44,12 @@ class ControlPreference extends Valida
         if ($select) {
             $arreglo["error"] = false;
             $arreglo["preferences"] = $select;
-            $arreglo["titulo"] = ($isQuery) ? "¡ Preferences Ecnontrados !" : "¡ Prefernece encontrado !";
+            $arreglo["titulo"] = ($isQuery) ? "¡ Preferences Ecnontrados !" : "¡ Preference encontrado !";
             $arreglo["msj"] = (($isQuery) ? "Se encontraron preferencias con " : "Se encontro preferencia con ") . $this -> keyValueArray($this -> pk_Preference);
         } else {
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($isQuery) ? "¡ Preferences no Ecnontrados !" : "¡ Prefernece no encontrado !";
-            $arreglo["msj"] = (($isQuery) ? "No se encontraron preferencias con " : "No se preferencia extra con ") . $this -> keyValueArray($this -> pk_Preference);
+            $arreglo["titulo"] = ($isQuery) ? "¡ Preferences no Ecnontrados !" : "¡ Preference no encontrado !";
+            $arreglo["msj"] = (($isQuery) ? "No se encontraron preferencias con " : "No se encontro preferencia con ") . $this -> keyValueArray($this -> pk_Preference);
         }
         return $arreglo;
     }
@@ -71,11 +71,11 @@ class ControlPreference extends Valida
             $arreglo["error"] = false;
             $arreglo["preferences"] = $consulta;
             $arreglo["titulo"] = "¡ Inconsistencias encontrados !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Preference ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron inconsistencias de registros en la tabla Preference ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconsistencias no encontrados !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Preference ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron inconsistencias de registros en la tabla Preference ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
@@ -101,7 +101,7 @@ class ControlPreference extends Valida
         if ($result) {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Registro existente !";
-            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Preferencia, porque ya existe un registro en la BD con el mismo key_name del mismo backup. Porfavor verifique y vuelva a intentarlo";
+            $arreglo["msj"] = "NO se puede " . (($isUpdate) ? "actualizar la" : "registrar la nueva") . " Preferencia, porque ya existe un registro en la BD con el mismo KEY_NAME del mismo backup. Porfavor verifique y vuelva a intentarlo";
         }
         return $arreglo;
     }

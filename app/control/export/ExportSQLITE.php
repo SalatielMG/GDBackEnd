@@ -153,11 +153,11 @@ class ExportSQLITE
 
         if ($error == 0) {
             $arreglo["error"] = false;
-            $arreglo["titulo"] = "¡ EXPORTACIÓN TERMINADA !";
+            $arreglo["titulo"] = "¡ Exportación terminada !";
             $arreglo["msj"] = "Se creo correctamente el fichero SQLITE del Respaldo con id_backup: " . $this -> id_backup;
         } else {
             $arreglo["error"] = "warning";
-            $arreglo["titulo"] = "¡ EXPORTACIÓN NO TERMINADA !";
+            $arreglo["titulo"] = "¡ Ecportación no terminada !";
             $arreglo["msj"] = "Ocurrieron errores al crear el fichero SQLITE del Respaldo con id_backup: " . $this -> id_backup;
         }
         return $arreglo;

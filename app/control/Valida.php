@@ -1,6 +1,5 @@
 <?php
 
-// require_once(APP_PATH."model/Usuario.php");
 require_once(APP_PATH . "model/Permiso.php");
 class Valida {
 
@@ -18,7 +17,7 @@ class Valida {
                 $permiso = $p -> mostrar("id = $permiso");
                 $msj = "El permiso no existe";
                 if (count($permiso) > 0)
-                    $msj = "No tiene el permiso de " . $permiso[0] -> permiso . " pongase en contacto con algun administrador o super administrador del sistema";
+                    $msj = "No tiene el permiso de " . $permiso[0] -> permiso . " pongase en contacto con algun Administrador o Super Administrador del sistema";
                 echo json_encode([
                     "error" => true,
                     "titulo" => "¡ Error de permisos !",
@@ -134,10 +133,6 @@ class Valida {
         $name = "";
         foreach ($arreglo as $key => $value) {
             $name .= "$aliasTable" . $value["name"] . ", ";
-            /*if ($key == $length)
-                $name = $name . $aliasTable . $value;
-            else
-                $name = $name . $aliasTable . $value . ", ";*/
         }
         $name = substr_replace($name, "", strlen($name) - 2);
         return $name;

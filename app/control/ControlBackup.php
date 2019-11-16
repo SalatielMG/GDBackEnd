@@ -52,7 +52,7 @@ class ControlBackup extends Valida
             if (!$consultaUser) {
                 $arreglo["error"] = true;
                 $arreglo["titulo"] = "¡ Usuario no encontrado !";
-                $arreglo["msj"] = " El usuario solicitado no se encuentra registrado la base de datos ";
+                $arreglo["msj"] = " El usuario " . $this -> email . " no se encuentra registrado en la base de datos ";
                 return $arreglo;
             }
             $arreglo["id_user"] = $consultaUser[0] -> id_user;
@@ -186,8 +186,6 @@ class ControlBackup extends Valida
             $arreglo = $this -> verifyExistsUser();
             if ($arreglo["error"]) return $arreglo;
         }
-        //$filtrosSearch = "(SELECT JSON_PRETTY({\"id_backup\":{\"value\" : \"\", \"valueAnt\" : \"\", \"isFilter\" : false}, \"automatic\":{\"value\" : \"-1\", \"valueAnt\" : \"\", \"isFilter\" : false}, \"date_creation\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false},\"date_download\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false},\"created_in\":{\"value\" : \"\",\"valueAnt\" : \"\",\"isFilter\" : false}})) as filtrosSearch";
-        //$filtrosSearch = "{\"id_backup\":{value : '', valueAnt : '', isFilter : false}, automatic:{value : '-1', valueAnt : '', isFilter : false}, date_creation:{value : '',valueAnt : '',isFilter : false},date_creation:{value : '',valueAnt : '',isFilter : false},date_download:{value : '',valueAnt : '',isFilter : false},created_in:{value : '',valueAnt : '',isFilter : false}} as filtrosSearch";
         $this -> pagina = $this -> pagina * $this -> limit;
         $where = "1 ORDER BY tabla.cantRep desc limit $this->pagina, $this->limit";
         $select = "tabla.*";
@@ -256,7 +254,7 @@ class ControlBackup extends Valida
                     if ($limpiarBackupsUser["error"]) {
                         $error++;
                         $arreglo["error"] = true;
-                        $arreglo["titulo"] = ($error == 1) ? "¡ ERROR DE AJUSTE DE 1 USUARIO !" : "¡ ERROR DE AJUTE DE $error USUARIOS !";
+                        $arreglo["titulo"] = ($error == 1) ? "¡ Error de ajuste de 1 usuario !" : "¡ Error de ajustes de $error usuarios !";
                         $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $error usuario" . (($error == 1) ? "": "s");
                         $arreglo["errorUser"][$this -> idUser] =  $limpiarBackupsUser;
                     }
@@ -332,7 +330,7 @@ class ControlBackup extends Valida
         } else {
             $arreglo["usuariosError"] = $errorUserCleanBackup;
             $arreglo["error"] = true;
-            $arreglo["titulo"] = ($warning == 1) ? "¡ Error de ajuste de 1 ussuario !" : "¡ Error de ajuste de $warning usuarios !";
+            $arreglo["titulo"] = ($warning == 1) ? "¡ Error de ajuste de 1 usuario !" : "¡ Error de ajuste de $warning usuarios !";
             $arreglo["msj"] = "No se ajustaron algunos o todos lo backups de $warning usuario" . (($warning == 1) ? "": "s");
         }
         return $arreglo;

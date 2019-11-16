@@ -157,11 +157,11 @@ class ControlCurrency extends Valida
             $arreglo["error"] = false;
             $arreglo["currencies"] = $consulta;
             $arreglo["titulo"] = "¡ Inconcistencias encontradas !";
-            $arreglo["msj"] = "Se encontraron duplicidades de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "Se encontraron inconsistencias de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         } else {
             $arreglo["error"] = true;
             $arreglo["titulo"] = "¡ Inconcistencias no encontradas !";
-            $arreglo["msj"] = "No se encontraron duplicidades de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
+            $arreglo["msj"] = "No se encontraron inconsistencias de registros en la tabla Currency ". (($data -> email != "Generales") ? "del usuario: $data->email" : "");
         }
         return $arreglo;
     }
