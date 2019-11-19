@@ -114,6 +114,50 @@ class ControlAutomatic extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Automatic["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Automatic["id_operation"] = $indexUnique -> id_operation;
+        $this -> pk_Automatic["id_account"] = $indexUnique -> id_account;
+        $this -> pk_Automatic["id_category"] = $indexUnique -> id_category;
+        $this -> pk_Automatic["period"] = $indexUnique -> period;
+        $this -> pk_Automatic["repeat_number"] = $indexUnique -> repeat_number;
+        $this -> pk_Automatic["each_number"] = $indexUnique -> each_number;
+        $this -> pk_Automatic["amount"] = $indexUnique -> amount;
+        $this -> pk_Automatic["sign"] = $indexUnique -> sign;
+        $this -> pk_Automatic["detail"] = $indexUnique -> detail;
+        $this -> pk_Automatic["initial_date"] = $indexUnique -> initial_date;
+        $automatic = $this -> buscarAutomaticsBackup(false);
+        //var_dump($account); return;
+        if ($automatic) {
+            $correcion = $this -> a -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertAutomatic = $this -> a -> agregar($automatic["automatics"][0]);
+                if ($insertAutomatic) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Operación automatica corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente la operacion automatica con " . $this -> keyValueArray($this -> pk_Automatic);
+                    $arreglo["automatic"] = $this -> buscarAutomaticsBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtner los datos de la Operación Automatica seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

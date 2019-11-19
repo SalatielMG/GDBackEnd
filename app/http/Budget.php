@@ -12,3 +12,4 @@ Ruta::get("buscarBudgetsBackup","ControlBudget@buscarBudgetsBackup");
 Ruta::get("buscarInconsistenciaDatosBudgets","ControlBudget@inconsistenciaBudget");
 Ruta::get("obtSizeTablebudgets","ControlBudget@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosbudgets","ControlBudget@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroBudget","ControlBudget@corregirInconsistenciaRegistro");

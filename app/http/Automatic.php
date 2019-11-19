@@ -14,3 +14,4 @@ Ruta::get("buscarAutomaticsBackup","ControlAutomatic@buscarAutomaticsBackup");
 Ruta::get("buscarInconsistenciaDatosAutomatics","ControlAutomatic@inconsistenciaAutomatics");
 Ruta::get("obtSizeTableautomatics","ControlAutomatic@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosautomatics","ControlAutomatic@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroAutomatic","ControlAutomatic@corregirInconsistenciaRegistro");

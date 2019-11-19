@@ -13,3 +13,4 @@ Ruta::get("buscarCardviewsBackup","ControlCardView@buscarCardviewsBackup");
 Ruta::get("buscarInconsistenciaDatosCardviews","ControlCardView@inconsistenciaCardView");
 Ruta::get("obtSizeTablecardviews","ControlCardView@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatoscardviews","ControlCardView@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroCardview","ControlCardView@corregirInconsistenciaRegistro");

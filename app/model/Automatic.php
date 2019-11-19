@@ -128,11 +128,11 @@ class Automatic extends DB
             'rate' => $dataAutomatic -> rate,
             'counter' => $dataAutomatic -> counter,
         ];
-        return $this -> update($this -> nameTable, $automatic, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_operation = $indexUnique->id_operation");
+        return $this -> update($this -> nameTable, $automatic, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
 
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_operation = $indexUnique->id_operation");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
 
 }

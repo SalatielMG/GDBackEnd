@@ -169,21 +169,24 @@ class ControlAccount extends Valida
     }
 
     public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
         $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
         $arreglo = array();
         $this -> pk_Account["id_backup"] = $indexUnique -> id_backup;
         $this -> pk_Account["id_account"] = $indexUnique -> id_account;
         $this -> pk_Account["name"] = $indexUnique -> name;
         $account = $this -> buscarAccountsBackup(false);
+        //var_dump($account); return;
         if ($account) {
             $correcion = $this -> a -> eliminar($indexUnique);
             if ($correcion) {
-                $insertAccount = $this -> a -> agregar($account[0]);
+                $insertAccount = $this -> a -> agregar($account["accounts"][0]);
                 if ($insertAccount) {
                     $arreglo["error"] = false;
                     $arreglo["titulo"] = "¡ Cuenta corregida !";
-                    $arreglo["msj"] = "Se corrigio correcamente la cuenta con : " . $this -> keyValueArray($this -> pk_Account);
-                    $arreglo["account"] = $account[0];
+                    $arreglo["msj"] = "Se corrigio correcamente la cuenta con " . $this -> keyValueArray($this -> pk_Account);
+                    $arreglo["account"] = $this -> buscarAccountsBackup(false);
                 } else {
                     $arreglo["error"] = true;
                     $arreglo["titulo"] = "¡ Error al corregir !";

@@ -118,6 +118,41 @@ class ControlCardView extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_CardView["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_CardView["id_card"] = $indexUnique -> id_card;
+        $cardview = $this -> buscarCardviewsBackup(false);
+        //var_dump($account); return;
+        if ($cardview) {
+            $correcion = $this -> cv -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertCardview = $this -> cv -> agregar($cardview["cardviews"][0]);
+                if ($insertCardview) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Cardview corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente la Cardview con " . $this -> keyValueArray($this -> pk_CardView);
+                    $arreglo["cardview"] = $this -> buscarCardviewsBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtner los datos de la Cardview seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

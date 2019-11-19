@@ -185,6 +185,41 @@ class ControlCurrency extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Currency["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Currency["iso_code"] = $indexUnique -> iso_code;
+        $currency = $this -> buscarCurrenciesBackup(false);
+        //var_dump($account); return;
+        if ($currency) {
+            $correcion = $this -> c -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertCurrency = $this -> c -> agregar($currency["currencies"][0]);
+                if ($insertCurrency) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Moneda corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente la Moneda con " . $this -> keyValueArray($this -> pk_Currency);
+                    $arreglo["currency"] = $this -> buscarCurrenciesBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtner los datos de la Moneda seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

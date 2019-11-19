@@ -88,6 +88,41 @@ class ControlExtra extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Extra["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Extra["id_extra"] = $indexUnique -> id_extra;
+        $extra = $this -> buscarExtrasBackup(false);
+        //var_dump($account); return;
+        if ($extra) {
+            $correcion = $this -> e -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertExtra = $this -> e -> agregar($extra["extras"][0]);
+                if ($insertExtra) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Extra corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente el registro Extra con " . $this -> keyValueArray($this -> pk_Extra);
+                    $arreglo["extra"] = $this -> buscarExtrasBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtener los datos del registro Extra seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

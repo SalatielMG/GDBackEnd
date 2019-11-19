@@ -74,9 +74,9 @@ class Category extends DB
             "icon_name" => "'$dataCategory->icon_name'",
             "number" => $dataCategory -> number,
         ];
-        return $this -> update($this -> nameTable, $category, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_category = $indexUnique->id_category");
+        return $this -> update($this -> nameTable, $category, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_category = $indexUnique->id_category");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
 }

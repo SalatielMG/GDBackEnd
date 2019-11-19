@@ -14,3 +14,4 @@ Ruta::get("buscarCurrenciesBackup","ControlCurrency@buscarCurrenciesBackup");
 Ruta::get("buscarInconsistenciaDatosCurrencies","ControlCurrency@inconsistenciaCurrency");
 Ruta::get("obtSizeTablecurrencies","ControlCurrency@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatoscurrencies","ControlCurrency@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroCurrency","ControlCurrency@corregirInconsistenciaRegistro");

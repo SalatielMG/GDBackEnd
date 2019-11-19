@@ -141,6 +141,43 @@ class ControlCategory extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Category["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Category["id_category"] = $indexUnique -> id_category;
+        $this -> pk_Category["id_account"] = $indexUnique -> id_account;
+        $this -> pk_Category["name"] = $indexUnique -> name;
+        $this -> pk_Category["sign"] = $indexUnique -> sign;
+        $category = $this -> buscarCategoriesBackup(false);
+        if ($category) {
+            $correcion = $this -> c -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertCategory = $this -> c -> agregar($category["categories"][0]);
+                if ($insertCategory) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Categoria corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente la Categoria con " . $this -> keyValueArray($this -> pk_Category);
+                    $arreglo["category"] = $this -> buscarCategoriesBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtner los datos de la Categoria seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

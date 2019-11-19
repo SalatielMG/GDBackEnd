@@ -111,6 +111,45 @@ class ControlBudget extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Budget["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Budget["id_account"] = $indexUnique -> id_account;
+        $this -> pk_Budget["id_category"] = $indexUnique -> id_category;
+        $this -> pk_Budget["period"] = $indexUnique -> period;
+        $this -> pk_Budget["amount"] = $indexUnique -> amount;
+        $this -> pk_Budget["budget"] = $indexUnique -> budget;
+        $budget = $this -> buscarBudgetsBackup(false);
+        //var_dump($account); return;
+        if ($budget) {
+            $correcion = $this -> b -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertBudget = $this -> b -> agregar($budget["budgets"][0]);
+                if ($insertBudget) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Presupesto corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente el presupesto con " . $this -> keyValueArray($this -> pk_Budget);
+                    $arreglo["budget"] = $this -> buscarBudgetsBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtener los datos del presupuesto seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

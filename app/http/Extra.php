@@ -12,3 +12,4 @@ Ruta::get("buscarExtrasBackup","ControlExtra@buscarExtrasBackup");
 Ruta::get("buscarInconsistenciaDatosExtras","ControlExtra@inconsistenciaExtra");
 Ruta::get("obtSizeTableextras","ControlExtra@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosextras","ControlExtra@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroExtra","ControlExtra@corregirInconsistenciaRegistro");

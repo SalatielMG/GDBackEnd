@@ -14,3 +14,4 @@ Ruta::get("buscarAccountsBackup","ControlAccount@buscarAccountsBackup");
 Ruta::get("buscarInconsistenciaDatosAccounts","ControlAccount@inconsistenciaAccounts");
 Ruta::get("obtSizeTableaccounts","ControlAccount@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosaccounts","ControlAccount@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroAccount","ControlAccount@corregirInconsistenciaRegistro");

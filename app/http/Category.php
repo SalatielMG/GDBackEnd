@@ -14,3 +14,4 @@ Ruta::get("buscarCategoriesBackup","ControlCategory@buscarCategoriesBackup");
 Ruta::get("buscarInconsistenciaDatosCategories","ControlCategory@inconsistenciaCategory");
 Ruta::get("obtSizeTablecategories","ControlCategory@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatoscategories","ControlCategory@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroCategory","ControlCategory@corregirInconsistenciaRegistro");
