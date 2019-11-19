@@ -79,6 +79,26 @@ class ControlPreference extends Valida
         }
         return $arreglo;
     }
+    public function obtSizeTable() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+        $arreglo = array();
+        $exixstIndexUnique = $this -> p -> verifyIfExistsIndexUnique($this -> p -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
+        }
+        $size = $this -> p -> sizeTable($this -> p -> nameTable);
+        if ($size) {
+            $arreglo["size"] = $size[0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Tamaño calculado !";
+            $arreglo["msj"] = "Se calculo correctamente el tamaño de la tabla de datos: " . $this -> p -> nameTable;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Tamaño no calculado !";
+            $arreglo["msj"] = "No se pudo calcular correctamente el tamaño de la tabla de datos: " . $this -> p -> nameTable;
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

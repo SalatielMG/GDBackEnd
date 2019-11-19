@@ -98,6 +98,26 @@ class ControlCardView extends Valida
         }
         return $arreglo;
     }
+    public function obtSizeTable() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+        $arreglo = array();
+        $exixstIndexUnique = $this -> cv -> verifyIfExistsIndexUnique($this -> cv -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
+        }
+        $size = $this -> cv -> sizeTable($this -> cv -> nameTable);
+        if ($size) {
+            $arreglo["size"] = $size[0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Tamaño calculado !";
+            $arreglo["msj"] = "Se calculo correctamente el tamaño de la tabla de datos: " . $this -> cv -> nameTable;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Tamaño no calculado !";
+            $arreglo["msj"] = "No se pudo calcular correctamente el tamaño de la tabla de datos: " . $this -> cv -> nameTable;
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

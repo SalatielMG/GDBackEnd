@@ -12,4 +12,5 @@ Ruta::delete("eliminarCurrency","ControlCurrency@eliminarCurrency");
 Ruta::get("obtCurrenciesGralBackup","ControlCurrency@obtCurrenciesGralBackup");
 Ruta::get("buscarCurrenciesBackup","ControlCurrency@buscarCurrenciesBackup");
 Ruta::get("buscarInconsistenciaDatosCurrencies","ControlCurrency@inconsistenciaCurrency");
+Ruta::get("obtSizeTablecurrencies","ControlCurrency@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatoscurrencies","ControlCurrency@corregirInconsitencia");

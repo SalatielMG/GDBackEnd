@@ -147,6 +147,60 @@ class ControlAccount extends Valida
         return $arreglo;
     }
 
+    public function obtSizeTable() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+        $arreglo = array();
+        $exixstIndexUnique = $this -> a -> verifyIfExistsIndexUnique($this -> a -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
+        }
+        $size = $this -> a -> sizeTable($this -> a -> nameTable);
+        if ($size) {
+            $arreglo["size"] = $size[0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Tamaño calculado !";
+            $arreglo["msj"] = "Se calculo correctamente el tamaño de la tabla de datos: " . $this -> a -> nameTable;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Tamaño no calculado !";
+            $arreglo["msj"] = "No se pudo calcular correctamente el tamaño de la tabla de datos: " . $this -> a -> nameTable;
+        }
+        return $arreglo;
+    }
+
+    public function corregirInconsistenciaRegistro() {
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Account["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Account["id_account"] = $indexUnique -> id_account;
+        $this -> pk_Account["name"] = $indexUnique -> name;
+        $account = $this -> buscarAccountsBackup(false);
+        if ($account) {
+            $correcion = $this -> a -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertAccount = $this -> a -> agregar($account[0]);
+                if ($insertAccount) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Cuenta corregida !";
+                    $arreglo["msj"] = "Se corrigio correcamente la cuenta con : " . $this -> keyValueArray($this -> pk_Account);
+                    $arreglo["account"] = $account[0];
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtner los datos de la cuenta seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

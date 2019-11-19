@@ -12,4 +12,5 @@ Ruta::get("obtNewId_account","ControlAccount@obtNewId_account");
 Ruta::get("obtAccountsBackup","ControlAccount@obtAccountsBackup");
 Ruta::get("buscarAccountsBackup","ControlAccount@buscarAccountsBackup");
 Ruta::get("buscarInconsistenciaDatosAccounts","ControlAccount@inconsistenciaAccounts");
+Ruta::get("obtSizeTableaccounts","ControlAccount@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosaccounts","ControlAccount@corregirInconsitencia");

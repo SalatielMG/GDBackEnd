@@ -10,4 +10,5 @@ Ruta::post("actualizarBudget","ControlBudget@actualizarBudget");
 Ruta::delete("eliminarBudget","ControlBudget@eliminarBudget");
 Ruta::get("buscarBudgetsBackup","ControlBudget@buscarBudgetsBackup");
 Ruta::get("buscarInconsistenciaDatosBudgets","ControlBudget@inconsistenciaBudget");
+Ruta::get("obtSizeTablebudgets","ControlBudget@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosbudgets","ControlBudget@corregirInconsitencia");

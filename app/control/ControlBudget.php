@@ -91,6 +91,26 @@ class ControlBudget extends Valida
         }
         return $arreglo;
     }
+    public function obtSizeTable() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+        $arreglo = array();
+        $exixstIndexUnique = $this -> b -> verifyIfExistsIndexUnique($this -> b -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
+        }
+        $size = $this -> b -> sizeTable($this -> b -> nameTable);
+        if ($size) {
+            $arreglo["size"] = $size[0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Tamaño calculado !";
+            $arreglo["msj"] = "Se calculo correctamente el tamaño de la tabla de datos: " . $this -> b -> nameTable;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Tamaño no calculado !";
+            $arreglo["msj"] = "No se pudo calcular correctamente el tamaño de la tabla de datos: " . $this -> b -> nameTable;
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

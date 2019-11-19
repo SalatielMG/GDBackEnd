@@ -82,13 +82,13 @@ class Account extends DB
     public function mostrar($where = "1", $select = "*", $tabla = "backup_accounts"){
         return $this -> getDatos($tabla, $select, $where);
     }
-    public function agregar($data) {
+    public function agregar($data, $isCorrecion = false) {
         $account = [
             'id_backup' => $data -> id_backup,
             'id_account' => $data -> id_account,
             'name' => "'$data->name'",
             'detail' => "'$data->detail'",
-            'sign' => "'" . $this -> signValue($data -> sign) . "'",
+            'sign' => ($isCorrecion) ? "'$data->sign'" : "'" . $this -> signValue($data -> sign) . "'",
             'income' => $data->income,
             'expense' => $data->expense,
             'initial_balance' => $data->initial_balance,
@@ -130,9 +130,9 @@ class Account extends DB
             'rate' => $data->rate,
             'icon_name' => "'$data->icon_name'"
         ];
-        return $this -> update($this-> nameTable, $account, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_account = $indexUnique->id_account");
+        return $this -> update($this-> nameTable, $account, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
     public function eliminar($indexUnique) {
-        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false) . " AND id_account = $indexUnique->id_account");
+        return $this -> delete($this -> nameTable, Valida::conditionVerifyExistsUniqueIndex($indexUnique, $this -> columnsTableIndexUnique, false));
     }
 }

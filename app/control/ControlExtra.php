@@ -68,6 +68,26 @@ class ControlExtra extends Valida
         }
         return $arreglo;
     }
+    public function obtSizeTable() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+        $arreglo = array();
+        $exixstIndexUnique = $this -> e -> verifyIfExistsIndexUnique($this -> e -> nameTable);
+        if ($exixstIndexUnique["indice"]) {
+            return $arreglo = $exixstIndexUnique;
+        }
+        $size = $this -> e -> sizeTable($this -> e -> nameTable);
+        if ($size) {
+            $arreglo["size"] = $size[0];
+            $arreglo["error"] = false;
+            $arreglo["titulo"] = "¡ Tamaño calculado !";
+            $arreglo["msj"] = "Se calculo correctamente el tamaño de la tabla de datos: " . $this -> e -> nameTable;
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Tamaño no calculado !";
+            $arreglo["msj"] = "No se pudo calcular correctamente el tamaño de la tabla de datos: " . $this -> e -> nameTable;
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

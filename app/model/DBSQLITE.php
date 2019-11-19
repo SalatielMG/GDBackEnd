@@ -162,15 +162,35 @@ class DBSQLITE
         }
     }
     public function insertMultipleData($table, $arreglo, $columnsTable) {
-        $sql = "INSERT INTO $table ";
-        foreach ($arreglo as $key => $value) {
-            $value = (array) $value;
-            if ($key == 0) $sql .= $this -> validateKeyNameDataInSQLITE($columnsTable) . " VALUES ";
-            $sql .= $this -> validateKeyValueDataInSQLITE($value, $columnsTable, $table);
+        $total = count($arreglo);
+        if ($total > 500) {
+            $bnd = true;
+            $vueltas = ceil($total / 500);
+            for ($i = 0; $i < $vueltas; $i++) {
+                $sql = "INSERT INTO $table " . $this -> validateKeyNameDataInSQLITE($columnsTable) . " VALUES ";
+                $vueltasPor500 = ($i == ($vueltas - 1)) ? $total : ($i + 1) * 500;
+                for ($index = ($i * 500); $index < $vueltasPor500; $index++) {
+                    $value = (array) $arreglo[$index];
+                    $sql .= $this -> validateKeyValueDataInSQLITE($value, $columnsTable, $table);
+                }
+                $sql = substr_replace($sql, ";", strlen($sql) - 1);
+                if (!$this -> solicitud($sql)) {
+                    $bnd = false;
+                    break;
+                }
+            }
+            return $bnd;
+        } else{
+            $sql = "INSERT INTO $table ";
+            foreach ($arreglo as $key => $value) {
+                $value = (array) $value;
+                if ($key == 0) $sql .= $this -> validateKeyNameDataInSQLITE($columnsTable) . " VALUES ";
+                $sql .= $this -> validateKeyValueDataInSQLITE($value, $columnsTable, $table);
+            }
+            $sql = substr_replace($sql, ";", strlen($sql) - 1);
+            return $this -> solicitud($sql);
         }
-        $sql = substr_replace($sql, ";", strlen($sql) - 1);
-        //return $sql;
-        return $this -> solicitud($sql);
+
     }
     private function validateKeyNameDataInSQLITE($columnsTable) {
         $columns = "(";

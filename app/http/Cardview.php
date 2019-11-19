@@ -11,4 +11,5 @@ Ruta::delete("eliminarCardview","ControlCardView@eliminarCardview");
 Ruta::get("obtCardViewsGralBackup","ControlCardView@obtCardViewsGralBackup");
 Ruta::get("buscarCardviewsBackup","ControlCardView@buscarCardviewsBackup");
 Ruta::get("buscarInconsistenciaDatosCardviews","ControlCardView@inconsistenciaCardView");
+Ruta::get("obtSizeTablecardviews","ControlCardView@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatoscardviews","ControlCardView@corregirInconsitencia");

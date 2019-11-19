@@ -10,4 +10,5 @@ Ruta::post("actualizarExtra","ControlExtra@actualizarExtra");
 Ruta::delete("eliminarExtra","ControlExtra@eliminarExtra");
 Ruta::get("buscarExtrasBackup","ControlExtra@buscarExtrasBackup");
 Ruta::get("buscarInconsistenciaDatosExtras","ControlExtra@inconsistenciaExtra");
+Ruta::get("obtSizeTableextras","ControlExtra@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosextras","ControlExtra@corregirInconsitencia");

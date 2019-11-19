@@ -135,9 +135,9 @@ class DB {
     //creando metodo de consulta
     public function getDatos($tablas, $select = "*", $where = 1, $limit="", $bnd = true){
         $sql = "SELECT $select FROM $tablas WHERE $where $limit";
-        if($bnd)
+        if ($bnd)
             $sql = "SELECT $select FROM $tablas WHERE $where";
-        if($this -> solicitud($sql))
+        if ($this -> solicitud($sql))
             return $this -> arreglo();
         return [];
     }
@@ -181,6 +181,14 @@ class DB {
 
     public static function signValue($sign) {
         return ($sign == "1") ? "+" : "-";
+    }
+
+    public function sizeTable($nameTable) {
+        $sql = "SELECT table_name AS 'Tables', round(((data_length + index_length) / 1024 / 1024 / 1024), 3) 'Size' FROM information_schema.TABLES WHERE table_schema = 'gastos5_app' ORDER BY (data_length + index_length) DESC";
+        $sqlMaster = "SELECT tabla.* from ($sql) AS tabla WHERE tabla.Tables = '$nameTable'";
+        if ($this -> solicitud($sqlMaster))
+            return $this -> arreglo();
+        return [];
     }
 
 }
