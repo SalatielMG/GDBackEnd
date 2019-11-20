@@ -111,6 +111,45 @@ class ControlMovement extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Movement["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Movement["id_account"] = $indexUnique -> id_account;
+        $this -> pk_Movement["id_category"] = $indexUnique -> id_category;
+        $this -> pk_Movement["amount"] = $indexUnique -> amount;
+        $this -> pk_Movement["detail"] = $indexUnique -> detail;
+        $this -> pk_Movement["date_idx"] = $indexUnique -> date_idx;
+        $movement = $this -> buscarMovementsBackup(false);
+        //var_dump($account); return;
+        if ($movement) {
+            $correcion = $this -> m -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertMovement = $this -> m -> agregar($movement["movements"][0]);
+                if ($insertMovement) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Movimiento corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente el Movimiento con " . $this -> keyValueArray($this -> pk_Movement);
+                    $arreglo["movement"] = $this -> buscarMovementsBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtener los datos del Movimiento seleccionado para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

@@ -12,3 +12,4 @@ Ruta::get("buscarMovementsBackup","ControlMovement@buscarMovementsBackup");
 Ruta::get("buscarInconsistenciaDatosMovements","ControlMovement@inconsistenciaMovement");
 Ruta::get("obtSizeTablemovements","ControlMovement@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatosmovements","ControlMovement@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroMovement","ControlMovement@corregirInconsistenciaRegistro");

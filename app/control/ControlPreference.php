@@ -99,6 +99,41 @@ class ControlPreference extends Valida
         }
         return $arreglo;
     }
+    public function corregirInconsistenciaRegistro() {
+        $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
+
+        $indexUnique = json_decode(Form::getValue("indexUnique", false, false));
+        $arreglo = array();
+        $this -> pk_Preference["id_backup"] = $indexUnique -> id_backup;
+        $this -> pk_Preference["key_name"] = $indexUnique -> key_name;
+        $preference = $this -> buscarPreferencesBackup(false);
+        //var_dump($account); return;
+        if ($preference) {
+            $correcion = $this -> p -> eliminar($indexUnique);
+            if ($correcion) {
+                $insertPreference = $this -> p -> agregar($preference["preferences"][0]);
+                if ($insertPreference) {
+                    $arreglo["error"] = false;
+                    $arreglo["titulo"] = "¡ Preferencia corregida !";
+                    $arreglo["msj"] = "Se corrigio correctamente la Preferencia con " . $this -> keyValueArray($this -> pk_Preference);
+                    $arreglo["preference"] = $this -> buscarPreferencesBackup(false);
+                } else {
+                    $arreglo["error"] = true;
+                    $arreglo["titulo"] = "¡ Error al corregir !";
+                    $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 2° Proceso Insertar --";
+                }
+            } else {
+                $arreglo["error"] = true;
+                $arreglo["titulo"] = "¡ Error al corregir !";
+                $arreglo["msj"] = "No se pudo corregir la inconsistencia del registro seleccionado. -- 1° Proceso Eliminar --";
+            }
+        } else {
+            $arreglo["error"] = true;
+            $arreglo["titulo"] = "¡ Error de consulta  !";
+            $arreglo["msj"] = "Error al obtener los datos de la Preferencia seleccionada para corregir";
+        }
+        return $arreglo;
+    }
     public function corregirInconsitencia() {
         $this -> verificarPermiso(PERMISO_MNTINCONSISTENCIA);
 

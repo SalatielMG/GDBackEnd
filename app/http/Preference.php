@@ -12,3 +12,4 @@ Ruta::get("buscarPreferencesBackup","ControlPreference@buscarPreferencesBackup")
 Ruta::get("buscarInconsistenciaDatosPreferences","ControlPreference@inconsistenciaPreference");
 Ruta::get("obtSizeTablepreferences","ControlPreference@obtSizeTable");
 Ruta::get("corregirInconsistenciaDatospreferences","ControlPreference@corregirInconsitencia");
+Ruta::get("corregirInconsistenciaRegistroPreference","ControlPreference@corregirInconsistenciaRegistro");
